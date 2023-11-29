@@ -49,8 +49,8 @@ do
     function Functions:RunFile(filepath)
         if isfile("Mana/".. filepath) then
             return loadstring(readfile("Mana/".. filepath))()
-        elseif game:HttpGet("https://raw.githubusercontent.com/MankaUser/ManaV2ForReblox/main/".. filepath) then
-            return loadstring(game:HttpGet("https://raw.githubusercontent.com/MankaUser/ManaV2ForReblox/main/".. filepath))()
+        elseif game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/".. filepath) then
+            return loadstring(game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/".. filepath))()
         else
             return print("[ManaV2ForReblox]: Can't find file:", filepath ,".")
         end
@@ -59,8 +59,8 @@ do
     function Functions:RunGameScript(path)
         if isfile("Mana/Scripts/".. path) then
             loadstring(readfile("Mana/Scripts/".. path))()
-        elseif game:HttpGet("https://raw.githubusercontent.com/MankaUser/ManaV2ForReblox/main/Scripts/".. path) then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/MankaUser/ManaV2ForReblox/main/Scripts/".. path))()
+        elseif game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/Scripts/".. path) then
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/Scripts/".. path))()
         end
     end
 end
