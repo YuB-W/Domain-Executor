@@ -1,6 +1,6 @@
-# ManaV2ForReblox
+# ManaV2ForRoblox 
 Cool script for roblox
-<div> Discontinued for sometime
+<div> Revived
   
 ## Supported Games:
 ```
