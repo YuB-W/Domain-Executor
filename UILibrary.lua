@@ -155,7 +155,7 @@ local function getcustomassetfunc(path)
             textlabel:Remove()
         end)
         local req = requestfunc({
-            Url = "https://raw.githubusercontent.com/MankaCoder/ManaV2ForReblox/main/"..path:gsub("Mana/Assets", "Assets"),
+            Url = "https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/"..path:gsub("Mana/Assets", "Assets"),
             Method = "GET"
         })
         writefile(path, req.Body)
@@ -184,7 +184,7 @@ local function getcustomassetfuncforsounds(path)
             textlabel:Remove()
         end)
         local req = requestfunc({
-            Url = "https://raw.githubusercontent.com/MankaCoder/ManaV2ForReblox/main/"..path:gsub("Mana/Assets/Sounds", "Sounds"),
+            Url = "https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/"..path:gsub("Mana/Assets/Sounds", "Sounds"),
             Method = "GET"
         })
         writefile(path, req.Body)
