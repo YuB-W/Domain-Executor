@@ -145,6 +145,18 @@ runFunction(function()
         GuiLibrary.Sounds = v
         end 
     })
+
+    LibrarrySize = LibrarySettings:CreateSlider({
+        Name = "Size",
+        Function = function(v)
+			UISizee = CoreGui.ManaV2.TabsFrame.UIScale
+            if UISizee then UISizee.Size = v end
+		end,
+        Min = 1,
+        Max = 10,
+        Default = 4,
+        Round = 0
+    })
 end)
 
 runFunction(function()

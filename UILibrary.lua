@@ -428,6 +428,7 @@ local tabs = {}
 function Library:CreateWindow()
     TabsFrame = Instance.new("Frame")
     local uilistthingy = Instance.new("UIListLayout")
+    local UIScale = Instance.new("UIScale")
     TabsFrame.Name = "Tabs"
     TabsFrame.Parent = ScreenGui
     TabsFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -440,6 +441,8 @@ function Library:CreateWindow()
     uilistthingy.FillDirection = Enum.FillDirection.Horizontal
     uilistthingy.SortOrder = Enum.SortOrder.LayoutOrder
     uilistthingy.Padding = UDim.new(0, 40)
+    UIScale.Parent = TabsFrame
+    UIScale.Size = 4
     function Library:CreateTab(title, color)
         table.insert(tabs, #tabs)
         local tab = Instance.new("TextButton")
