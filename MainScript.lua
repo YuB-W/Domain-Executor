@@ -96,7 +96,6 @@ local Tabs = {
 
 Mana.Tabs = Tabs
 
---[[
 runFunction(function()
     Discord = Tabs.Misc:CreateToggle({
         Name = "CopyDiscordInvite",
@@ -110,7 +109,7 @@ runFunction(function()
         end
     })
 end)
-]]
+
 
 runFunction(function()
     local LibNotification = {Value = true}
