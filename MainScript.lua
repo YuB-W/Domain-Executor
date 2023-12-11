@@ -33,19 +33,6 @@ local function runFunction(func) func() end
 local Functions = {}
 
 do
-    --[[
-    function Functions:GithubRequest(filepath)
-        if not isfile("Mana/"..scripturl) then
-            local suc, res = pcall(function() return game:HttpGet("https://raw.githubusercontent.com/MankaUser/ManaV2ForReblox/"..scripturl, true) end)
-            assert(suc, res)
-            assert(res ~= "404: Not Found", res)
-            --if scripturl:find(".lua") then res = "--This watermark is used to delete the file if its cached, remove it to make the file persist after commits.\n"..res end
-            writefile("Mana/"..scripturl, res)
-        end
-        return readfile("Mana/"..scripturl)
-    end
-    ]]
-
     function Functions:RunFile(filepath)
         if isfile("Mana/".. filepath) then
             return loadstring(readfile("Mana/".. filepath))()
@@ -65,7 +52,7 @@ do
     end
 end
 
-if not getgenv or (identifyexecutor and identifyexecutor():find("Arceus")) then
+if not getgenv then
     return warn("[ManaV2ForReblox]: Unsupported executor.")
 end
 
@@ -83,6 +70,14 @@ Mana.GuiLibrary = GuiLibrary
 Mana.Functions = Functions
 Mana.Activated = true
 
+--some mobile support, and yea it's only smaller gui
+UISizee = CoreGui.ManaV2.TabsFrame.UIScale
+if UserInputService.TouchEnabled and UserInputService.KeyboardEnabled == false then
+    UISizee.Size = 2
+else
+    
+end
+
 GuiLibrary:CreateWindow()
 
 local Tabs = {
@@ -96,7 +91,6 @@ local Tabs = {
 
 Mana.Tabs = Tabs
 
---[[
 runFunction(function()
     Discord = Tabs.Misc:CreateToggle({
         Name = "CopyDiscordInvite",
@@ -110,7 +104,7 @@ runFunction(function()
         end
     })
 end)
-]]
+
 
 runFunction(function()
     local LibNotification = {Value = true}
