@@ -96,7 +96,7 @@ function conf.functions:LoadConfigs()
 		conf.functions:MakeFile()
 	end
     wait(0.5)
-	return HttpService:JSONDecode(readfile("Mana/Config/"..game.PlaceId..".json"))
+    return pcall(function() HttpService:JSONDecode(readfile("Mana/Config/"..game.PlaceId..".json")) end)
 end
 
 function conf.functions:WriteConfigs(tab)
