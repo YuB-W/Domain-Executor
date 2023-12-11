@@ -2,7 +2,9 @@
 Cool script for roblox
   
 Loadstring: 
-```loadstring(game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/MainScript.lua"))()```
+```
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/MainScript.lua"))()
+```
 
 ## Supported Games:
 ```
