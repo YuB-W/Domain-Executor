@@ -448,7 +448,7 @@ function Library:CreateWindow()
     uilistthingy.SortOrder = Enum.SortOrder.LayoutOrder
     uilistthingy.Padding = UDim.new(0, 40)
     UIScale.Parent = TabsFrame
-    UIScale.Size = 4
+    UIScale.Scale = 4
     function Library:CreateTab(title, color)
         table.insert(tabs, #tabs)
         local tab = Instance.new("TextButton")
