@@ -85,7 +85,7 @@ local Tabs = {
 UISizee = CoreGui.ManaV2.TabsFrame.UIScale
 if UserInputService.TouchEnabled and UserInputService.KeyboardEnabled == false then
     warn("[ManaV2ForRoblox]: mobile user.")
-    UISizee.Size = 2
+    UISizee.Scale = 2
 else
     warn("[ManaV2ForRoblox]: not mobile user.")
 end
@@ -145,7 +145,7 @@ runFunction(function()
         Name = "Size",
         Function = function(v)
 			UISizee = CoreGui.ManaV2.TabsFrame.UIScale
-            if UISizee then UISizee.Size = v end
+            if UISizee then UISizee.Scale = v end
 		end,
         Min = 1,
         Max = 10,
