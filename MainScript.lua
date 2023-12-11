@@ -85,7 +85,7 @@ local Tabs = {
 UISizee = CoreGui.ManaV2.Tabs.UIScale
 if UserInputService.TouchEnabled then
     warn("[ManaV2ForRoblox]: mobile user.")
-    UISizee.Scale = 2
+    UISizee.Scale = 7
 else
     warn("[ManaV2ForRoblox]: not mobile user.")
 end
