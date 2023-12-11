@@ -53,11 +53,11 @@ do
 end
 
 if not getgenv then
-    return warn("[ManaV2ForReblox]: Unsupported executor.")
+    return warn("[ManaV2ForRoblox]: Unsupported executor.")
 end
 
 if Mana and Mana.Activated == true then 
-    warn("[ManaV2ForReblox]: Already loaded.")
+    warn("[ManaV2ForRoblox]: Already loaded.")
     return
 end
 
@@ -73,9 +73,10 @@ Mana.Activated = true
 --some mobile support, and yea it's only smaller gui
 UISizee = CoreGui.ManaV2.TabsFrame.UIScale
 if UserInputService.TouchEnabled and UserInputService.KeyboardEnabled == false then
+    warn("[ManaV2ForRoblox]: mobile user.")
     UISizee.Size = 2
 else
-    print("[ManaV2ForRoblox]: not mobile user.")
+    warn("[ManaV2ForRoblox]: not mobile user.")
 end
 
 GuiLibrary:CreateWindow()
@@ -201,7 +202,7 @@ runFunction(function()
     })
 end)
 
-print("[ManaV2ForReblox/MainScript.lua]: Loaded in " .. tostring(tick() - startTick) .. ".")
+print("[ManaV2ForRoblox/MainScript.lua]: Loaded in " .. tostring(tick() - startTick) .. ".")
 
 UniversalScript = Functions:RunFile("Scripts/Universal.lua")
 GameScript = Functions:RunGameScript("".. PlaceId ..".lua")

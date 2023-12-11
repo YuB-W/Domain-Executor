@@ -16,6 +16,7 @@ local InputService = game:GetService("UserInputService")
 local input = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
+local HttpService = game:GetService("HttpService")
 
 
 -- I don't know what do i write here 
@@ -78,20 +79,16 @@ local sliderapi = {}
 -- Config system
 local foldername = "Mana/Config"
 local conf = {
-	["file"]=foldername.."/"..game.PlaceId..".json",
-	["functions"]={}
+	["file"] = foldername.."/"..game.PlaceId..".json",
+	["functions"] = {}
 }
-
-if game.PlaceId == 6872274481 or game.PlaceId == 8560631822 or game.PlaceId == 8444591321 then
-    conf["file"] = foldername.."/bedwars.json"
-end
 
 function conf.functions:MakeFile()
 	if isfile(conf["file"]) then return end
-	if not isfolder(foldername)  then
-		makefolder(foldername)
-	end
-	writefile(conf["file"],"{}")
+        if not isfolder(foldername)  then
+            makefolder(foldername)
+        end
+	writefile(conf["file"], "{}")
 end
 
 function conf.functions:LoadConfigs()
@@ -99,12 +96,12 @@ function conf.functions:LoadConfigs()
 		conf["functions"]:MakeFile()
 	end
     wait(0.5)
-	return game:GetService("HttpService"):JSONDecode(readfile(conf["file"]))
+	return HttpService:JSONDecode(readfile(conf["file"]))
 end
 
 function conf.functions:WriteConfigs(tab)
 	conf["functions"]:MakeFile()
-	writefile(conf["file"],game:GetService("HttpService"):JSONEncode((tab or {})))
+	writefile(conf["file"], HttpService:JSONEncode((tab or {})))
 end
 local configtable = (conf["functions"]:LoadConfigs() or {})
 

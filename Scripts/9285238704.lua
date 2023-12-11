@@ -156,4 +156,4 @@ runFunction(function()
         end
     })
 end)
-print("[ManaV2ForRebloz/Scripts/9285238704.lua]: Loaded in " .. tostring(tick() - startTick) .. ". ")
+print("[ManaV2ForRoblox/Scripts/9285238704.lua]: Loaded in " .. tostring(tick() - startTick) .. ". ")
