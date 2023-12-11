@@ -70,15 +70,6 @@ Mana.GuiLibrary = GuiLibrary
 Mana.Functions = Functions
 Mana.Activated = true
 
---some mobile support, and yea it's only smaller gui
-UISizee = CoreGui.ManaV2.TabsFrame.UIScale
-if UserInputService.TouchEnabled and UserInputService.KeyboardEnabled == false then
-    warn("[ManaV2ForRoblox]: mobile user.")
-    UISizee.Size = 2
-else
-    warn("[ManaV2ForRoblox]: not mobile user.")
-end
-
 GuiLibrary:CreateWindow()
 
 local Tabs = {
@@ -89,6 +80,15 @@ local Tabs = {
     World = GuiLibrary:CreateTab("World",Color3.fromRGB(52,28,228)),
     Misc = GuiLibrary:CreateTab("Other",Color3.fromRGB(240, 157, 62))
 }
+
+--some mobile support, and yea it's only smaller gui
+UISizee = CoreGui.ManaV2.TabsFrame.UIScale
+if UserInputService.TouchEnabled and UserInputService.KeyboardEnabled == false then
+    warn("[ManaV2ForRoblox]: mobile user.")
+    UISizee.Size = 2
+else
+    warn("[ManaV2ForRoblox]: not mobile user.")
+end
 
 Mana.Tabs = Tabs
 
