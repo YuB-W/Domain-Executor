@@ -96,7 +96,16 @@ function conf.functions:LoadConfigs()
 		conf.functions:MakeFile()
 	end
     wait(0.5)
-    return pcall(function() HttpService:JSONDecode(readfile("Mana/Config/"..game.PlaceId..".json")) end)
+    local success, data = pcall(function()
+        return HttpService:JSONDecode(readfile("Mana/Config/"..game.PlaceId..".json"))
+    end)
+    if success then
+        warn("[ManaV2ForRoblox]: success!")
+        return data
+    else
+        warn("Error in decoding JSON:", data, ".")
+        return {}
+    end
 end
 
 function conf.functions:WriteConfigs(tab)
