@@ -1,4 +1,4 @@
-# ManaV2ForRoblox Revived
+# ManaV2ForRoblox - Revived
 Cool script for roblox
   
 ## Supported Games:
