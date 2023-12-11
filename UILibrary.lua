@@ -84,32 +84,32 @@ local conf = {
 }
 
 function conf.functions:MakeFile()
-	if isfile(conf["file"]) then return end
+	if isfile("Mana/Config/"..game.PlaceId..".json") then return end
         if not isfolder(foldername)  then
             makefolder(foldername)
         end
-	writefile(conf["file"], "{}")
+	writefile("Mana/Config/"..game.PlaceId..".json", "{}")
 end
 
 function conf.functions:LoadConfigs()
-	if not isfile(conf["file"]) then
-		conf["functions"]:MakeFile()
+	if not isfile("Mana/Config/"..game.PlaceId..".json") then
+		conf.functions:MakeFile()
 	end
     wait(0.5)
-	return HttpService:JSONDecode(readfile(conf["file"]))
+	return HttpService:JSONDecode(readfile("Mana/Config/"..game.PlaceId..".json"))
 end
 
 function conf.functions:WriteConfigs(tab)
-	conf["functions"]:MakeFile()
-	writefile(conf["file"], HttpService:JSONEncode((tab or {})))
+	conf.functions:MakeFile()
+	writefile("Mana/Config/"..game.PlaceId..".json", HttpService:JSONEncode((tab or {})))
 end
-local configtable = (conf["functions"]:LoadConfigs() or {})
+local configtable = (conf.functions:LoadConfigs() or {})
 
 local configsaving = true
 spawn(function()
     repeat
-        conf["functions"]:WriteConfigs(configtable)
-        task.wait(5)
+        conf.functions:WriteConfigs(configtable)
+        task.wait(30)
     until (not configsaving)
 end)
 
