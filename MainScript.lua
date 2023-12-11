@@ -75,7 +75,7 @@ UISizee = CoreGui.ManaV2.TabsFrame.UIScale
 if UserInputService.TouchEnabled and UserInputService.KeyboardEnabled == false then
     UISizee.Size = 2
 else
-    
+    print("[ManaV2ForRoblox]: not mobile user.")
 end
 
 GuiLibrary:CreateWindow()
