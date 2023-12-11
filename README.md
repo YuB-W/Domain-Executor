@@ -8,11 +8,6 @@ Every Second You Get +1 | roblox.com/games/11912525919
 Bee Swarm Simulator | roblox.com/games/1537690962
 ```
 
-## Games that are not supported anymore:
-```
-Bedwars
-```
-
 ## Supported Game's Features:
 ```
 RaceClicker:
