@@ -144,7 +144,7 @@ runFunction(function()
     LibrarrySize = LibrarySettings:CreateSlider({
         Name = "Size",
         Function = function(v)
-			UISizee = CoreGui.ManaV2.TabsFrame.UIScale
+			UISizee = CoreGui.ManaV2.Frame.UIScale
             if UISizee then UISizee.Scale = v end
 		end,
         Min = 1,

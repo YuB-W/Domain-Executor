@@ -9,6 +9,7 @@ local Players = game.Players
 local LocalPlayer = Players.LocalPlayer
 local Mouse = game.Players.LocalPlayer:GetMouse()
 local PlayerGui = LocalPlayer.PlayerGui
+local configsaving = true
 
 -- Services
 local UserInputService = game:GetService("UserInputService")
@@ -114,7 +115,6 @@ function conf.functions:WriteConfigs(tab)
 end
 local configtable = (conf.functions:LoadConfigs() or {})
 
-local configsaving = true
 spawn(function()
     repeat
         conf.functions:WriteConfigs(configtable)
@@ -380,7 +380,7 @@ local function dragGUI(gui, dragpart)
         local function update(input)
             local delta = input.Position - dragStart
             local Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + (delta.X), startPos.Y.Scale, startPos.Y.Offset + (delta.Y))
-            game:GetService("TweenService"):Create(gui, TweenInfo.new(.20), {Position = Position}):Play()
+            TweenService:Create(gui, TweenInfo.new(.20), {Position = Position}):Play()
         end
         dragpart.InputBegan:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch and dragging == false then
@@ -411,12 +411,8 @@ local function dragGUI(gui, dragpart)
     end)
 end
 
-local GuiLibraryFunctions = {}
-
-
-
 local function playsound(id, volume) 
-      if Library["Sounds"] == true then
+      if Library.Sounds == true then
 	    local sound = Instance.new("Sound")
 	    sound.Parent = workspace
 	    sound.SoundId = id
