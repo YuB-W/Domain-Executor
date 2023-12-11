@@ -1,7 +1,5 @@
 # ManaV2ForRoblox Revived
 Cool script for roblox
-
-Discontinued until i get web executor with httpget
   
 ## Supported Games:
 ```
