@@ -108,44 +108,36 @@ end)
 
 
 runFunction(function()
-    local LibNotification = {Value = true}
     local LibSounds = {Value = true}
-    local LibrarrySize = {Value = 1.1}
-    local UICornerSlider = {Value = 2}
     local LibrarySettings = Tabs.Misc:CreateToggle({
         Name = "LibrarySettings",
         Keybind = nil,
         Callback = function(v)
             if v then
-            
+                en = v
             else
             
             end
         end
     })
 
-    LibNotification = LibrarySettings:CreateOptionTog({
-        Name = "Notifications",
-        Default = true,
-        Func = function(v)
-        GuiLibrary.Notifications = v
-        end
-        
-    })
-
     LibSounds = LibrarySettings:CreateOptionTog({
         Name = "Sounds",
         Default = true,
         Func = function(v)
-        GuiLibrary.Sounds = v
+            if en then
+                GuiLibrary.Sounds = v
+            end
         end 
     })
 
     LibrarrySize = LibrarySettings:CreateSlider({
         Name = "Size",
         Function = function(v)
-			UISizee = CoreGui.ManaV2.Tabs.UIScale
-            if UISizee then UISizee.Scale = v end
+            if en then
+                UISizee = CoreGui.ManaV2.Tabs.UIScale
+                if UISizee then UISizee.Scale = v end
+            end
 		end,
         Min = 1,
         Max = 10,

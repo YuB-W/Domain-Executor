@@ -30,28 +30,26 @@ end}
 local optionframe
 local TabsFrame
 
--- Main ScreenGui
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Parent = CoreGui
+-- Main thing
+local ScreenGui = Instance.new("ScreenGui", CoreGui)
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.Name = "ManaV2"
-
--- Notifications ScreenGui
-local ScreenGuitwo = Instance.new("ScreenGui")
-ScreenGuitwo.Parent = CoreGui
-ScreenGuitwo.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGuitwo.Name = "ManaNotificationGui"
+ScreenGui.Name = "Mana"
+local ClickGui = Instance.new("Frame", ScreenGui)
+ClickGui.Name = "ClickGui"
+local NotificationGui = Instance.new("Frame", ScreenGui)
+NotificationGui.Name = "NotificationGui"
+NotificationGui.Size = UDim2.new(0, 100, 0, 10)
+NotificationGui.Position = UDim2.new(0, 1817, 0, 955)
+NotificationGui.Active = true
+NotificationGui.Draggable = true
 
 local keybinds = {}
 local Library = {
-    ["Rainbow"] = false,
-    ["Notifications"] = false,
     ["Sounds"] = true,
-    ["CornerRadius"] = 3,
-    ["Scale"] = 1.1,
     ["GuiKeybind"] = "N",
     ["IsDraggable"] = true,
-    ["???"] = true,
+    ["Font"] = Enum.Font.Gotham,
+    ["TextSize"] = 20,
     ["Objects"] = {}
 }
 
@@ -104,7 +102,7 @@ function conf.functions:LoadConfigs()
         warn("[ManaV2ForRoblox]: success!")
         return data
     else
-        warn("Error in decoding JSON:", data, ".")
+        warn("[ManaV2ForRoblox]: error in decoding JSON:", data, ".")
         return {}
     end
 end
@@ -172,204 +170,123 @@ local function getcustomassetfunc(path)
     return cachedassets[path]
 end
 
-local cachedassetstwo = {}
-local function getcustomassetfuncforsounds(path)
-    if not betterisfile(path) then
-        spawn(function()
-            local textlabel = Instance.new("TextLabel")
-            textlabel.Size = UDim2.new(1, 0, 0, 36)
-            textlabel.Text = "Downloading "..path
-            textlabel.BackgroundTransparency = 1
-            textlabel.TextStrokeTransparency = 0
-            textlabel.TextSize = 30
-            textlabel.Font = Enum.Font.SourceSans
-            textlabel.TextColor3 = Color3.new(1, 1, 1)
-            textlabel.Position = UDim2.new(0, 0, 0, -36)
-            textlabel.Parent = ScreenGuitwo
-            repeat wait() until betterisfile(path)
-            textlabel:Remove()
-        end)
-        local req = requestfunc({
-            Url = "https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/"..path:gsub("Mana/Assets/Sounds", "Sounds"),
-            Method = "GET"
-        })
-        writefile(path, req.Body)
-    end
-    if cachedassetstwo[path] == nil then
-        cachedassetstwo[path] = getasset(path) 
-    end
-    return cachedassetstwo[path]
-end
-
 function Library:ToggleLibrary()
-    if not ScreenGui.Enabled and UserInputService:GetFocusedTextBox() == nil then
-        ScreenGui.Enabled = true
+    if not NotificationGui.Visible and UserInputService:GetFocusedTextBox() == nil then
+        NotificationGui.Visible = true
     else
         if UserInputService:GetFocusedTextBox() == nil then
-            ScreenGui.Enabled = false
+            NotificationGui.Visible = false
         end
     end
 end
 
-function Library:CreateNotification(title, text, delay2, toggled)
+--notification (from Future)
+local function bettertween2(obj, newpos, dir, style, tim, override)
     spawn(function()
-        if ScreenGuitwo:FindFirstChild("Background") then ScreenGuitwo:FindFirstChild("Background"):Destroy() end
-		if Library["Notifications"] == true then
-	        local frame = Instance.new("Frame")
-	        frame.Size = UDim2.new(0, 100, 0, 115)
-	        frame.Position = UDim2.new(0.5, 0, 0, -115)
-	        frame.BorderSizePixel = 0
-	        frame.AnchorPoint = Vector2.new(0.5, 0)
-	        frame.BackgroundTransparency = 0.5
-	        frame.BackgroundColor3 = Color3.new(0, 0, 0)
-	        frame.Name = "Background"
-	        frame.Parent = ScreenGuitwo
-	        local frameborder = Instance.new("Frame")
-	        frameborder.Size = UDim2.new(1, 0, 0, 8)
-	        frameborder.BorderSizePixel = 0
-	        frameborder.BackgroundColor3 = (toggled and Color3.fromRGB(102, 205, 67) or Color3.fromRGB(205, 64, 78))
-	        frameborder.Parent = frame
-	        local frametitle = Instance.new("TextLabel")
-	        frametitle.Font = Enum.Font.SourceSansLight
-	        frametitle.BackgroundTransparency = 1
-	        frametitle.Position = UDim2.new(0, 0, 0, 30)
-	        frametitle.TextColor3 = (toggled and Color3.fromRGB(102, 205, 67) or Color3.fromRGB(205, 64, 78))
-	        frametitle.Size = UDim2.new(1, 0, 0, 28)
-	        frametitle.Text = "          "..title
-	        frametitle.TextSize = 24
-	        frametitle.TextXAlignment = Enum.TextXAlignment.Left
-	        frametitle.TextYAlignment = Enum.TextYAlignment.Top
-	        frametitle.Parent = frame
-	        local frametext = Instance.new("TextLabel")
-	        frametext.Font = Enum.Font.SourceSansLight
-	        frametext.BackgroundTransparency = 1
-	        frametext.Position = UDim2.new(0, 0, 0, 68)
-	        frametext.TextColor3 = Color3.new(1, 1, 1)
-	        frametext.Size = UDim2.new(1, 0, 0, 28)
-	        frametext.Text = "          "..text
-	        frametext.TextSize = 24
-	        frametext.TextXAlignment = Enum.TextXAlignment.Left
-	        frametext.TextYAlignment = Enum.TextYAlignment.Top
-	        frametext.Parent = frame
-	        local textsize = game:GetService("TextService"):GetTextSize(frametitle.Text, frametitle.TextSize, frametitle.Font, Vector2.new(100000, 100000))
-	        local textsize2 = game:GetService("TextService"):GetTextSize(frametext.Text, frametext.TextSize, frametext.Font, Vector2.new(100000, 100000))
-	        if textsize2.X > textsize.X then textsize = textsize2 end
-	        frame.Size = UDim2.new(0, textsize.X + 38, 0, 115)
-	        pcall(function()
-	            frame:TweenPosition(UDim2.new(0.5, 0, 0, 20), Enum.EasingDirection.InOut, Enum.EasingStyle.Quad, 0.15)
-	            game:GetService("Debris"):AddItem(frame, delay2 + 0.15)
-	        end)
-	end
+        local frame = Instance.new("Frame")
+        frame.Visible = false
+        frame.Position = obj.Position
+        frame.Parent = ScreenGui
+        frame:GetPropertyChangedSignal("Position"):Connect(function()
+            obj.Position = UDim2.new(frame.Position.X.Scale, frame.Position.X.Offset, obj.Position.Y.Scale, obj.Position.Y.Offset)
+        end)
+        pcall(function()
+            frame:TweenPosition(newpos, dir, style, tim, override)
+        end)
+        frame.Parent = nil
+        task.wait(tim)
+        frame:Remove()
     end)
 end
 
-function Library:CreateWarning(title, text, delay2)
-    spawn(function()
-        if ScreenGuitwo:FindFirstChild("Background") then ScreenGuitwo:FindFirstChild("Background"):Destroy() end
-	        local frame = Instance.new("Frame")
-	        frame.Size = UDim2.new(0, 100, 0, 115)
-	        frame.Position = UDim2.new(0.5, 0, 0, -115)
-	        frame.BorderSizePixel = 0
-	        frame.AnchorPoint = Vector2.new(0.5, 0)
-	        frame.BackgroundTransparency = 0.5
-	        frame.BackgroundColor3 = Color3.new(0, 0, 0)
-	        frame.Name = "Background"
-	        frame.Parent = ScreenGuitwo
-	        local frameborder = Instance.new("Frame")
-	        frameborder.Size = UDim2.new(1, 0, 0, 8)
-	        frameborder.BorderSizePixel = 0
-	        frameborder.BackgroundColor3 = Color3.fromRGB(205, 64, 78)
-	        frameborder.Parent = frame
-	        local frametitle = Instance.new("TextLabel")
-	        frametitle.Font = Enum.Font.SourceSansLight
-	        frametitle.BackgroundTransparency = 1
-	        frametitle.Position = UDim2.new(0, 0, 0, 30)
-	        frametitle.TextColor3 = Color3.fromRGB(205, 64, 78)
-	        frametitle.Size = UDim2.new(1, 0, 0, 28)
-	        frametitle.Text = "          "..title
-	        frametitle.TextSize = 24
-	        frametitle.TextXAlignment = Enum.TextXAlignment.Left
-	        frametitle.TextYAlignment = Enum.TextYAlignment.Top
-	        frametitle.Parent = frame
-	        local frametext = Instance.new("TextLabel")
-	        frametext.Font = Enum.Font.SourceSansLight
-	        frametext.BackgroundTransparency = 1
-	        frametext.Position = UDim2.new(0, 0, 0, 68)
-	        frametext.TextColor3 = Color3.new(1, 1, 1)
-	        frametext.Size = UDim2.new(1, 0, 0, 28)
-	        frametext.Text = "          "..text
-	        frametext.TextSize = 24
-	        frametext.TextXAlignment = Enum.TextXAlignment.Left
-	        frametext.TextYAlignment = Enum.TextYAlignment.Top
-	        frametext.Parent = frame
-	        local textsize = game:GetService("TextService"):GetTextSize(frametitle.Text, frametitle.TextSize, frametitle.Font, Vector2.new(100000, 100000))
-	        local textsize2 = game:GetService("TextService"):GetTextSize(frametext.Text, frametext.TextSize, frametext.Font, Vector2.new(100000, 100000))
-	        if textsize2.X > textsize.X then textsize = textsize2 end
-	        frame.Size = UDim2.new(0, textsize.X + 38, 0, 115)
-	        pcall(function()
-	            frame:TweenPosition(UDim2.new(0.5, 0, 0, 20), Enum.EasingDirection.InOut, Enum.EasingStyle.Quad, 0.15)
-	            game:GetService("Debris"):AddItem(frame, delay2 + 0.15)
-	        end)
+local NotificationSize = UDim2.new(0, 300, 0, 100)
+function GuiLibrary:CreateNotification(tittle, text, Time)
+spawn(function()
+        local Time = Time or 2
+        local title = title or "Notification"
+        local text = text or "No text"
+
+        local offset = #NotificationGui:GetChildren()
+        local ToastNotification = Instance.new("Frame")
+        local Topbar = Instance.new("Frame")
+        local Bottombar = Instance.new("Frame")
+        local Title = Instance.new("TextLabel")
+        local Text = Instance.new("TextLabel")
+        ToastNotification.Name = "ToastNotification"
+        ToastNotification.Parent = NotificationGui
+        ToastNotification.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+        ToastNotification.BackgroundTransparency = 0.250
+        ToastNotification.BorderSizePixel = 0
+        ToastNotification.Position = UDim2.new(1, 0, 1, -((5 + NotificationSize.Y.Offset) * (offset + 1)))
+        ToastNotification.Size = NotificationSize
+        Topbar.Name = "Topbar"
+        Topbar.Parent = ToastNotification
+        Topbar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        Topbar.BackgroundTransparency = 0.6
+        Topbar.BorderSizePixel = 0
+        Topbar.Size = UDim2.new(0, NotificationSize.X.Offset, 0, NotificationSize.Y.Offset/3.16)
+        Bottombar.Name = "Bottombar"
+        Bottombar.Parent = ToastNotification
+        Bottombar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        Bottombar.BackgroundTransparency = 0.6
+        Bottombar.BorderSizePixel = 0
+        Bottombar.Size = UDim2.new(0, NotificationSize.X.Offset, 0, 5)
+        Bottombar.Position = UDim2.new(0.5,0, 1, -5)
+        Bottombar.AnchorPoint = Vector2.new(0.5, 0)
+        Title.Name = "Title"
+        Title.Parent = Topbar
+        Title.BackgroundTransparency = 1.000
+        Title.Position = UDim2.new(0.0260000005, 0, 0, 0)
+        Title.Size = UDim2.new(0, NotificationSize.X.Offset/1.16326531, 0, NotificationSize.Y.Offset/3.16)
+        Title.Font = GuiLibrary.Font
+        Title.Text = title
+        Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+        Title.TextSize = 20
+        Title.TextXAlignment = Enum.TextXAlignment.Left
+        Text.Name = "Text"
+        Text.Parent = ToastNotification
+        Text.BackgroundTransparency = 1.000
+        Text.Position = UDim2.new(0.0260000005, 0, 0, Topbar.Size.Y.Offset + 5)
+        Text.Size = UDim2.new(0, NotificationSize.X.Offset/1.14, 0, NotificationSize.Y.Offset/1.05333333)
+        Text.Font = GuiLibrary.Font
+        Text.Text = text
+        Text.TextColor3 = Color3.fromRGB(255, 255, 255)
+        Text.TextSize = 20
+        Text.TextWrapped = true
+        Text.TextXAlignment = Enum.TextXAlignment.Left
+        Text.TextYAlignment = Enum.TextYAlignment.Top
+
+        bettertween2(ToastNotification, UDim2.new(1, -(NotificationSize.X.Offset + 10), 1, -((5 + NotificationSize.Y.Offset) * (offset + 1))), Enum.EasingDirection.In, Enum.EasingStyle.Sine, 0.15, true)
+        task.wait(0.15)
+        pcall(function()
+            Bottombar:TweenSize(UDim2.new(0, 0, 0, 5), Enum.EasingDirection.In, Enum.EasingStyle.Linear, Time, true)
+        end)
+        task.wait(Time)
+        bettertween2(ToastNotification, UDim2.new(1, 0, 1, ToastNotification.Position.Y.Offset), Enum.EasingDirection.In, Enum.EasingStyle.Sine, 0.15, true)
+        task.wait(0.15)
+        ToastNotification:Destroy()
     end)
 end
 
 --Library:CreateNotification("Loaded", "Press N to toggle GUI", 3, true)
 --Library:CreateWarning("Loaded", "Press N to toggle GUI", 3)
 
-function Library:CreateUIToggleButton()
-    screenien = Instance.new("ScreenGui", game:GetService("CoreGui"))
-    Background = Instance.new("Frame")
-    Text = Instance.new("TextButton")
-    UICorner = Instance.new("UICorner")
-    Dragg = Instance.new("TextLabel")
-    ICorner_2 = Instance.new("UICorner")
-
-    screenien.Name = ("54687")
-
-    Background.Name = "Background"
-    Background.Parent = screenien
-    Background.BackgroundColor3 = Color3.fromRGB(83, 83, 83)
-    Background.BackgroundTransparency = 1.000
-    Background.Position = UDim2.new(0.0920729373, 0, 0.0988000023, 0)
-    Background.Size = UDim2.new(0, 100, 0, 40)
-    Background.Draggable = true
-    Background.Active = true
-    Background.Selectable = true
-
-    Text.Name = "Text"
-    Text.Parent = Background
-    Text.BackgroundColor3 = Color3.fromRGB(81, 81, 81)
-    Text.BackgroundTransparency = 0.500
-    Text.BorderSizePixel = 0
-    Text.Position = UDim2.new(0.400000006, 0, 0, 0)
-    Text.Size = UDim2.new(0, 60, 0, 40)
-    Text.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Text.TextSize = 15.000
-    Text.Text = "Mana"
-
-    UICorner.CornerRadius = UDim.new(0, Library["CornerRadius"])
-    UICorner.Parent = Text
-
-    Dragg.Name = "Dragg"
-    Dragg.Parent = Background
-    Dragg.BackgroundColor3 = Color3.fromRGB(141, 255, 121)
-    Dragg.BackgroundTransparency = 0.500
-    Dragg.BorderSizePixel = 0
-    Dragg.Position = UDim2.new(0.0599999987, 0, 0, 0)
-    Dragg.Size = UDim2.new(0, 35, 0, 40)
-    Dragg.Font = Enum.Font.SourceSans
-    Dragg.Text = ""
-    Dragg.TextColor3 = Color3.fromRGB(0, 0, 0)
-    Dragg.TextSize = 14.000
-
-    Text.MouseButton1Click:Connect(function()
-    if game.CoreGui.ManaV2.Enabled == false then
-	    game.CoreGui.ManaV2.Enabled = true
-    elseif game.CoreGui.ManaV2.Enabled == true then
-	    game.CoreGui.ManaV2.Enabled = false
-    end
-    end)
-end
+-- GUI Button
+local button = Instance.new("TextButton")
+button.Position = UDim2.new(1, -1816, 0, -32)
+button.Text = "Mana"
+button.BackgroundColor3 = Color3.fromRGB(26, 25, 26)
+button.TextColor3 = Color3.new(1, 1, 1)
+button.Size = UDim2.new(0, 32, 0, 32)
+button.BorderSizePixel = 0
+button.BackgroundTransparency = 0.5
+button.Parent = ScreenGui
+--[[
+button.Active = true
+button.Draggable = true
+]]
+local UICorner = Instance.new("UICorner")
+UICorner.Parent = button
 
 local function dragGUI(gui, dragpart)
     spawn(function()
@@ -863,7 +780,7 @@ function Library:CreateWindow()
                         newindex = getvalue(newindex + 1)
                         dropdownapi.Select(newindex)
                     else
-                        Library:CreateWarning("NewIndex in selector ("..argstable.Name..") in function `SelectNext` was not found!", "If this keeps happening, go to you exploit's folder\nthen go to workspace/Mana/Config\nand delete everything inside of that folder", 10, false)
+                        Library:CreateNotification("NewIndex in selector ("..argstable.Name..") in function `SelectNext` was not found!", "If this keeps happening, go to you exploit's folder\nthen go to workspace/Mana/Config\nand delete everything inside of that folder", 10)
                     end
                 end
 
@@ -873,7 +790,7 @@ function Library:CreateWindow()
                         newindex = getvalue(newindex - 1)
                         dropdownapi.Select(newindex)
                     else
-                        Library:CreateWarning("NewIndex in selector ("..argstable.Name..") in function `SelectPrevious` was not found!", "If this keeps happening, go to you exploit's folder\nthen go to workspace/Mana/Config\nand delete everything inside of that folder", 10, false)
+                        Library:CreateWarning("NewIndex in selector ("..argstable.Name..") in function `SelectPrevious` was not found!", "If this keeps happening, go to you exploit's folder\nthen go to workspace/Mana/Config\nand delete everything inside of that folder", 10)
                     end
                 end
     			if configtable[ddname] and configtable[ddname]["Value"] then
@@ -952,6 +869,7 @@ function Library:CreateWindow()
                 return optiontogval
             end
             
+            --idk if it work
             function sussyamog:CreateTextBox(argstable)
                 local textboxapi = {["Value"] = (configtable[argstable["Name"]..sussyamog["Name"].."_MN"] and configtable[argstable["Name"]..sussyamog["Name"].."_MN"]["Value"] or argstable.Value)}
                 local slider = Instance.new("TextBox")
