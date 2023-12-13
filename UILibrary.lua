@@ -464,6 +464,7 @@ function Library:CreateWindow()
     uilistthingy.FillDirection = Enum.FillDirection.Horizontal
     uilistthingy.SortOrder = Enum.SortOrder.LayoutOrder
     uilistthingy.Padding = UDim.new(0, 40)
+    UIScale.Name = "scalee"
     UIScale.Parent = TabsFrame
     UIScale.Scale = 4
     function Library:CreateTab(title, color)
