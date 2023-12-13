@@ -271,6 +271,7 @@ end
 ]]
 
 function Library:CreateNotification(title, text, delay2, toggled)
+    --[[
     spawn(function()
         if ScreenGuitwo:FindFirstChild("Background") then ScreenGuitwo:FindFirstChild("Background"):Destroy() end
 		if Library["Notifications"] == true then
@@ -320,9 +321,11 @@ function Library:CreateNotification(title, text, delay2, toggled)
 	        end)
 	end
     end)
+    ]]
 end
 
 function Library:CreateWarning(title, text, delay2)
+    --[[
     spawn(function()
         if ScreenGuitwo:FindFirstChild("Background") then ScreenGuitwo:FindFirstChild("Background"):Destroy() end
 	        local frame = Instance.new("Frame")
@@ -370,6 +373,7 @@ function Library:CreateWarning(title, text, delay2)
 	            game:GetService("Debris"):AddItem(frame, delay2 + 0.15)
 	        end)
     end)
+    ]]
 end
 
 --Library:CreateNotification("Loaded", "Press N to toggle GUI", 3, true)
