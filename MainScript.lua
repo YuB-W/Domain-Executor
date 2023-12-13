@@ -82,10 +82,9 @@ local Tabs = {
 }
 
 --some mobile support, and yea it's only smaller gui
-UISizee = CoreGui.ManaV2.Tabs:FindFirstChild("scalee")
 if UserInputService.TouchEnabled then
     warn("[ManaV2ForRoblox]: mobile user.")
-    UISizee.Scale = 0.2
+    CoreGui.ManaV2.Tabs:FindFirstChild("scalee").Scale = 0.2
 else
     warn("[ManaV2ForRoblox]: not mobile user.")
 end
