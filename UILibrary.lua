@@ -201,7 +201,8 @@ end
 
 local NotificationSize = UDim2.new(0, 300, 0, 100)
 function GuiLibrary:CreateNotification(tittle, text, Time)
-spawn(function()
+    --[[until i make it for mobile it will be disabled
+    spawn(function()
         local Time = Time or 2
         local title = title or "Notification"
         local text = text or "No text"
@@ -266,6 +267,7 @@ spawn(function()
         task.wait(0.15)
         ToastNotification:Destroy()
     end)
+    ]]
 end
 
 --Library:CreateNotification("Loaded", "Press N to toggle GUI", 3, true)
