@@ -113,11 +113,9 @@ runFunction(function()
                 AutoClickerEnabled = true
                 while AutoClickerEnabled do
                     if mouse1click and (isrbxactive and isrbxactive() or iswindowactive and iswindowactive()) then
-                        --if CoreGui["ManaV2"].Enabled == false then
-                            local clickfunc = (AutoClickerMode.Value == "Click" and mouse1click or mouse2click)
+                            local clickfunc = (mouse1click)
                             clickfunc()
                             task.wait(1 / AutoClickerCPS.Value)
-                        --end
                     end
                 end
             else
@@ -372,28 +370,6 @@ runFunction(function()
 end)
 
 runFunction(function()
-    local MouseConnection
-    local ClickTP = Tabs.Movement:CreateToggle({
-        Name = "ClickTP",
-        Keybind = nil,
-        Callback = function(callback) 
-            if callback then 
-                MouseConnection = Mouse.Button1Down:Connect(function()
-                    if isAlive() and Mouse.Target then 
-                        LocalPlayer.Character.HumanoidRootPart.CFrame = Mouse.Hit + Vector3.new(0, 3, 0)
-                    end
-                end)
-            else
-                if MouseConnection then 
-                    MouseConnection:Disconnect()
-                    MouseConnection = nil
-                end
-            end
-        end
-    })
-end)
-
-runFunction(function()
     local Speed = {Value = 23}
     Speed = Tabs.Movement:CreateToggle({
         Name = "Speed",
@@ -626,6 +602,60 @@ runFunction(function()
 end)
 
 --Utility
+
+runFunction(function()
+    local MouseConnection
+    local ClickTP = Tabs.Utility:CreateToggle({
+        Name = "ClickTP",
+        Keybind = nil,
+        Callback = function(callback) 
+            if callback then 
+                MouseConnection = Mouse.Button1Down:Connect(function()
+                    if isAlive() and Mouse.Target then 
+                        LocalPlayer.Character.HumanoidRootPart.CFrame = Mouse.Hit + Vector3.new(0, 3, 0)
+                    end
+                end)
+            else
+                if MouseConnection then 
+                    MouseConnection:Disconnect()
+                    MouseConnection = nil
+                end
+            end
+        end
+    })
+end)
+
+runFunction(function()
+    local CameraUnlock = Tabs.Utility:CreateToggle({
+        Name = "CameraUnlock",
+        Keybind = nil,
+        Callback = function(callback) 
+            if callback then 
+                LocalPlayer.CameraMaxZoomDistance = 99999999
+            else
+                print("[ManaV2ForRoblox]: no way to make it back.")
+            end
+        end
+    })
+end)
+
+runFunction(function()
+    local InfinityJump = Tabs.Utility:CreateToggle({
+        Name = "InfinityJump",
+        Keybind = nil,
+        Callback = function(callback) 
+            if callback then 
+                UserInputService.JumpRequest:Connect(function()
+                    if callback then
+                        LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+                    end
+                end)
+            else
+                
+            end
+        end
+    })
+end)
 
 --World
 

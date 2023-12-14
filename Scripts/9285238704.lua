@@ -36,7 +36,7 @@ local setthreadidentityfunc = syn and syn.set_thread_identity or set_thread_iden
 local getthreadidentityfunc = syn and syn.get_thread_identity or get_thread_identity or getidentity or getthreadidentity
 local getasset = getsynasset or getcustomasset
 local function runFunction(func) func() end
-local entity = loadstring(game:HttpGet("https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/main/Libraries/entityHandler.lua", true))()
+local Entity = loadstring(game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/Modules/EntityHandler.lua", true))()
 
 local Services = ReplicatedStorage.Packages.Knit.Services
 local Remotes = {
