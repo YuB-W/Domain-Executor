@@ -1,7 +1,8 @@
 # ManaV2ForRoblox - Revived
 Cool script for roblox
 
-Current status: not working corrently
+Current status: working
+
 Loadstring: 
 ```
 loadstring(game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/MainScript.lua"))()
