@@ -369,31 +369,33 @@ runFunction(function()
     })
 end)
 
-runFunction(function()
-    local Speed = {Value = 23}
-    Speed = Tabs.Movement:CreateToggle({
-        Name = "Speed",
-        Keybind = nil,
-        Callback = function(v)
-            if v == true then
-                Humanoid.WalkSpeed = Speed["Value"]
-            else
-                Humanoid.WalkSpeed = 16
-            end
-        end
-    })
-
-    Speed = Speed:CreateSlider({
+if Functions:CheckPlace("Bedwars").bla == false then
+    runFunction(function()
+        local Speed = {Value = 23}
+        Speed = Tabs.Movement:CreateToggle({
             Name = "Speed",
-            Function = function(v)
-                Humanoid.WalkSpeed = Speed.Value or v
-            end,
-            Min = 0,
-            Max = 200,
-            Default = 16,
-            Round = 0
+            Keybind = nil,
+            Callback = function(v)
+                if v == true then
+                    Humanoid.WalkSpeed = Speed["Value"]
+                else
+                    Humanoid.WalkSpeed = 16
+                end
+            end
         })
-end)
+
+        Speed = Speed:CreateSlider({
+                Name = "Speed",
+                Function = function(v)
+                    Humanoid.WalkSpeed = Speed.Value or v
+                end,
+                Min = 0,
+                Max = 200,
+                Default = 16,
+                Round = 0
+            })
+    end)
+end
 
 --Render
 
@@ -603,27 +605,29 @@ end)
 
 --Utility
 
-runFunction(function()
-    local MouseConnection
-    local ClickTP = Tabs.Utility:CreateToggle({
-        Name = "ClickTP",
-        Keybind = nil,
-        Callback = function(callback) 
-            if callback then 
-                MouseConnection = Mouse.Button1Down:Connect(function()
-                    if isAlive() and Mouse.Target then 
-                        LocalPlayer.Character.HumanoidRootPart.CFrame = Mouse.Hit + Vector3.new(0, 3, 0)
+if Functions:CheckPlace("Bedwars").bla == false then
+    runFunction(function()
+        local MouseConnection
+        local ClickTP = Tabs.Utility:CreateToggle({
+            Name = "ClickTP",
+            Keybind = nil,
+            Callback = function(callback) 
+                if callback then 
+                    MouseConnection = Mouse.Button1Down:Connect(function()
+                        if isAlive() and Mouse.Target then 
+                            LocalPlayer.Character.HumanoidRootPart.CFrame = Mouse.Hit + Vector3.new(0, 3, 0)
+                        end
+                    end)
+                else
+                    if MouseConnection then 
+                        MouseConnection:Disconnect()
+                        MouseConnection = nil
                     end
-                end)
-            else
-                if MouseConnection then 
-                    MouseConnection:Disconnect()
-                    MouseConnection = nil
                 end
             end
-        end
-    })
-end)
+        })
+    end)
+end
 
 runFunction(function()
     local CameraUnlock = Tabs.Utility:CreateToggle({
@@ -675,6 +679,7 @@ runFunction(function()
             end
         end
     })
+    
     Gravity = Gravity:CreateSlider({
         Name = "Gravity",
         Function = function()
@@ -687,5 +692,4 @@ runFunction(function()
         Default = 196,
         Round = 0
     })
-
 end)

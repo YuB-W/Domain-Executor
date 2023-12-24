@@ -50,6 +50,19 @@ do
             loadstring(game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/Scripts/".. path))()
         end
     end
+
+    function Functions:CheckPlace(placename)
+        local bla
+        if placename == "Bedwars" then
+            if PlaceId == 8560631822 or PlaceId == 8444591321 or PlaceId == 6872274481 then
+                bla = true
+                return bla
+            else
+                bla = false
+                return bla
+            end
+        end
+    end
 end
 
 if not getgenv then
