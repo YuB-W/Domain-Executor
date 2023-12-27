@@ -1,7 +1,7 @@
 # ManaV2ForRoblox - Revived
 Cool script for roblox
 
-Current status: working
+Current status: i don't know
 
 Loadstring: 
 ```
