@@ -28,6 +28,8 @@ local Camera = workspace.Camera
 local Mouse = LocalPlayer:GetMouse()
 local PlayerGui = LocalPlayer.PlayerGui
 local Animation = Character.Animate
+local Place = Functions:CheckPlace("Bedwars").bla
+print(Place)
 
 local entity = Mana.Entity
 local GuiLibrary = Mana.GuiLibrary
@@ -369,7 +371,7 @@ runFunction(function()
     })
 end)
 
-if Functions:CheckPlace("Bedwars").bla == false then
+if Place == false then
     runFunction(function()
         local Speed = {Value = 23}
         Speed = Tabs.Movement:CreateToggle({
@@ -605,7 +607,7 @@ end)
 
 --Utility
 
-if Functions:CheckPlace("Bedwars").bla == false then
+if Place == false then
     runFunction(function()
         local MouseConnection
         local ClickTP = Tabs.Utility:CreateToggle({
