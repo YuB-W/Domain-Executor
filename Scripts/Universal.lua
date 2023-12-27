@@ -28,7 +28,7 @@ local Camera = workspace.Camera
 local Mouse = LocalPlayer:GetMouse()
 local PlayerGui = LocalPlayer.PlayerGui
 local Animation = Character.Animate
-local Place = Functions:CheckPlace("Bedwars").bla
+local Place = Functions:CheckPlace("Bedwars")
 print(Place)
 
 local entity = Mana.Entity

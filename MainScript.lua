@@ -52,14 +52,11 @@ do
     end
 
     function Functions:CheckPlace(placename)
-        local bla
         if placename == "Bedwars" then
             if PlaceId == 8560631822 or PlaceId == 8444591321 or PlaceId == 6872274481 then
-                bla = true
-                return bla
+                return true
             else
-                bla = false
-                return bla
+                return false
             end
         end
     end
