@@ -1,7 +1,7 @@
 # ManaV2ForRoblox - Revived
 Cool script for roblox
 
-Current status: i don't know
+Current status: working (but not in bedwars)
 
 Loadstring: 
 ```
