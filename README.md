@@ -1,7 +1,9 @@
 # ManaV2ForRoblox - Revived
 Cool script for roblox
 
-Current status: working (but not in bedwars)
+Discontinued until i get normal executor for roblox.
+
+Current status: working 
 
 Loadstring: 
 ```
