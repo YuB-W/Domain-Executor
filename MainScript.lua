@@ -72,7 +72,7 @@ if Mana and Mana.Activated == true then
 end
 
 
-local GuiLibrary = Functions:RunFile("UILibrary.lua")
+local GuiLibrary = Functions:RunFile("GuiLibrary.lua")
 
 getgenv().Mana = {}
 Mana.Entity = loadstring(game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/Modules/EntityHandler.lua", true))()
@@ -206,4 +206,4 @@ end)
 print("[ManaV2ForRoblox/MainScript.lua]: Loaded in " .. tostring(tick() - startTick) .. ".")
 
 UniversalScript = Functions:RunFile("Scripts/Universal.lua")
-GameScript = Functions:RunGameScript("".. PlaceId ..".lua")
+GameScript = Functions:RunGameScript("".. PlaceId ..".lua") --if you get error bc of this, it's okay (and i don't want to do suc, res = bla bla)

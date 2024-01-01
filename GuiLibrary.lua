@@ -50,6 +50,7 @@ local Library = {
     ["IsDraggable"] = true,
     ["Font"] = Enum.Font.Gotham,
     ["TextSize"] = 20,
+    ["TranslationLanguage"] = "",
     ["Objects"] = {}
 }
 
@@ -99,7 +100,7 @@ function conf.functions:LoadConfigs()
         return HttpService:JSONDecode(readfile("Mana/Config/"..game.PlaceId..".json"))
     end)
     if success then
-        warn("[ManaV2ForRoblox]: success!")
+        warn("[ManaV2ForRoblox]: successfully decoded JSON.")
         return data
     else
         warn("[ManaV2ForRoblox]: error in decoding JSON:", data, ".")
@@ -379,7 +380,7 @@ end
 --Library:CreateNotification("Loaded", "Press N to toggle GUI", 3, true)
 --Library:CreateWarning("Loaded", "Press N to toggle GUI", 3)
 
--- GUI Button
+-- GUI Button (idk what positions are for mobile)
 local button = Instance.new("TextButton")
 button.Position = UDim2.new(1, -1816, 0, -32)
 button.Text = "Mana"
@@ -448,6 +449,14 @@ local function playsound(id, volume)
 	    wait(2)
 	    sound:Destroy()
       end
+end
+
+--translations
+
+local Translation
+if GuiLibrary.TranslationLanguage ~= "" then
+    --i need to think about how to make this
+    Translation = ""
 end
 
 local a
