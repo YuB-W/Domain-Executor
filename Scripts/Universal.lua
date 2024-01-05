@@ -633,20 +633,6 @@ if Place == false then
 end
 
 runFunction(function()
-    local CameraUnlock = Tabs.Utility:CreateToggle({
-        Name = "CameraUnlock",
-        Keybind = nil,
-        Callback = function(callback) 
-            if callback then 
-                LocalPlayer.CameraMaxZoomDistance = 99999999
-            else
-                print("[ManaV2ForRoblox]: no way to make it back.")
-            end
-        end
-    })
-end)
-
-runFunction(function()
     local InfinityJump = Tabs.Utility:CreateToggle({
         Name = "InfinityJump",
         Keybind = nil,
@@ -659,6 +645,20 @@ runFunction(function()
                 end)
             else
                 
+            end
+        end
+    })
+end)
+
+runFunction(function()
+    local Noclip = Tabs.Utility:CreateToggle({
+        Name = "Noclip",
+        Keybind = nil,
+        Callback = function(callback) 
+            if callback then 
+                LocalPlayer.Character.Humanoid:ChangeState(11)
+            else
+                LocalPlayer.Character.Humanoid:ChangeState(5)
             end
         end
     })

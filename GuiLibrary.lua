@@ -4,20 +4,18 @@
 
 repeat task.wait() until game:IsLoaded()
 
+-- Services
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local HttpService = game:GetService("HttpService")
+local CoreGui = game:GetService("CoreGui")
+
 -- Instances
 local Players = game.Players
 local LocalPlayer = Players.LocalPlayer
 local Mouse = game.Players.LocalPlayer:GetMouse()
 local PlayerGui = LocalPlayer.PlayerGui
 local configsaving = true
-
--- Services
-local UserInputService = game:GetService("UserInputService")
-local InputService = game:GetService("UserInputService")
-local input = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
-local CoreGui = game:GetService("CoreGui")
-local HttpService = game:GetService("HttpService")
 
 
 -- I don't know what do i write here 
@@ -452,12 +450,12 @@ local function playsound(id, volume)
 end
 
 --translations
-
+--[[
 local Translation
 if GuiLibrary.TranslationLanguage ~= "" then
-    --i need to think about how to make this
     Translation = ""
 end
+]]
 
 local a
 local tabs = {}
