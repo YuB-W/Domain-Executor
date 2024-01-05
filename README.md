@@ -1,7 +1,7 @@
 # ManaV2ForRoblox - Revived
 Cool script for roblox
 
-Discontinued until i get normal executor for roblox.
+I'll don't make big updates for this script until i get normal executor (i mean no new games support, only new features).
 
 Current status: working 
 
