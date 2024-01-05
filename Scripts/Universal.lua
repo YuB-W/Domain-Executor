@@ -608,6 +608,20 @@ end)
 
 --Utility
 
+runFunction(function()
+    local CameraUnlock = Tabs.Utility:CreateToggle({
+        Name = "CameraUnlock",
+        Keybind = nil,
+        Callback = function(callback) 
+            if callback then 
+                LocalPlayer.CameraMaxZoomDistance = 99999999
+            else
+                print("[ManaV2ForRoblox]: no way to make it back.")
+            end
+        end
+    })
+end)
+
 if Place == false then
     runFunction(function()
         local MouseConnection
