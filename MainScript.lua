@@ -91,14 +91,6 @@ local Tabs = {
     Misc = GuiLibrary:CreateTab("Other",Color3.fromRGB(240, 157, 62))
 }
 
---some mobile support, and yea it's only smaller gui
-if UserInputService.TouchEnabled then
-    warn("[ManaV2ForRoblox]: mobile user.")
-    CoreGui.Mana.Tabs:FindFirstChild("scalee").Scale = 0.7
-else
-    warn("[ManaV2ForRoblox]: not mobile user.")
-end
-
 Mana.Tabs = Tabs
 
 runFunction(function()
@@ -202,6 +194,14 @@ runFunction(function()
         end
     })
 end)
+
+--some mobile support, and yea it's only smaller gui
+if UserInputService.TouchEnabled then
+    warn("[ManaV2ForRoblox]: mobile user.")
+    CoreGui.Mana.Tabs:FindFirstChild("scalee").Scale = 0.7
+else
+    warn("[ManaV2ForRoblox]: not mobile user.")
+end
 
 print("[ManaV2ForRoblox/MainScript.lua]: Loaded in " .. tostring(tick() - startTick) .. ".")
 
