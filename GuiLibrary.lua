@@ -478,6 +478,7 @@ function Library:CreateWindow()
         tab.Name = title
 	tab.Draggable = true
 	tab.Active = true
+    tab.Selectable = true
         tab.ZIndex = 1
         tab.Parent = TabsFrame
         tab.BackgroundColor3 = Color3.fromRGB(14, 14, 23)
@@ -488,6 +489,8 @@ function Library:CreateWindow()
         tab.LayoutOrder = 1 + #tabs
         tab.AutoButtonColor = false
 	tab.Text = ""
+        
+        dragGUI()
     
         tabname.Name = title
         tabname.Parent = tab
@@ -503,6 +506,9 @@ function Library:CreateWindow()
         tabname.TextSize = 22.000
         tabname.TextWrapped = true
         tabname.TextXAlignment = Enum.TextXAlignment.Left
+    tabname.Draggable = true
+    tabname.Active = true
+    tabname.Selectable = true
     
         assetthing.Parent = tabname
         assetthing.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -510,12 +516,8 @@ function Library:CreateWindow()
         assetthing.Position = UDim2.new(0.86, 0,0.154, 0)
         assetthing.Size = UDim2.new(0, 30, 0, 30)
 
-        if tittle == "Other" then
-        assetthing.Image = getcustomassetfunc("Mana/Assets/settings.png") or getasset("Mana/Assets/settings.png")
-        end
-
         local tabtable = {
-            ["Toggles"]={}
+            ["Toggles"] = {}
         }
         function tabtable:CreateToggle(data)
             local info = {
