@@ -160,9 +160,6 @@ runFunction(function()
                 if CoreGui:FindFirstChild("ManaV2") then CoreGui:FindFirstChild("ManaV2"):Destroy() end
                 if CoreGui:FindFirstChild("ManaNotificationGui") then CoreGui:FindFirstChild("ManaNotificationGui"):Destroy() end
                 if CoreGui:FindFirstChild("54687") then CoreGui:FindFirstChild("54687"):Destroy() end
-                if CoreGui:FindFirstChild("54687") then CoreGui:FindFirstChild("54687"):Destroy() end
-                if CoreGui:FindFirstChild("54687") then CoreGui:FindFirstChild("54687"):Destroy() end
-                if CoreGui:FindFirstChild("54687") then CoreGui:FindFirstChild("54687"):Destroy() end
                 if CoreGui:FindFirstChild("54674679857") then CoreGui:FindFirstChild("54674679857"):Destroy() end
             else
 
@@ -181,9 +178,6 @@ runFunction(function()
             -- Cringe code but idc
             if CoreGui:FindFirstChild("ManaV2") then CoreGui:FindFirstChild("ManaV2"):Destroy() end
             if CoreGui:FindFirstChild("ManaNotificationGui") then CoreGui:FindFirstChild("ManaNotificationGui"):Destroy() end
-            if CoreGui:FindFirstChild("54687") then CoreGui:FindFirstChild("54687"):Destroy() end
-            if CoreGui:FindFirstChild("54687") then CoreGui:FindFirstChild("54687"):Destroy() end
-            if CoreGui:FindFirstChild("54687") then CoreGui:FindFirstChild("54687"):Destroy() end
             if CoreGui:FindFirstChild("54687") then CoreGui:FindFirstChild("54687"):Destroy() end
             if CoreGui:FindFirstChild("54674679857") then CoreGui:FindFirstChild("54674679857"):Destroy() end
             wait(1)
@@ -206,4 +200,7 @@ end
 print("[ManaV2ForRoblox/MainScript.lua]: Loaded in " .. tostring(tick() - startTick) .. ".")
 
 UniversalScript = Functions:RunFile("Scripts/Universal.lua")
-GameScript = Functions:RunGameScript("".. PlaceId ..".lua") --if you get error bc of this, it's okay (and i don't want to do suc, res = bla bla)
+local Success, Error = pcall(function() 
+    Functions:RunGameScript("".. PlaceId ..".lua") 
+end) 
+if not Success then warn(Error) end

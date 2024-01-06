@@ -4,21 +4,19 @@
 
 repeat task.wait() until game:IsLoaded()
 
--- Services
 local UserInputService = game:GetService("UserInputService")
+local DebrisService = game:GetService("Debris")
 local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
+local TextService = game:GetService("TextService")
 local CoreGui = game:GetService("CoreGui")
 
--- Instances
 local Players = game.Players
 local LocalPlayer = Players.LocalPlayer
 local Mouse = game.Players.LocalPlayer:GetMouse()
 local PlayerGui = LocalPlayer.PlayerGui
 local configsaving = true
 
-
--- I don't know what do i write here 
 local getasset = getsynasset or getcustomasset
 
 local tweens = {Notification = function(base)
@@ -153,7 +151,7 @@ local function getcustomassetfunc(path)
             textlabel.Font = Enum.Font.SourceSans
             textlabel.TextColor3 = Color3.new(1, 1, 1)
             textlabel.Position = UDim2.new(0, 0, 0, -36)
-            textlabel.Parent = ScreenGuitwo
+            textlabel.Parent = ScreenGui
             repeat wait() until betterisfile(path)
             textlabel:Remove()
         end)
@@ -270,10 +268,9 @@ end
 ]]
 
 function Library:CreateNotification(title, text, delay2, toggled)
-    --[[
     spawn(function()
-        if ScreenGuitwo:FindFirstChild("Background") then ScreenGuitwo:FindFirstChild("Background"):Destroy() end
-		if Library["Notifications"] == true then
+        if ScreenGui:FindFirstChild("Background") then ScreenGui:FindFirstChild("Background"):Destroy() end
+		if Library.Notifications == true then
 	        local frame = Instance.new("Frame")
 	        frame.Size = UDim2.new(0, 100, 0, 115)
 	        frame.Position = UDim2.new(0.5, 0, 0, -115)
@@ -282,7 +279,7 @@ function Library:CreateNotification(title, text, delay2, toggled)
 	        frame.BackgroundTransparency = 0.5
 	        frame.BackgroundColor3 = Color3.new(0, 0, 0)
 	        frame.Name = "Background"
-	        frame.Parent = ScreenGuitwo
+	        frame.Parent = ScreenGui
 	        local frameborder = Instance.new("Frame")
 	        frameborder.Size = UDim2.new(1, 0, 0, 8)
 	        frameborder.BorderSizePixel = 0
@@ -310,23 +307,21 @@ function Library:CreateNotification(title, text, delay2, toggled)
 	        frametext.TextXAlignment = Enum.TextXAlignment.Left
 	        frametext.TextYAlignment = Enum.TextYAlignment.Top
 	        frametext.Parent = frame
-	        local textsize = game:GetService("TextService"):GetTextSize(frametitle.Text, frametitle.TextSize, frametitle.Font, Vector2.new(100000, 100000))
-	        local textsize2 = game:GetService("TextService"):GetTextSize(frametext.Text, frametext.TextSize, frametext.Font, Vector2.new(100000, 100000))
+	        local textsize = TextService:GetTextSize(frametitle.Text, frametitle.TextSize, frametitle.Font, Vector2.new(100000, 100000))
+	        local textsize2 = TextService:GetTextSize(frametext.Text, frametext.TextSize, frametext.Font, Vector2.new(100000, 100000))
 	        if textsize2.X > textsize.X then textsize = textsize2 end
 	        frame.Size = UDim2.new(0, textsize.X + 38, 0, 115)
 	        pcall(function()
 	            frame:TweenPosition(UDim2.new(0.5, 0, 0, 20), Enum.EasingDirection.InOut, Enum.EasingStyle.Quad, 0.15)
-	            game:GetService("Debris"):AddItem(frame, delay2 + 0.15)
+	            DebrisService:AddItem(frame, delay2 + 0.15)
 	        end)
 	end
     end)
-    ]]
 end
 
 function Library:CreateWarning(title, text, delay2)
-    --[[
     spawn(function()
-        if ScreenGuitwo:FindFirstChild("Background") then ScreenGuitwo:FindFirstChild("Background"):Destroy() end
+        if ScreenGui:FindFirstChild("Background") then ScreenGui:FindFirstChild("Background"):Destroy() end
 	        local frame = Instance.new("Frame")
 	        frame.Size = UDim2.new(0, 100, 0, 115)
 	        frame.Position = UDim2.new(0.5, 0, 0, -115)
@@ -335,7 +330,7 @@ function Library:CreateWarning(title, text, delay2)
 	        frame.BackgroundTransparency = 0.5
 	        frame.BackgroundColor3 = Color3.new(0, 0, 0)
 	        frame.Name = "Background"
-	        frame.Parent = ScreenGuitwo
+	        frame.Parent = ScreenGui
 	        local frameborder = Instance.new("Frame")
 	        frameborder.Size = UDim2.new(1, 0, 0, 8)
 	        frameborder.BorderSizePixel = 0
@@ -363,16 +358,15 @@ function Library:CreateWarning(title, text, delay2)
 	        frametext.TextXAlignment = Enum.TextXAlignment.Left
 	        frametext.TextYAlignment = Enum.TextYAlignment.Top
 	        frametext.Parent = frame
-	        local textsize = game:GetService("TextService"):GetTextSize(frametitle.Text, frametitle.TextSize, frametitle.Font, Vector2.new(100000, 100000))
-	        local textsize2 = game:GetService("TextService"):GetTextSize(frametext.Text, frametext.TextSize, frametext.Font, Vector2.new(100000, 100000))
+	        local textsize = TextService:GetTextSize(frametitle.Text, frametitle.TextSize, frametitle.Font, Vector2.new(100000, 100000))
+	        local textsize2 = TextService:GetTextSize(frametext.Text, frametext.TextSize, frametext.Font, Vector2.new(100000, 100000))
 	        if textsize2.X > textsize.X then textsize = textsize2 end
 	        frame.Size = UDim2.new(0, textsize.X + 38, 0, 115)
 	        pcall(function()
 	            frame:TweenPosition(UDim2.new(0.5, 0, 0, 20), Enum.EasingDirection.InOut, Enum.EasingStyle.Quad, 0.15)
-	            game:GetService("Debris"):AddItem(frame, delay2 + 0.15)
+	            DebrisService:AddItem(frame, delay2 + 0.15)
 	        end)
     end)
-    ]]
 end
 
 --Library:CreateNotification("Loaded", "Press N to toggle GUI", 3, true)
@@ -388,12 +382,6 @@ button.Size = UDim2.new(0, 32, 0, 32)
 button.BorderSizePixel = 0
 button.BackgroundTransparency = 0.5
 button.Parent = ScreenGui
---[[
-button.Active = true
-button.Draggable = true
-]]
-local UICorner = Instance.new("UICorner")
-UICorner.Parent = button
 
 local function dragGUI(gui, dragpart)
     spawn(function()
@@ -618,7 +606,7 @@ function Library:CreateWindow()
                     focus["Elements"]["toggle_"..title]=false
                 end)
                 conf["functions"]:WriteConfigs(configtable)
-                local x = (game:GetService("HttpService"):JSONDecode(readfile(conf["file"])))
+                local x = (HttpService:JSONDecode(readfile(conf["file"])))
                 if isfile(conf["file"]) and x[title]["Keybind"] ~= "none" and x[title]["Keybind"] ~= nil then
                     x = x[title]["Keybind"]
                     --[title]["Keybind"] or "none")
