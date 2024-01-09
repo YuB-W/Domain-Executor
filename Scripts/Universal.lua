@@ -4,11 +4,6 @@
 
 local startTick = tick()
 
-local request = (syn and syn.request) or request or http_request or (http and http.request)
-local queueteleport = syn and syn.queue_on_teleport or queue_on_teleport or fluxus and fluxus.queue_on_teleport
-local setthreadidentityfunc = syn and syn.set_thread_identity or set_thread_identity or setidentity or setthreadidentity
-local getthreadidentityfunc = syn and syn.get_thread_identity or get_thread_identity or getidentity or getthreadidentity
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
@@ -28,14 +23,13 @@ local Camera = workspace.Camera
 local Mouse = LocalPlayer:GetMouse()
 local PlayerGui = LocalPlayer.PlayerGui
 local Animation = Character.Animate
-local Functions = Mana.Functions
 local Place = Functions:CheckPlace("Bedwars")
 print(Place)
 
 local entity = Mana.Entity
 local GuiLibrary = Mana.GuiLibrary
 local Tabs = Mana.Tabs
-local Functions = Mana.funcs
+local Functions = Mana.Functions
 
 local getasset = getsynasset or getcustomasset
 local function runFunction(func) func() end
@@ -285,22 +279,21 @@ end)
 runFunction(function()
     local TPValue = {Value = 5}
     local isTeleporting = false
-    local AntiRusher = Tabs.Movement:CreateToggle({
+    local ForwardTP = Tabs.Movement:CreateToggle({
         Name = "ForwardTP",
         Keybind = nil,
         Callback = function(v)
             if v and not isTeleporting then
                 isTeleporting = true
-                local player = game.Players.LocalPlayer
-                local character = player.Character
-                if character then
-                    local humanoid = character.Humanoid
+                if LocalPlayer.Character then
+                    local humanoid = LocalPlayer.Character.Humanoid
                     if humanoid.MoveDirection.Magnitude > 0 or humanoid:GetState() == Enum.HumanoidStateType.Running then
-                        local forwardVector = character.HumanoidRootPart.CFrame.lookVector
-                        character.HumanoidRootPart.CFrame = character.HumanoidRootPart.CFrame + forwardVector * TPValue.Value
+                        local forwardVector = LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector
+                        LocalPlayer.Character.HumanoidRootPart.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame + forwardVector * TPValue.Value
                     end
                 end
                 isTeleporting = false
+                ForwardTP:silentToggle()
                 else
                 
             end
@@ -320,6 +313,11 @@ runFunction(function()
 end)
 
 runFunction(function()
+    --[[
+        Note:
+        3 - Jumping
+        5 - Freefall
+    ]]
     local HighJump
     local HighJumpPower = {Value = 20}
     local HighJumpGravity = {Value = 5}
@@ -328,22 +326,22 @@ runFunction(function()
         Keybind = nil,
         Callback = function(callback)
             if callback then
-                LocalPlayer.Character.Humanoid:ChangeState("Jumping")
+                LocalPlayer.Character.Humanoid:ChangeState(3)
                 task.wait()
                 workspace.Gravity = HighJumpGravity.Value
                 spawn(function()
                     for i = 1, HighJumpPower.Value do
                         wait()
                         if (not callback) then return end
-                        LocalPlayer.Character.Humanoid:ChangeState("Jumping")
+                        LocalPlayer.Character.Humanoid:ChangeState(3)
                     end
                 end)
                 spawn(function()
                     for i = 1, HighJumpPower.Value / 28 do
                         task.wait(0.1)
-                        LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Freefall)
+                        LocalPlayer.Character.Humanoid:ChangeState(5)
                         task.wait(0.1)
-                        LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                        LocalPlayer.Character.Humanoid:ChangeState(3)
                     end
                 end)
                 HighJump:silentToggle()
@@ -380,7 +378,7 @@ if Place == false then
             Keybind = nil,
             Callback = function(v)
                 if v == true then
-                    Humanoid.WalkSpeed = Speed["Value"]
+                    Humanoid.WalkSpeed = Speed.Value
                 else
                     Humanoid.WalkSpeed = 16
                 end
@@ -403,7 +401,6 @@ end
 --Render
 
 runFunction(function()
-    --Pasted from old code because im lazy to make new one
     local chinahattrail
     local ChinaHatEnabled = false
     Tabs.Render:CreateToggle({
@@ -484,7 +481,7 @@ runFunction(function()
         Keybind = nil,
         Callback = function(v)
             if v then
-                CurrentCamera.FieldOfView = NewFov["Value"]
+                CurrentCamera.FieldOfView = NewFov.Value
             else
                 CurrentCamera.FieldOfView = OldFov
             end
@@ -494,7 +491,7 @@ runFunction(function()
     NewFov = FovChanger:CreateSlider({
         Name = "Field Of View",
         Function = function(v)
-            CurrentCamera.FieldOfView = v or NewFov["Value"]
+            CurrentCamera.FieldOfView = v or NewFov.Value
         end,
         Min = 1,
         Max = 150,
@@ -593,7 +590,7 @@ runFunction(function()
                 while RainbowSkinEnabled and task.wait(0.1) do
                     local player = game.Players.LocalPlayer
                     local character = player.Character or player.CharacterAdded:Wait()
-                    for _,part in pairs(character:GetDescendants()) do
+                    for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
                         if part:IsA("BasePart") then
                             part.Color = Color3.new(math.random(), math.random(), math.random())
                         end
@@ -654,7 +651,7 @@ runFunction(function()
             if callback then 
                 UserInputService.JumpRequest:Connect(function()
                     if callback then
-                        LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+                        LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState(3)
                     end
                 end)
             else
@@ -689,7 +686,7 @@ runFunction(function()
         Callback = function(v)
             if v == true then
                 GravityEnabled = true
-                workspace.Gravity = GravityValueBeb.Value
+                workspace.Gravity = GravityValue.Value
             else
                 GravityEnabled = false
                 workspace.Gravity = 196.19999694824
@@ -701,7 +698,7 @@ runFunction(function()
         Name = "Gravity",
         Function = function()
             if GravityEnabled then
-                workspace.Gravity = GravityValueBeb.Value
+                workspace.Gravity = GravityValue.Value
             end
         end,
         Min = 1,
@@ -710,3 +707,6 @@ runFunction(function()
         Round = 0
     })
 end)
+
+warn("[ManaV2ForRoblox]: using getgenv version.")
+print("[ManaV2ForRoblox/Universal.lua]: Loaded in " .. tostring(tick() - startTick) .. ".")

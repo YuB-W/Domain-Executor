@@ -8,6 +8,7 @@ local startTick = tick()
 
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
+local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
@@ -22,6 +23,7 @@ local RealCamera = workspace.Camera
 local Mouse = LocalPlayer:GetMouse()
 local PlayerGui = LocalPlayer.PlayerGui
 local PlaceId = game.PlaceId
+local Whitelist = HttpService:JSONDecode(game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/Whitelist/main/Whitelist.json"))
 
 --what do i write here
 local request = (syn and syn.request) or request or http_request or (http and http.request)
@@ -63,7 +65,7 @@ do
 end
 
 if not getgenv then
-    return warn("[ManaV2ForRoblox]: Unsupported executor.")
+    return loadstring(game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/Games/Universal.lua"))()
 end
 
 if Mana and Mana.Activated == true then 
@@ -79,6 +81,23 @@ Mana.Entity = loadstring(game:HttpGet("https://raw.githubusercontent.com/Maanaaa
 Mana.GuiLibrary = GuiLibrary
 Mana.Functions = Functions
 Mana.Activated = true
+Mana.Whitelisted = false
+
+for Name, Tag in pairs(Whitelist) do
+    local Player = Players:FindFirstChild(name)
+    if Player then
+        local head = Player.Character:FindFirstChild("Head")
+        if head then
+            local DisplayNameContainer = head:FindFirstChild("Nametag") and head.Nametag:FindFirstChild("DisplayNameContainer")
+            if DisplayNameContainer then
+                local DisplayName = DisplayNameContainer:FindFirstChild("DisplayName")
+                if DisplayName then
+                    DisplayName.Text = Tag.Nametag
+                end
+            end
+        end
+    end
+end
 
 GuiLibrary:CreateWindow()
 

@@ -4,12 +4,6 @@
 
 local startTick = tick()
 
-local request = (syn and syn.request) or request or http_request or (http and http.request)
-local queueteleport = syn and syn.queue_on_teleport or queue_on_teleport or fluxus and fluxus.queue_on_teleport
-local setthreadidentityfunc = syn and syn.set_thread_identity or set_thread_identity or setidentity or setthreadidentity
-local getthreadidentityfunc = syn and syn.get_thread_identity or get_thread_identity or getidentity or getthreadidentity
-
---Services
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
@@ -19,7 +13,6 @@ local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 
---Variables
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character
 local HumanoidRootPart = Character.HumanoidRootPart
@@ -28,16 +21,11 @@ local Camera = workspace.CurrentCamera
 local RealCamera = workspace.Camera
 local Mouse = LocalPlayer:GetMouse()
 local PlayerGui = LocalPlayer.PlayerGui
-
--- Mana Variables
 local GuiLibrary = Mana.GuiLibrary
 local Tabs = Mana.Tabs
 local Functions = Mana.funcs
 
---What do i write here
-local getasset = getsynasset or getcustomasset
 local function runFunction(func) func() end
-local Entity = loadstring(game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/Modules/EntityHandler.lua", true))()
 
 local CFrames = {
     FarmJumps = CFrame.new(-500.47287, 5.51772547, 10915.1553, -0.999997258, -1.50035824e-08, 0.00233520381, -1.49010466e-08, 1, 4.39257235e-08, -0.00233520381, 4.38908074e-08, -0.999997258),

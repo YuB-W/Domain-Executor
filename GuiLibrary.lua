@@ -490,7 +490,7 @@ function Library:CreateWindow()
         tab.AutoButtonColor = false
 	tab.Text = ""
         
-        dragGUI()
+        dragGUI(tabname, tab)
     
         tabname.Name = title
         tabname.Parent = tab

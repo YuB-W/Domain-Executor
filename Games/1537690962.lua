@@ -25,20 +25,20 @@ local PlayerGui = LocalPlayer.PlayerGui
 local Animation = Character.Animate
 local Collectibles = workspace.Collectibles
 
-local entity = Mana.Entity
-local GuiLibrary = Mana.GuiLibrary
-local Tabs = Mana.Tabs
-local Functions = Mana.funcs
+local GuiLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/GuiLibrary.lua"))()
+
+GuiLibrary:CreateWindow()
+
+local Tabs = {
+    Combat = GuiLibrary:CreateTab("Combat",Color3.fromRGB(252, 60, 68)),
+    Movement = GuiLibrary:CreateTab("Movement",Color3.fromRGB(255, 148, 36)),
+    Render = GuiLibrary:CreateTab("Render",Color3.fromRGB(59, 170, 222)),
+    Utility = GuiLibrary:CreateTab("Utility",Color3.fromRGB(83, 214, 110)),
+    World = GuiLibrary:CreateTab("World",Color3.fromRGB(52,28,228)),
+    Misc = GuiLibrary:CreateTab("Other",Color3.fromRGB(240, 157, 62))
+}
 
 local function runFunction(func) func() end
-
-do
-    local oldcharacteradded = entity.characterAdded
-        entity.characterAdded = function(Player, Character, LocalCheck)
-            return oldcharacteradded(Player, Character, LocalCheck, function() end)
-        end
-    entity.fullEntityRefresh()
-end
 
 local spawn = function(func) 
     return coroutine.wrap(func)()
