@@ -1,6 +1,8 @@
 # ManaV2ForRoblox - Revived
 Cool script for roblox
 
+supports any executor that has file system
+
 Current status: working 
 
 Loadstring: 
@@ -13,6 +15,7 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRob
 RaceClicker | roblox.com/games/9285238704
 Every Second You Get +1 | roblox.com/games/11912525919
 Bee Swarm Simulator | roblox.com/games/1537690962
+Build A Boat For Treasure | roblox.com/games/537413528
 ```
 
 ## Supported Game's Features:
@@ -39,4 +42,9 @@ AutoDig
 FarmLeaves
 FarmTokens and Bubbels
 MemoryMatchHack
+```
+
+```
+Build A Boat For Treasure:
+InfinityBlocks
 ```
