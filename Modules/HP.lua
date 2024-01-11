@@ -1,5 +1,5 @@
 local CoreGui = game:GetService("CoreGui")
-local Humanoid = game.Players.LocalPlayer.сharacter.Humanoid
+local Humanoid = game.Players.LocalPlayer.Character.Humanoid
 
 HPScreen = Instance.new("ScreenGui")
 Background = Instance.new("Frame")

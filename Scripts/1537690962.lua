@@ -5,13 +5,6 @@
 local startTick = tick()
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
-local HttpService = game:GetService("HttpService")
-local TextService = game:GetService("TextService")
-local RunService = game:GetService("RunService")
-local Lighting = game:GetService("Lighting")
-local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 
 local LocalPlayer = Players.LocalPlayer
@@ -98,97 +91,6 @@ end
 local BeeSwarm = {
     DispenserRemote = ReplicatedStorage.Events.ToyEvent
 }
-
---[[
-	--not done
-runFunction(function()
-	AutoDig = {Value = false}
-	FieldAutoFarmEnabled = false
-	FieldAutoFarm = Tabs.Utility:CreateToggle({
-        Name = "FieldAutoFarm (Beta)",
-        Keybind = nil,
-        Callback = function(callback)
-            if callback then
-				FieldAutoFarmEnabled = true
-                RunLoops:BindToRenderStep("FieldAutoFarm", function()
-					
-                end)
-            else
-				FieldAutoFarmEnabled = false
-                RunLoops:UnbindFromRenderStep("FieldAutoFarm")
-            end
-        end
-    })
-
-
-
-end)
-]]
-
---[[
-	not working bc dropdowns are broken :\
-runFunction(function()
-	AutoFarmLeaves = false
-	AutoFarmTokens = false
-	ItemsAutoFarmMode = {Value = Leaves}
-	AutoFarmEnabled = false
-	ItemsAutoFarm = Tabs.Utility:CreateToggle({
-        Name = "ItemsAutoFarm",
-        Keybind = nil,
-        Callback = function(callback)
-            if callback then
-				AutoFarmEnabled = true
-                RunLoops:BindToRenderStep("ItemsAutoFarm", function()
-					if ItemsAutoFarmMode.Value == "Leaves" then
-						while AutoFarmLeaves do
-							wait(1)    
-							for i, v in pairs(workspace:GetDescendants()) do
-								if FarmLeavesEnabled then
-									if string.find(v.Name, "LeafBurst") then
-									LocalPlayer.Character.HumanoidRootPart.CFrame = v.Parent.CFrame * CFrame.new(0,0,0)
-									end
-								end
-							end
-
-							for i,v in pairs(Collectibles:GetChildren()) do
-								if FarmLeavesEnabled then
-									if tostring(v) == tostring(game.Players.LocalPlayer.Name) or tostring(v) == test then
-										if (v.Position - LocalPlayer.Character.HumanoidRootPart.Position).magnitude <= 60 then
-											Item.CFrame = CFrame.new(v.Position.x, plr.Character.HumanoidRootPart.Position.y, v.Position.z)
-											local Tween = TweenService:Create(LocalPlayer.Character.HumanoidRootPart, Info, Item)
-											Tween:Play()
-										end
-									end
-								end
-							end
-						end
-					elseif ItemsAutoFarmMode.Value == "Tokens" then
-						while AutoFarmTokens do
-							for i,v in pairs(Collectibles:GetChildren()) do
-								if FarmLeavesEnabled then
-									if v.Name == "C" then
-										LocalPlayer.Character.HumanoidRootPart.CFrame = v.CFrame
-									end
-								end
-							end
-						end
-					end
-                end)
-            else
-				AutoFarmEnabled = false
-                RunLoops:UnbindFromRenderStep("ItemsAutoFarm")
-            end
-        end
-    })
-
-	ItemsAutoFarmMode = ItemsAutoFarm:CreateDropDown({
-        Name = "Item",
-        Function = function() end,
-        List = {"Leaves", "Tokens"},
-        Default = "Leaves"
-    })
-end)
-]]
 
 runFunction(function()
 	AutoDig = Tabs.Utility:CreateToggle({

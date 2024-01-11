@@ -4,13 +4,6 @@
 
 local startTick = tick()
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
-local HttpService = game:GetService("HttpService")
-local TextService = game:GetService("TextService")
-local RunService = game:GetService("RunService")
-local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 
 local LocalPlayer = Players.LocalPlayer

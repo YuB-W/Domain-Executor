@@ -7,9 +7,7 @@ repeat task.wait() until game:IsLoaded()
 local startTick = tick()
 
 local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
-local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 
@@ -23,7 +21,7 @@ local RealCamera = workspace.Camera
 local Mouse = LocalPlayer:GetMouse()
 local PlayerGui = LocalPlayer.PlayerGui
 local PlaceId = game.PlaceId
-local Whitelist = HttpService:JSONDecode(game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/Whitelist/main/Whitelist.json"))
+--local Whitelist = HttpService:JSONDecode(game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/Whitelist/main/Whitelist.json"))
 
 --what do i write here
 local request = (syn and syn.request) or request or http_request or (http and http.request)
@@ -83,31 +81,15 @@ Mana.Functions = Functions
 Mana.Activated = true
 Mana.Whitelisted = false
 
-for Name, Tag in pairs(Whitelist) do
-    local Player = Players:FindFirstChild(name)
-    if Player then
-        local head = Player.Character:FindFirstChild("Head")
-        if head then
-            local DisplayNameContainer = head:FindFirstChild("Nametag") and head.Nametag:FindFirstChild("DisplayNameContainer")
-            if DisplayNameContainer then
-                local DisplayName = DisplayNameContainer:FindFirstChild("DisplayName")
-                if DisplayName then
-                    DisplayName.Text = Tag.Nametag
-                end
-            end
-        end
-    end
-end
-
 GuiLibrary:CreateWindow()
 
 local Tabs = {
-    Combat = GuiLibrary:CreateTab("Combat",Color3.fromRGB(252, 60, 68)),
-    Movement = GuiLibrary:CreateTab("Movement",Color3.fromRGB(255, 148, 36)),
-    Render = GuiLibrary:CreateTab("Render",Color3.fromRGB(59, 170, 222)),
-    Utility = GuiLibrary:CreateTab("Utility",Color3.fromRGB(83, 214, 110)),
-    World = GuiLibrary:CreateTab("World",Color3.fromRGB(52,28,228)),
-    Misc = GuiLibrary:CreateTab("Other",Color3.fromRGB(240, 157, 62))
+    Combat = GuiLibrary:CreateTab("Combat", Color3.fromRGB(252, 60, 68)),
+    Movement = GuiLibrary:CreateTab("Movement", Color3.fromRGB(255, 148, 36)),
+    Render = GuiLibrary:CreateTab("Render", Color3.fromRGB(59, 170, 222)),
+    Utility = GuiLibrary:CreateTab("Utility", Color3.fromRGB(83, 214, 110)),
+    World = GuiLibrary:CreateTab("World", Color3.fromRGB(52,28,228)),
+    Misc = GuiLibrary:CreateTab("Other", Color3.fromRGB(240, 157, 62))
 }
 
 Mana.Tabs = Tabs
@@ -132,11 +114,9 @@ runFunction(function()
     local LibrarySettings = Tabs.Misc:CreateToggle({
         Name = "LibrarySettings",
         Keybind = nil,
-        Callback = function(v)
-            if v then
-                en = v
-            else
-            
+        Callback = function(callback)
+            if callback then
+                en = callback
             end
         end
     })
@@ -175,7 +155,6 @@ runFunction(function()
                 Mana.Activated = false
                 Uninject:silentToggle()
                 wait(0.1)
-                -- Cringe code but idc
                 if CoreGui:FindFirstChild("ManaV2") then CoreGui:FindFirstChild("ManaV2"):Destroy() end
                 if CoreGui:FindFirstChild("ManaNotificationGui") then CoreGui:FindFirstChild("ManaNotificationGui"):Destroy() end
                 if CoreGui:FindFirstChild("54687") then CoreGui:FindFirstChild("54687"):Destroy() end

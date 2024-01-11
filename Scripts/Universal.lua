@@ -153,109 +153,6 @@ end)
 
 
 runFunction(function()
-    --[[
-    local flygravityb = {Value = 0}
-    local flyspeedb = {Value = 23}
-    local FlyStudTP = {Value = 5}
-    local flyenabled = false
-    
-    local function flyLogic()
-        if not flyenabled then
-            return
-        end
-        
-        local player = game.Players.LocalPlayer
-        local character = player.Character
-        if not character or not character:IsDescendantOf(workspace) then
-            return
-        end
-        
-        local humanoid = character:FindFirstChild("Humanoid")
-        if not humanoid or humanoid.Health == 0 then
-            return
-        end
-        
-        local HumanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-        if not HumanoidRootPart then
-            return
-        end
-        
-        workspace.Gravity = flygravityb.Value
-        humanoid.WalkSpeed = flyspeedb.Value
-        
-        local UserInputService = game:GetService("UserInputService")
-        local SpaceHeld = UserInputService:IsKeyDown(Enum.KeyCode.Space)
-        local ShiftHeld = UserInputService:IsKeyDown(Enum.KeyCode.LeftShift)
-        
-        if SpaceHeld then
-            HumanoidRootPart.CFrame = HumanoidRootPart.CFrame * CFrame.new(0, FlyStudTP.Value, 0)
-        end
-        
-        if ShiftHeld then
-            HumanoidRootPart.CFrame = HumanoidRootPart.CFrame * CFrame.new(0, -FlyStudTP.Value, 0)
-        end
-    end
-    
-    local fly = Tabs.Movement:CreateToggle({
-        Name = "Fly",
-        Keybind = nil,
-        Callback = function(callback)
-            flyenabled = callback
-            
-            if flyenabled then
-                spawn(function()
-                    while flyenabled do
-                        flyLogic()
-                        wait()
-                    end
-                end)
-            else
-                local player = game.Players.LocalPlayer
-                if player.Character then
-                    player.Character.Humanoid.WalkSpeed = flyspeedb.Value
-                end
-                workspace.Gravity = 196
-            end
-        end
-    })
-    
-    flyspeedb = fly:CreateSlider({
-        Name = "FlyWalkSpeed",
-        Function = function(v)
-            if flyenabled then
-                game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = v
-            end
-        end,
-        Min = 0,
-        Max = 23,
-        Default = 23,
-        Round = 0
-    })
-    
-    flygravityb = fly:CreateSlider({
-        Name = "FlyGravity",
-        Function = function(v)
-            if flyenabled then
-                workspace.Gravity = v
-            end
-        end,
-        Min = 0,
-        Max = 196,
-        Default = 0,
-        Round = 0
-    })
-    
-    FlyStudTP = fly:CreateSlider({
-        Name = "StudTP",
-        Function = function(v)
-        end,
-        Min = 0,
-        Max = 15,
-        Default = 5,
-        Round = 0
-    })
-    ]]
-
     local FlightEnabled = {Value = false}
     local Flight = Tabs.Movement:CreateToggle({
         Name = "Flight",
@@ -282,8 +179,8 @@ runFunction(function()
     local ForwardTP = Tabs.Movement:CreateToggle({
         Name = "ForwardTP",
         Keybind = nil,
-        Callback = function(v)
-            if v and not isTeleporting then
+        Callback = function(callback)
+            if callback and not isTeleporting then
                 isTeleporting = true
                 if LocalPlayer.Character then
                     local humanoid = LocalPlayer.Character.Humanoid
@@ -372,13 +269,13 @@ end)
 
 if Place == false then
     runFunction(function()
-        local Speed = {Value = 23}
+        local SpeedValue = {Value = 23}
         Speed = Tabs.Movement:CreateToggle({
             Name = "Speed",
             Keybind = nil,
-            Callback = function(v)
-                if v == true then
-                    Humanoid.WalkSpeed = Speed.Value
+            Callback = function(callback)
+                if callback == true then
+                    LocalPlayer.Character.Humanoid.WalkSpeed = SpeedValue.Value
                 else
                     Humanoid.WalkSpeed = 16
                 end
@@ -386,15 +283,15 @@ if Place == false then
         })
 
         Speed = Speed:CreateSlider({
-                Name = "Speed",
-                Function = function(v)
-                    Humanoid.WalkSpeed = Speed.Value or v
-                end,
-                Min = 0,
-                Max = 200,
-                Default = 16,
-                Round = 0
-            })
+        Name = "Speed",
+        Function = function(v)
+            LocalPlayer.Character.Humanoid.WalkSpeed = SpeedValue.Value or v
+        end,
+        Min = 0,
+        Max = 200,
+        Default = 16,
+        Round = 0
+    })
     end)
 end
 
@@ -406,8 +303,8 @@ runFunction(function()
     Tabs.Render:CreateToggle({
         Name = "ChinaHat",
         Keybind = nil,
-        Callback = function(v)
-            ChinaHatEnabled = v
+        Callback = function(callback)
+            ChinaHatEnabled = callback
             if ChinaHatEnabled then
                 spawn(function()
                     repeat
@@ -463,8 +360,8 @@ runFunction(function()
     Tabs.Render:CreateToggle({
         Name = "CustomCrossHair",
         Keybind = nil,
-        Callback = function(v)
-            if v then
+        Callback = function(callback)
+            if callback then
                 Mouse.Icon = "rbxassetid://9943168532"
             else
                 Mouse.Icon = ""
@@ -479,8 +376,8 @@ runFunction(function()
     local FovChanger = Tabs.Render:CreateToggle({
         Name = "FovChanger",
         Keybind = nil,
-        Callback = function(v)
-            if v then
+        Callback = function(callback)
+            if callback then
                 CurrentCamera.FieldOfView = NewFov.Value
             else
                 CurrentCamera.FieldOfView = OldFov
@@ -504,8 +401,8 @@ runFunction(function()
     Tabs.Render:CreateToggle({
         Name = "Night",
         Keybind = nil,
-        Callback = function(v)
-            if v then
+        Callback = function(callback)
+            if callback then
                 Lighting.TimeOfDay = "1:00:00"
             else
                 Lighting.TimeOfDay = LightingTime
@@ -518,8 +415,8 @@ runFunction(function()
     Tabs.Render:CreateToggle({
         Name = "NoAnimation",
         Keybind = nil,
-        Callback = function(v)
-            if v then
+        Callback = function(callback)
+            if callback then
                 Animation.Disabled = true          
             else
                 Animation.Disabled = false            
@@ -536,8 +433,8 @@ runFunction(function()
     TimeOfDay = Tabs.Render:CreateToggle({
         Name = "TimeOfDay",
         Keybind = nil,
-        Callback = function(v)
-            if v then
+        Callback = function(callback)
+            if callback then
                 Lighting.TimeOfDay = Hours.Value..":"..Minutes.Value..":"..Seconds.Value
             else
                 Lighting.TimeOfDay = "13:00:00"
@@ -576,30 +473,6 @@ runFunction(function()
         Max = 64,
         Default = 0,
         Round = 0
-    })
-end)
-
-runFunction(function()
-    local RainbowSkinEnabled = false
-    RainbowSkin = Tabs.Render:CreateToggle({
-        Name = "RainbowSkin",
-        Keybind = nil,
-        Callback = function(v)
-            if v then
-                RainbowSkinEnabled = true
-                while RainbowSkinEnabled and task.wait(0.1) do
-                    local player = game.Players.LocalPlayer
-                    local character = player.Character or player.CharacterAdded:Wait()
-                    for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
-                        if part:IsA("BasePart") then
-                            part.Color = Color3.new(math.random(), math.random(), math.random())
-                        end
-                    end
-                end
-            else
-                RainbowSkinEnabled = false
-            end
-        end
     })
 end)
 
@@ -683,8 +556,8 @@ runFunction(function()
     local Gravity = Tabs.World:CreateToggle({
         Name = "Gravity",
         Keybind = nil,
-        Callback = function(v)
-            if v == true then
+        Callback = function(callback)
+            if callback then
                 GravityEnabled = true
                 workspace.Gravity = GravityValue.Value
             else
@@ -694,11 +567,12 @@ runFunction(function()
         end
     })
     
-    Gravity = Gravity:CreateSlider({
+    GravityValue = Gravity:CreateSlider({
         Name = "Gravity",
-        Function = function()
+        Function = function(v)
             if GravityEnabled then
-                workspace.Gravity = GravityValue.Value
+                GravityValue.Value = v
+                workspace.Gravity = GravityValue.Value or v
             end
         end,
         Min = 1,
@@ -708,5 +582,13 @@ runFunction(function()
     })
 end)
 
-warn("[ManaV2ForRoblox]: using getgenv version.")
+--some mobile support, and yea it's only smaller gui
+if UserInputService.TouchEnabled then
+    warn("[ManaV2ForRoblox]: mobile user.")
+    CoreGui.Mana.Tabs:FindFirstChild("scalee").Scale = 0.7
+else
+    warn("[ManaV2ForRoblox]: not mobile user.")
+end
+
+warn("[ManaV2ForRoblox]: using normal version.")
 print("[ManaV2ForRoblox/Universal.lua]: Loaded in " .. tostring(tick() - startTick) .. ".")

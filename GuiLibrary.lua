@@ -5,10 +5,10 @@
 repeat task.wait() until game:IsLoaded()
 
 local UserInputService = game:GetService("UserInputService")
-local DebrisService = game:GetService("Debris")
 local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
 local TextService = game:GetService("TextService")
+local DebrisService = game:GetService("Debris")
 local CoreGui = game:GetService("CoreGui")
 
 local Players = game.Players
