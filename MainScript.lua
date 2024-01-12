@@ -75,7 +75,7 @@ end
 local GuiLibrary = Functions:RunFile("GuiLibrary.lua")
 
 getgenv().Mana = {}
-Mana.Entity = loadstring(game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/Modules/EntityHandler.lua", true))()
+Mana.Entity = loadstring(game:HttpGet("https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/main/Libraries/entityHandler.lua", true))()
 Mana.GuiLibrary = GuiLibrary
 Mana.Functions = Functions
 Mana.Activated = true
