@@ -583,11 +583,11 @@ function Library:CreateWindow()
                 HoverText.BackgroundColor3 = tabname.TextColor3
                 HoverText.Text = "  " .. Hovertext
             end
-			
+            
             toggle.MouseMoved:Connect(function()
                 HoverText.Visible = true
                 HoverText.Parent = toggle
-                HoverText.Position = UDim2.fromOffset(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y)
+                HoverText.Position = UDim2.new(0, UserInputService:GetMouseLocation().X, 0, UserInputService:GetMouseLocation().Y)
             end)
             
             toggle.MouseLeave:Connect(function()
