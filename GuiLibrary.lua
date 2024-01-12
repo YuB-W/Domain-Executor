@@ -579,7 +579,7 @@ function Library:CreateWindow()
             togname.TextXAlignment = Enum.TextXAlignment.Left
             if Hovertext ~= "" or Hovertext ~= "nil" then
                 HoverText.BackgroundColor3 = tabname.TextColor3
-                HoverText.Text = HoverText
+                HoverText.Text = Hovertext
             end
 			
             toggle.MouseMoved:Connect(function()
