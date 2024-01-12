@@ -25,7 +25,6 @@ end}
 
 local optionframe
 local TabsFrame
-local HoverText
 
 -- Main thing
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
@@ -55,6 +54,22 @@ if isfolder("Mana") == false then
     makefolder("Mana")
 end
 
+if isfolder("Mana/Assets") == false then
+    makefolder("Mana/Assets")
+end
+
+if isfolder("Mana/Config") == false then
+    makefolder("Mana/Config")
+end
+
+if isfolder("Mana/Scripts") == false then
+    makefolder("Mana/Scripts")
+end
+
+if isfolder("Mana/Modules") == false then
+    makefolder("Mana/Modules")
+end
+
 local sliderapi = {}
 
 -- Config system
@@ -66,9 +81,9 @@ local conf = {
 
 function conf.functions:MakeFile()
 	if isfile("Mana/Config/"..game.PlaceId..".json") then return end
-    if not isfolder(foldername) then
-        makefolder(foldername)
-    end
+        if not isfolder(foldername)  then
+            makefolder(foldername)
+        end
 	writefile("Mana/Config/"..game.PlaceId..".json", "{}")
 end
 
@@ -452,7 +467,7 @@ function Library:CreateWindow()
     UIScale.Name = "scalee"
     UIScale.Parent = TabsFrame
     UIScale.Scale = 4
-	HoverText.Text = "  " .. "HoverText"
+    HoverText.Text = "  " .. "HoverText"
 	HoverText.ZIndex = 1
 	HoverText.TextColor3 = Color3.fromRGB(160, 160, 160)
 	HoverText.TextXAlignment = Enum.TextXAlignment.Left
@@ -523,13 +538,13 @@ function Library:CreateWindow()
             local info = {
             ["Name"] = data["Name"],  
             ["Keybind"] = (configtable[data["Name"]["Keybind"]] or data["Keybind"]), 
-            ["Callback"] = (data["Callback"] or function() end)
+            ["Callback"] = (data["Callback"] or function() end),
             ["HoverText"] = data["HovetText"]
             }
             -- adding module name to configtable
-            configtable[info["Name"]]={
-                ["Keybind"]=((configtable[info["Name"]] and configtable[info["Name"]]["Keybind"]) or "none"), 
-                ["IsToggled"]=((configtable[info["Name"]] and configtable[info["Name"]]["IsToggled"]) or false)
+            configtable[info["Name"]] = {
+                ["Keybind"] = ((configtable[info["Name"]] and configtable[info["Name"]]["Keybind"]) or "none"), 
+                ["IsToggled"] = ((configtable[info["Name"]] and configtable[info["Name"]]["IsToggled"]) or false)
             }
             -- code
             local title, keybind, callback, Hovertext = info["Name"], info["Keybind"], info["Callback"], info["HoverText"]
@@ -570,7 +585,7 @@ function Library:CreateWindow()
             togname.TextSize = 22.000
             togname.TextWrapped = true
             togname.TextXAlignment = Enum.TextXAlignment.Left
-            if Hovertext then
+            if Hovertext ~= "" or Hovertext ~= "nil" then
                 HoverText.BackgroundColor3 = tabname.TextColor3
                 HoverText.Text = HoverText
             end
