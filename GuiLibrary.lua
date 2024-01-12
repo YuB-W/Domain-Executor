@@ -579,6 +579,7 @@ function Library:CreateWindow()
             togname.TextWrapped = true
             togname.TextXAlignment = Enum.TextXAlignment.Left
 
+            --[[
             if Hovertext == not "" or Hovertext == not "nil" then
                 HoverText.BackgroundColor3 = tabname.TextColor3
                 HoverText.Text = "  " .. Hovertext
@@ -594,7 +595,8 @@ function Library:CreateWindow()
                 HoverText.Visible = false
                 HoverText.Parent = TabsFrame
             end)
-
+            ]]
+            
             local optionselement = {
                 ["Stuff"] = {}
             }
