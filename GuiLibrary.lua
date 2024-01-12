@@ -577,7 +577,10 @@ function Library:CreateWindow()
             togname.TextSize = 22.000
             togname.TextWrapped = true
             togname.TextXAlignment = Enum.TextXAlignment.Left
-            if Hovertext ~= "" or Hovertext ~= "nil" then
+            
+            if Hovertext == "" or Hovertext == "nil" then
+
+            else
                 HoverText.BackgroundColor3 = tabname.TextColor3
                 HoverText.Text = Hovertext
             end
