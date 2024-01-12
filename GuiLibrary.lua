@@ -585,11 +585,13 @@ function Library:CreateWindow()
 			
             toggle.MouseMoved:Connect(function()
                 HoverText.Visible = true
+                HoverText.Parent = toggle
                 HoverText.Position = UDim2.fromOffset(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y)
             end)
             
             toggle.MouseLeave:Connect(function()
                 HoverText.Visible = false
+                HoverText.Parent = TabsFrame
             end)
 
             local optionselement = {
