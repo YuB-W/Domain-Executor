@@ -474,6 +474,7 @@ function Library:CreateWindow()
 	HoverText.TextSize = 14
 	HoverText.Visible = false
 	HoverText.Parent = TabsFrame
+    HoverText.AnchorPoint = Vector2.new(0.5, 0.5)
 
     function Library:CreateTab(title, color)
         table.insert(tabs, #tabs)
