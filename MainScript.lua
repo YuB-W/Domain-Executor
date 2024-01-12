@@ -21,7 +21,7 @@ local RealCamera = workspace.Camera
 local Mouse = LocalPlayer:GetMouse()
 local PlayerGui = LocalPlayer.PlayerGui
 local PlaceId = game.PlaceId
---local Whitelist = HttpService:JSONDecode(game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/Whitelist/main/Whitelist.json"))
+local Whitelist = HttpService:JSONDecode(game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/Whitelist/main/Whitelist.json"))
 
 --what do i write here
 local request = (syn and syn.request) or request or http_request or (http and http.request)
@@ -62,10 +62,15 @@ do
     end
 end
 
+if not getgenv then
+    return warn("[ManaV2ForRoblox]: Unsupported executor.")
+end
+
 if Mana and Mana.Activated == true then 
     warn("[ManaV2ForRoblox]: Already loaded.")
     return
 end
+
 
 local GuiLibrary = Functions:RunFile("GuiLibrary.lua")
 
