@@ -22,14 +22,15 @@ local CurrentCamera = workspace.CurrentCamera
 local Camera = workspace.Camera
 local Mouse = LocalPlayer:GetMouse()
 local PlayerGui = LocalPlayer.PlayerGui
+local Backpack = LocalPlayer.Backpack
 local Animation = Character.Animate
-local Place = Functions:CheckPlace("Bedwars")
-print(Place)
 
 local entity = Mana.Entity
 local GuiLibrary = Mana.GuiLibrary
 local Tabs = Mana.Tabs
 local Functions = Mana.Functions
+
+local Place = Functions:CheckPlace("Bedwars")
 
 local getasset = getsynasset or getcustomasset
 local function runFunction(func) func() end
