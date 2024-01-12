@@ -3,8 +3,6 @@ Cool script for roblox
 
 Supports any executor that has file system
 
-Current status: working 
-
 Loadstring:
 ```
 loadstring(game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/MainScript.lua"))()
