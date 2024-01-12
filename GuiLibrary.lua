@@ -25,6 +25,7 @@ end}
 
 local optionframe
 local TabsFrame
+local HoverText
 
 -- Main thing
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
@@ -451,6 +452,7 @@ function Library:CreateWindow()
     TabsFrame = Instance.new("Frame")
     local uilistthingy = Instance.new("UIListLayout")
     local UIScale = Instance.new("UIScale")
+    HoverText = Instance.new("TextLabel")
     TabsFrame.Name = "Tabs"
     TabsFrame.Parent = ScreenGui
     TabsFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -466,6 +468,22 @@ function Library:CreateWindow()
     UIScale.Name = "scalee"
     UIScale.Parent = TabsFrame
     UIScale.Scale = 4
+	HoverText.Text = "  " .. "HoverText"
+	HoverText.ZIndex = 1
+	HoverText.TextColor3 = Color3.fromRGB(160, 160, 160)
+	HoverText.TextXAlignment = Enum.TextXAlignment.Left
+	HoverText.TextSize = 14
+	HoverText.Visible = false
+	HoverText.Parent = TabsFrame
+
+    TextButton.MouseMoved:Connect(function()
+        HoverText.Visible = true
+        HoverText.Position = UDim2.fromOffset(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y)
+    end)
+    
+    TextButton.MouseLeave:Connect(function()
+        HoverText.Visible = false
+    end)
     function Library:CreateTab(title, color)
         table.insert(tabs, #tabs)
         local tab = Instance.new("TextButton")
@@ -489,8 +507,6 @@ function Library:CreateWindow()
         tab.LayoutOrder = 1 + #tabs
         tab.AutoButtonColor = false
 	tab.Text = ""
-        
-        dragGUI(tabname, tab)
     
         tabname.Name = title
         tabname.Parent = tab
@@ -524,6 +540,7 @@ function Library:CreateWindow()
             ["Name"] = data["Name"],  
             ["Keybind"] = (configtable[data["Name"]["Keybind"]] or data["Keybind"]), 
             ["Callback"] = (data["Callback"] or function() end)
+            ["HoverText"] = data["HovetText"]
             }
             -- adding module name to configtable
             configtable[info["Name"]]={
@@ -531,11 +548,11 @@ function Library:CreateWindow()
                 ["IsToggled"]=((configtable[info["Name"]] and configtable[info["Name"]]["IsToggled"]) or false)
             }
             -- code
-            local title,keybind,callback=info["Name"],info["Keybind"],info["Callback"]
+            local title, keybind, callback, Hovertext = info["Name"], info["Keybind"], info["Callback"], info["HoverText"]
             keybind = (keybind or {["Name"] = nil})
             keybinds[(keybind.Name or "%*")] = (keybind.Name == nil and false or true)
             local focus = {
-                ["Elements"]={}
+                ["Elements"] = {}
             }
             
             local sussyamog = {["Enabled"] = false, ["Name"] = (data["Name"] or "")}
@@ -569,6 +586,10 @@ function Library:CreateWindow()
             togname.TextSize = 22.000
             togname.TextWrapped = true
             togname.TextXAlignment = Enum.TextXAlignment.Left
+            if Hovertext then
+                HoverText.BackgroundColor3 = tabname.TextColor3
+                HoverText.Text = HoverText
+            end
 			
             local optionselement = {
                 ["Stuff"] = {}
