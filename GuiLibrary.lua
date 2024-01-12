@@ -55,22 +55,6 @@ if isfolder("Mana") == false then
     makefolder("Mana")
 end
 
-if isfolder("Mana/Assets") == false then
-    makefolder("Mana/Assets")
-end
-
-if isfolder("Mana/Config") == false then
-    makefolder("Mana/Config")
-end
-
-if isfolder("Mana/Scripts") == false then
-    makefolder("Mana/Scripts")
-end
-
-if isfolder("Mana/Modules") == false then
-    makefolder("Mana/Modules")
-end
-
 local sliderapi = {}
 
 -- Config system
@@ -82,9 +66,9 @@ local conf = {
 
 function conf.functions:MakeFile()
 	if isfile("Mana/Config/"..game.PlaceId..".json") then return end
-        if not isfolder(foldername)  then
-            makefolder(foldername)
-        end
+    if not isfolder(foldername) then
+        makefolder(foldername)
+    end
 	writefile("Mana/Config/"..game.PlaceId..".json", "{}")
 end
 
