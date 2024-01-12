@@ -18,7 +18,7 @@ local PlayerGui = LocalPlayer.PlayerGui
 
 local GuiLibrary = Mana.GuiLibrary
 local Tabs = Mana.Tabs
-local Functions = Mana.funcs
+local Functions = Mana.Functions
 
 local function runFunction(func) func() end
 

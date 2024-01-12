@@ -62,15 +62,10 @@ do
     end
 end
 
-if not getgenv then
-    return loadstring(game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/Games/Universal.lua"))()
-end
-
 if Mana and Mana.Activated == true then 
     warn("[ManaV2ForRoblox]: Already loaded.")
     return
 end
-
 
 local GuiLibrary = Functions:RunFile("GuiLibrary.lua")
 
