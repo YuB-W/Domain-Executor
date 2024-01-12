@@ -475,14 +475,6 @@ function Library:CreateWindow()
 	HoverText.Visible = false
 	HoverText.Parent = TabsFrame
 
-    TextButton.MouseMoved:Connect(function()
-        HoverText.Visible = true
-        HoverText.Position = UDim2.fromOffset(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y)
-    end)
-    
-    TextButton.MouseLeave:Connect(function()
-        HoverText.Visible = false
-    end)
     function Library:CreateTab(title, color)
         table.insert(tabs, #tabs)
         local tab = Instance.new("TextButton")
@@ -590,6 +582,15 @@ function Library:CreateWindow()
                 HoverText.Text = HoverText
             end
 			
+            toggle.MouseMoved:Connect(function()
+                HoverText.Visible = true
+                HoverText.Position = UDim2.fromOffset(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y)
+            end)
+            
+            toggle.MouseLeave:Connect(function()
+                HoverText.Visible = false
+            end)
+
             local optionselement = {
                 ["Stuff"] = {}
             }
