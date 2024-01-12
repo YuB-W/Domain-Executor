@@ -198,7 +198,7 @@ runFunction(function()
         end
     })
     
-    TPValue = AntiRusher:CreateSlider({
+    TPValue = ForwardTP:CreateSlider({
         Name = "Studs",
         Function = function(v)
             TPValue.Value = v
