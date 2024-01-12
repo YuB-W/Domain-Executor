@@ -531,7 +531,7 @@ function Library:CreateWindow()
             ["Name"] = data["Name"],  
             ["Keybind"] = (configtable[data["Name"]["Keybind"]] or data["Keybind"]), 
             ["Callback"] = (data["Callback"] or function() end),
-            ["HoverText"] = data["HovetText"]
+            ["HoverText"] = data["HoverText"]
             }
             -- adding module name to configtable
             configtable[info["Name"]] = {
