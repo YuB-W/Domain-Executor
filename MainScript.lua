@@ -155,29 +155,21 @@ runFunction(function()
                 Mana.Activated = false
                 Uninject:silentToggle()
                 wait(0.1)
-                if CoreGui:FindFirstChild("ManaV2") then CoreGui:FindFirstChild("ManaV2"):Destroy() end
-                if CoreGui:FindFirstChild("ManaNotificationGui") then CoreGui:FindFirstChild("ManaNotificationGui"):Destroy() end
-                if CoreGui:FindFirstChild("54687") then CoreGui:FindFirstChild("54687"):Destroy() end
-                if CoreGui:FindFirstChild("54674679857") then CoreGui:FindFirstChild("54674679857"):Destroy() end
+                if CoreGui:FindFirstChild("Mana") then CoreGui:FindFirstChild("Mana"):Destroy() end
             else
 
             end
         end
     })
 
-    ReInject = Tabs.Misc:CreateToggle({
+    Reinject = Tabs.Misc:CreateToggle({
         Name = "ReInject",
         Keybind = nil,
         Callback = function(v)
         if v then
             Mana.Activated = false
-            ReInject:silentToggle()
-            wait(0.1)
-            -- Cringe code but idc
-            if CoreGui:FindFirstChild("ManaV2") then CoreGui:FindFirstChild("ManaV2"):Destroy() end
-            if CoreGui:FindFirstChild("ManaNotificationGui") then CoreGui:FindFirstChild("ManaNotificationGui"):Destroy() end
-            if CoreGui:FindFirstChild("54687") then CoreGui:FindFirstChild("54687"):Destroy() end
-            if CoreGui:FindFirstChild("54674679857") then CoreGui:FindFirstChild("54674679857"):Destroy() end
+            Reinject:silentToggle()
+            if CoreGui:FindFirstChild("Mana") then CoreGui:FindFirstChild("Mana"):Destroy() end
             wait(1)
             Functions:RunFile("MainScript.lua")
         else
