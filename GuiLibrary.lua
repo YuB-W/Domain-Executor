@@ -517,25 +517,31 @@ function Library:CreateWindow()
             ["Toggles"] = {}
         }
         function tabtable:CreateToggle(data)
+            -- values
             local info = {
-            ["Name"] = data["Name"],  
-            ["HoverText"] = data["HoverText"],
-            ["Keybind"] = (configtable[data["Name"]["Keybind"]] or data["Keybind"]), 
-            ["Callback"] = (data["Callback"] or function() end)
+                ["Name"] = data["Name"],  
+                ["HoverText"] = data["HoverText"],
+                ["Keybind"] = (configtable[data["Name"]["Keybind"]] or data["Keybind"]), 
+                ["Callback"] = (data["Callback"] or function() end)
             }
+
             -- adding module name to configtable
             configtable[info["Name"]] = {
                 ["Keybind"] = ((configtable[info["Name"]] and configtable[info["Name"]]["Keybind"]) or "none"), 
                 ["IsToggled"] = ((configtable[info["Name"]] and configtable[info["Name"]]["IsToggled"]) or false)
             }
-            -- code
-            local title, Hovertext, keybind, callback = info["Name"], info["HoverText"], info["Keybind"], info["Callback"]
+
+            -- values
+            local title, ToolTip, keybind, callback = info["Name"], info["HoverText"], info["Keybind"], info["Callback"] -- ToolTip is HoverText
+
+            -- keybinds
             keybind = (keybind or {["Name"] = nil})
             keybinds[(keybind.Name or "%*")] = (keybind.Name == nil and false or true)
+
             local focus = {
                 ["Elements"] = {}
             }
-            
+
             local sussyamog = {["Enabled"] = false, ["Name"] = (data["Name"] or "")}
             table.insert(tabtable["Toggles"],#tabtable["Toggles"])
             sussyamog["Enabled"] = false
@@ -568,13 +574,13 @@ function Library:CreateWindow()
             togname.TextWrapped = true
             togname.TextXAlignment = Enum.TextXAlignment.Left
 
-            if Hovertext == not "" then
+            if ToolTip == not "" then
                 HoverText.BackgroundColor3 = tabname.TextColor3
-                HoverText.Text = "  " .. Hovertext
+                HoverText.Text = "  " .. ToolTip
             end
             
             toggle.MouseMoved:Connect(function()
-                if Hovertext == not "" then
+                if ToolTip == not "" then
                     HoverText.Visible = true
                     HoverText.Parent = toggle
                     HoverText.Position = UDim2.new(0, Mouse.Position.X + 10, 0, Mouse.Position.Y + 10)
