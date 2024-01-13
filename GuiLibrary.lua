@@ -576,7 +576,8 @@ function Library:CreateWindow()
 
             toggle.MouseMoved:Connect(function()
                 if ToolTip then
-                    HoverText.BackgroundColor3 = tabname.TextColor3
+                    HoverText.BackgroundColor3 = Color3.fromRGB(14, 20, 14)
+                    HoverText.TextColor3 = tabname.TextColor3
                     HoverText.Text = "  " .. ToolTip
                     HoverText.Visible = true
                     HoverText.Parent = toggle
@@ -585,7 +586,7 @@ function Library:CreateWindow()
                     local offsetY = 10
 
                     local MousePos = UserInputService:GetMouseLocation()
-                    HoverText.Position = UDim2.new(0, mousePos.X + offsetX, 0, mousePos.Y + offsetY)
+                    HoverText.Position = UDim2.new(0, MousePos.X + offsetX, 0, MousePos.Y + offsetY)
                 end
             end)
 
