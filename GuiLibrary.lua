@@ -582,8 +582,8 @@ function Library:CreateWindow()
                     HoverText.Visible = true
                     HoverText.Parent = toggle
 
-                    local offsetX = 10
-                    local offsetY = 10
+                    local offsetX = 1
+                    local offsetY = 1
 
                     local MousePos = UserInputService:GetMouseLocation()
                     HoverText.Position = UDim2.new(0, MousePos.X + offsetX, 0, MousePos.Y + offsetY)
