@@ -574,19 +574,21 @@ function Library:CreateWindow()
             togname.TextWrapped = true
             togname.TextXAlignment = Enum.TextXAlignment.Left
 
-            if ToolTip == not "" then
-                HoverText.BackgroundColor3 = tabname.TextColor3
-                HoverText.Text = "  " .. ToolTip
-            end
-            
             toggle.MouseMoved:Connect(function()
-                if ToolTip == not "" then
+                if ToolTip then
+                    HoverText.BackgroundColor3 = tabname.TextColor3
+                    HoverText.Text = "  " .. ToolTip
                     HoverText.Visible = true
                     HoverText.Parent = toggle
-                    HoverText.Position = UDim2.new(0, Mouse.Position.X + 10, 0, Mouse.Position.Y + 10)
+
+                    local offsetX = 10
+                    local offsetY = 10
+
+                    local MousePos = UserInputService:GetMouseLocation()
+                    HoverText.Position = UDim2.new(0, mousePos.X + offsetX, 0, mousePos.Y + offsetY)
                 end
             end)
-            
+
             toggle.MouseLeave:Connect(function()
                 HoverText.Visible = false
                 HoverText.Parent = TabsFrame
