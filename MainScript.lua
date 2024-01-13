@@ -166,15 +166,15 @@ runFunction(function()
         Name = "ReInject",
         Keybind = nil,
         Callback = function(v)
-        if v then
-            Mana.Activated = false
-            Reinject:silentToggle()
-            if CoreGui:FindFirstChild("Mana") then CoreGui:FindFirstChild("Mana"):Destroy() end
-            wait(1)
-            Functions:RunFile("MainScript.lua")
-        else
-            
-        end
+            if v then
+                Mana.Activated = false
+                Reinject:silentToggle()
+                if CoreGui:FindFirstChild("Mana") then CoreGui:FindFirstChild("Mana"):Destroy() end
+                wait(1)
+                Functions:RunFile("MainScript.lua")
+            else
+                
+            end
         end
     })
 end)

@@ -456,7 +456,7 @@ function Library:CreateWindow()
     UIScale.Name = "scalee"
     UIScale.Parent = TabsFrame
     UIScale.Scale = 4
-    HoverText.Text = "  " .. "HoverText"
+    HoverText.Text = "  "
 	HoverText.ZIndex = 1
 	HoverText.TextColor3 = Color3.fromRGB(160, 160, 160)
 	HoverText.TextXAlignment = Enum.TextXAlignment.Left
@@ -519,9 +519,9 @@ function Library:CreateWindow()
         function tabtable:CreateToggle(data)
             local info = {
             ["Name"] = data["Name"],  
+            ["HoverText"] = data["HoverText"],
             ["Keybind"] = (configtable[data["Name"]["Keybind"]] or data["Keybind"]), 
-            ["Callback"] = (data["Callback"] or function() end),
-            ["HoverText"] = data["HoverText"]
+            ["Callback"] = (data["Callback"] or function() end)
             }
             -- adding module name to configtable
             configtable[info["Name"]] = {
@@ -529,7 +529,7 @@ function Library:CreateWindow()
                 ["IsToggled"] = ((configtable[info["Name"]] and configtable[info["Name"]]["IsToggled"]) or false)
             }
             -- code
-            local title, keybind, callback, Hovertext = info["Name"], info["Keybind"], info["Callback"], info["HoverText"]
+            local title, Hovertext, keybind, callback = info["Name"], info["HoverText"], info["Keybind"], info["Callback"]
             keybind = (keybind or {["Name"] = nil})
             keybinds[(keybind.Name or "%*")] = (keybind.Name == nil and false or true)
             local focus = {
@@ -568,13 +568,13 @@ function Library:CreateWindow()
             togname.TextWrapped = true
             togname.TextXAlignment = Enum.TextXAlignment.Left
 
-            if Hovertext == not "" or Hovertext == not "nil" then
+            if Hovertext == not "" then
                 HoverText.BackgroundColor3 = tabname.TextColor3
                 HoverText.Text = "  " .. Hovertext
             end
             
             toggle.MouseMoved:Connect(function()
-                if Hovertext == not "" or Hovertext == not "nil" then
+                if Hovertext == not "" then
                     HoverText.Visible = true
                     HoverText.Parent = toggle
                     HoverText.Position = UDim2.new(0, Mouse.Position.X + 10, 0, Mouse.Position.Y + 10)
@@ -582,10 +582,8 @@ function Library:CreateWindow()
             end)
             
             toggle.MouseLeave:Connect(function()
-                if Hovertext == not "" or Hovertext == not "nil" then
-                    HoverText.Visible = false
-                    HoverText.Parent = TabsFrame
-                end
+                HoverText.Visible = false
+                HoverText.Parent = TabsFrame
             end)
             
             local optionselement = {
