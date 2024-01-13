@@ -24,6 +24,7 @@ local Mouse = LocalPlayer:GetMouse()
 local PlayerGui = LocalPlayer.PlayerGui
 local Backpack = LocalPlayer.Backpack
 local Animation = Character.Animate
+local LightingTime = Lighting.TimeOfDay
 
 local entity = Mana.Entity
 local GuiLibrary = Mana.GuiLibrary
