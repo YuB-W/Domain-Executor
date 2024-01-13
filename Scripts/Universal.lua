@@ -99,9 +99,9 @@ do
 end
 
 -- Combat tab
+
 runFunction(function()
     AutoClickerCPS = {Value = 15}
-    AutoClickerMode = {Value = "Click"}
     AutoClickerEnabled = false
     AutoClicker = Tabs.Combat:CreateToggle({
         Name = "UniversalAutoClicker",
@@ -111,9 +111,9 @@ runFunction(function()
                 AutoClickerEnabled = true
                 while AutoClickerEnabled do
                     if mouse1click and (isrbxactive and isrbxactive() or iswindowactive and iswindowactive()) then
-                            local clickfunc = (mouse1click)
-                            clickfunc()
-                            task.wait(1 / AutoClickerCPS.Value)
+                        local clickfunc = (mouse1click)
+                        clickfunc()
+                        task.wait(1 / AutoClickerCPS.Value)
                     end
                 end
             else
@@ -583,13 +583,4 @@ runFunction(function()
     })
 end)
 
---some mobile support, and yea it's only smaller gui
-if UserInputService.TouchEnabled then
-    warn("[ManaV2ForRoblox]: mobile user.")
-    CoreGui.Mana.Tabs:FindFirstChild("scalee").Scale = 0.7
-else
-    warn("[ManaV2ForRoblox]: not mobile user.")
-end
-
-warn("[ManaV2ForRoblox]: using normal version.")
 print("[ManaV2ForRoblox/Universal.lua]: Loaded in " .. tostring(tick() - startTick) .. ".")

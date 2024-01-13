@@ -13,8 +13,7 @@ local CoreGui = game:GetService("CoreGui")
 
 local Players = game.Players
 local LocalPlayer = Players.LocalPlayer
-local Mouse = game.Players.LocalPlayer:GetMouse()
-local PlayerGui = LocalPlayer.PlayerGui
+local Mouse = LocalPlayer:GetMouse()
 local configsaving = true
 
 local getasset = getsynasset or getcustomasset
@@ -43,10 +42,8 @@ local keybinds = {}
 local Library = {
     ["Sounds"] = true,
     ["GuiKeybind"] = "N",
-    ["IsDraggable"] = true,
     ["Font"] = Enum.Font.Gotham,
     ["TextSize"] = 20,
-    ["TranslationLanguage"] = "",
     ["Objects"] = {}
 }
 
@@ -437,14 +434,6 @@ local function playsound(id, volume)
       end
 end
 
---translations
---[[
-local Translation
-if GuiLibrary.TranslationLanguage ~= "" then
-    Translation = ""
-end
-]]
-
 local a
 local tabs = {}
 function Library:CreateWindow()
@@ -579,29 +568,31 @@ function Library:CreateWindow()
             togname.TextWrapped = true
             togname.TextXAlignment = Enum.TextXAlignment.Left
 
-            --[[
             if Hovertext == not "" or Hovertext == not "nil" then
                 HoverText.BackgroundColor3 = tabname.TextColor3
                 HoverText.Text = "  " .. Hovertext
             end
             
             toggle.MouseMoved:Connect(function()
-                HoverText.Visible = true
-                HoverText.Parent = toggle
-                HoverText.Position = UDim2.new(0, UserInputService:GetMouseLocation().X, 0, UserInputService:GetMouseLocation().Y)
+                if Hovertext == not "" or Hovertext == not "nil" then
+                    HoverText.Visible = true
+                    HoverText.Parent = toggle
+                    HoverText.Position = UDim2.new(0, Mouse.Position.X + 10, 0, Mouse.Position.Y + 10)
+                end
             end)
             
             toggle.MouseLeave:Connect(function()
-                HoverText.Visible = false
-                HoverText.Parent = TabsFrame
+                if Hovertext == not "" or Hovertext == not "nil" then
+                    HoverText.Visible = false
+                    HoverText.Parent = TabsFrame
+                end
             end)
-            ]]
             
             local optionselement = {
                 ["Stuff"] = {}
             }
             local BindText
-                table.insert(optionselement["Stuff"],#optionselement["Stuff"])
+                table.insert(optionselement["Stuff"], #optionselement["Stuff"])
                 local optionframe = Instance.new("Frame")
                 optionframe.Name = "optionframe"
                 optionframe.Parent = tab
