@@ -1,6 +1,8 @@
 # ManaV2ForRoblox - Revived
 Cool script for roblox
 
+It's not discontinued, im just making things better.
+ 
 Supports executors that has file system
 
 Loadstring:
