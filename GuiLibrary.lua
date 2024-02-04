@@ -954,6 +954,7 @@ function Library:CreateWindow()
     end
 end
 
+--[[
 function Library:ToggleLibrary()
     if NotificationGui.Visible == false and TabsFrame.Visible == false 
         if UserInputService:GetFocusedTextBox() == nil then
@@ -974,5 +975,6 @@ UserInputService.InputBegan:Connect(function(input)
         Library:ToggleLibrary()
     end
 end) 
+]]
 
 return Library
