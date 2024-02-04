@@ -1,7 +1,7 @@
 # ManaV2ForRoblox - Revived
 Cool script for roblox
-
-Supports executors that has file system
+ 
+Supports any executors that has file system AND getngenv thing
 
 Loadstring:
 ```
