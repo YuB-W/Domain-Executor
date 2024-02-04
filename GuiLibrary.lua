@@ -955,7 +955,7 @@ function Library:CreateWindow()
 end
 
 function Library:ToggleLibrary()
-    if not (NotificationGui.Visible and TabsFrame.Visible) and UserInputService:GetFocusedTextBox() == nil then
+    if NotificationGui.Visible == false and TabsFrame.Visible == false and UserInputService:GetFocusedTextBox() == nil then
         NotificationGui.Visible = true
         TabsFrame.Visible = true
     else
