@@ -955,15 +955,17 @@ function Library:CreateWindow()
 end
 
 function Library:ToggleLibrary()
-    if NotificationGui.Visible == false and TabsFrame.Visible == false and UserInputService:GetFocusedTextBox() == nil then
-        print("a")
-        NotificationGui.Visible = true
-        TabsFrame.Visible = true
+    if NotificationGui.Visible == false and TabsFrame.Visible == false 
+        if UserInputService:GetFocusedTextBox() == nil then
+            NotificationGui.Visible = true
+            TabsFrame.Visible = true
+        end
     else
         if UserInputService:GetFocusedTextBox() == nil then
-            print("b")
             NotificationGui.Visible = false
-            TabsFrame.Visible = false
+            if TabsFrame then -- to stop getting errors after this
+                TabsFrame.Visible = false
+            end
         end
     end
 end
