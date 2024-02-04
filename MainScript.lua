@@ -39,7 +39,7 @@ do
         elseif game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/".. filepath) then
             return loadstring(game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/".. filepath))()
         else
-            return print("[ManaV2ForReblox]: Can't find file:", filepath ,".")
+            return print("[ManaV2ForRoblox]: Can't find file:", filepath ,".")
         end
     end
 
@@ -48,6 +48,8 @@ do
             loadstring(readfile("Mana/Scripts/".. path))()
         elseif game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/Scripts/".. path) then
             loadstring(game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/Scripts/".. path))()
+        else
+            return print("[ManaV2ForRoblox]: Can't find game script:", filepath ,".")
         end
     end
 
@@ -63,7 +65,9 @@ do
 end
 
 if not getgenv then
-    return warn("[ManaV2ForRoblox]: Unsupported executor.")
+    warn("[ManaV2ForRoblox]: Using _G function.")
+elseif not (_G and getgenv) then
+    return warn("[ManaV2ForRoblox: Unsupported executor.]")
 end
 
 if Mana and Mana.Activated == true then 
@@ -71,15 +75,24 @@ if Mana and Mana.Activated == true then
     return
 end
 
-
 local GuiLibrary = Functions:RunFile("GuiLibrary.lua")
 
-getgenv().Mana = {}
-Mana.Entity = loadstring(game:HttpGet("https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/main/Libraries/entityHandler.lua", true))()
-Mana.GuiLibrary = GuiLibrary
-Mana.Functions = Functions
-Mana.Activated = true
-Mana.Whitelisted = false
+--trash code timee
+if getgenv then
+    getgenv().Mana = {}
+    Mana.Entity = loadstring(game:HttpGet("https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/main/Libraries/entityHandler.lua", true))()
+    Mana.GuiLibrary = GuiLibrary
+    Mana.Functions = Functions
+    Mana.Activated = true
+    Mana.Whitelisted = false
+else
+    _G.Mana = {}
+    Mana.Entity = loadstring(game:HttpGet("https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/main/Libraries/entityHandler.lua", true))()
+    Mana.GuiLibrary = GuiLibrary
+    Mana.Functions = Functions
+    Mana.Activated = true
+    Mana.Whitelisted = false
+end
 
 GuiLibrary:CreateWindow()
 

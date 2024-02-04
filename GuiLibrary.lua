@@ -164,109 +164,9 @@ local function getcustomassetfunc(path)
     return cachedassets[path]
 end
 
-function Library:ToggleLibrary()
-    if not NotificationGui.Visible and UserInputService:GetFocusedTextBox() == nil then
-        NotificationGui.Visible = true
-    else
-        if UserInputService:GetFocusedTextBox() == nil then
-            NotificationGui.Visible = false
-        end
-    end
-end
-
---notification (from Future)
-local function bettertween2(obj, newpos, dir, style, tim, override)
-    spawn(function()
-        local frame = Instance.new("Frame")
-        frame.Visible = false
-        frame.Position = obj.Position
-        frame.Parent = ScreenGui
-        frame:GetPropertyChangedSignal("Position"):Connect(function()
-            obj.Position = UDim2.new(frame.Position.X.Scale, frame.Position.X.Offset, obj.Position.Y.Scale, obj.Position.Y.Offset)
-        end)
-        pcall(function()
-            frame:TweenPosition(newpos, dir, style, tim, override)
-        end)
-        frame.Parent = nil
-        task.wait(tim)
-        frame:Remove()
-    end)
-end
-
---[[
-local NotificationSize = UDim2.new(0, 300, 0, 100)
-function GuiLibrary:CreateNotification(tittle, text, Time)
-    spawn(function()
-        local Time = Time or 2
-        local title = title or "Notification"
-        local text = text or "No text"
-
-        local offset = #NotificationGui:GetChildren()
-        local ToastNotification = Instance.new("Frame")
-        local Topbar = Instance.new("Frame")
-        local Bottombar = Instance.new("Frame")
-        local Title = Instance.new("TextLabel")
-        local Text = Instance.new("TextLabel")
-        ToastNotification.Name = "ToastNotification"
-        ToastNotification.Parent = NotificationGui
-        ToastNotification.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-        ToastNotification.BackgroundTransparency = 0.250
-        ToastNotification.BorderSizePixel = 0
-        ToastNotification.Position = UDim2.new(1, 0, 1, -((5 + NotificationSize.Y.Offset) * (offset + 1)))
-        ToastNotification.Size = NotificationSize
-        Topbar.Name = "Topbar"
-        Topbar.Parent = ToastNotification
-        Topbar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        Topbar.BackgroundTransparency = 0.6
-        Topbar.BorderSizePixel = 0
-        Topbar.Size = UDim2.new(0, NotificationSize.X.Offset, 0, NotificationSize.Y.Offset/3.16)
-        Bottombar.Name = "Bottombar"
-        Bottombar.Parent = ToastNotification
-        Bottombar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        Bottombar.BackgroundTransparency = 0.6
-        Bottombar.BorderSizePixel = 0
-        Bottombar.Size = UDim2.new(0, NotificationSize.X.Offset, 0, 5)
-        Bottombar.Position = UDim2.new(0.5,0, 1, -5)
-        Bottombar.AnchorPoint = Vector2.new(0.5, 0)
-        Title.Name = "Title"
-        Title.Parent = Topbar
-        Title.BackgroundTransparency = 1.000
-        Title.Position = UDim2.new(0.0260000005, 0, 0, 0)
-        Title.Size = UDim2.new(0, NotificationSize.X.Offset/1.16326531, 0, NotificationSize.Y.Offset/3.16)
-        Title.Font = GuiLibrary.Font
-        Title.Text = title
-        Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-        Title.TextSize = 20
-        Title.TextXAlignment = Enum.TextXAlignment.Left
-        Text.Name = "Text"
-        Text.Parent = ToastNotification
-        Text.BackgroundTransparency = 1.000
-        Text.Position = UDim2.new(0.0260000005, 0, 0, Topbar.Size.Y.Offset + 5)
-        Text.Size = UDim2.new(0, NotificationSize.X.Offset/1.14, 0, NotificationSize.Y.Offset/1.05333333)
-        Text.Font = GuiLibrary.Font
-        Text.Text = text
-        Text.TextColor3 = Color3.fromRGB(255, 255, 255)
-        Text.TextSize = 20
-        Text.TextWrapped = true
-        Text.TextXAlignment = Enum.TextXAlignment.Left
-        Text.TextYAlignment = Enum.TextYAlignment.Top
-
-        bettertween2(ToastNotification, UDim2.new(1, -(NotificationSize.X.Offset + 10), 1, -((5 + NotificationSize.Y.Offset) * (offset + 1))), Enum.EasingDirection.In, Enum.EasingStyle.Sine, 0.15, true)
-        task.wait(0.15)
-        pcall(function()
-            Bottombar:TweenSize(UDim2.new(0, 0, 0, 5), Enum.EasingDirection.In, Enum.EasingStyle.Linear, Time, true)
-        end)
-        task.wait(Time)
-        bettertween2(ToastNotification, UDim2.new(1, 0, 1, ToastNotification.Position.Y.Offset), Enum.EasingDirection.In, Enum.EasingStyle.Sine, 0.15, true)
-        task.wait(0.15)
-        ToastNotification:Destroy()
-    end)
-end
-]]
-
 function Library:CreateNotification(title, text, delay2, toggled)
     spawn(function()
-        if ScreenGui:FindFirstChild("Background") then ScreenGui:FindFirstChild("Background"):Destroy() end
+        if NotificationGui:FindFirstChild("Background") then NotificationGui:FindFirstChild("Background"):Destroy() end
 		if Library.Notifications == true then
 	        local frame = Instance.new("Frame")
 	        frame.Size = UDim2.new(0, 100, 0, 115)
@@ -276,7 +176,7 @@ function Library:CreateNotification(title, text, delay2, toggled)
 	        frame.BackgroundTransparency = 0.5
 	        frame.BackgroundColor3 = Color3.new(0, 0, 0)
 	        frame.Name = "Background"
-	        frame.Parent = ScreenGui
+	        frame.Parent = NotificationGui
 	        local frameborder = Instance.new("Frame")
 	        frameborder.Size = UDim2.new(1, 0, 0, 8)
 	        frameborder.BorderSizePixel = 0
@@ -318,7 +218,7 @@ end
 
 function Library:CreateWarning(title, text, delay2)
     spawn(function()
-        if ScreenGui:FindFirstChild("Background") then ScreenGui:FindFirstChild("Background"):Destroy() end
+        if NotificationGui:FindFirstChild("Background") then NotificationGui:FindFirstChild("Background"):Destroy() end
 	        local frame = Instance.new("Frame")
 	        frame.Size = UDim2.new(0, 100, 0, 115)
 	        frame.Position = UDim2.new(0.5, 0, 0, -115)
@@ -327,7 +227,7 @@ function Library:CreateWarning(title, text, delay2)
 	        frame.BackgroundTransparency = 0.5
 	        frame.BackgroundColor3 = Color3.new(0, 0, 0)
 	        frame.Name = "Background"
-	        frame.Parent = ScreenGui
+	        frame.Parent = NotificationGui
 	        local frameborder = Instance.new("Frame")
 	        frameborder.Size = UDim2.new(1, 0, 0, 8)
 	        frameborder.BorderSizePixel = 0
@@ -369,16 +269,20 @@ end
 --Library:CreateNotification("Loaded", "Press N to toggle GUI", 3, true)
 --Library:CreateWarning("Loaded", "Press N to toggle GUI", 3)
 
--- GUI Button (idk what positions are for mobile)
-local button = Instance.new("TextButton")
-button.Position = UDim2.new(1, -1816, 0, -32)
-button.Text = "Mana"
-button.BackgroundColor3 = Color3.fromRGB(26, 25, 26)
-button.TextColor3 = Color3.new(1, 1, 1)
-button.Size = UDim2.new(0, 32, 0, 32)
-button.BorderSizePixel = 0
-button.BackgroundTransparency = 0.5
-button.Parent = ScreenGui
+local Button = Instance.new("TextButton")
+local Corner = Instance.new("UICorner", Button)
+Corner.CornerRadius = UDim.new(0, 8)
+Button.Name = "GuiButton"
+Button.Position = UDim2.new(1, -702, 0, -32)
+Button.Text = "Mana"
+--Button.Active = true
+--Button.Draggable = true
+Button.BackgroundColor3 = Color3.fromRGB(26, 25, 26)
+Button.TextColor3 = Color3.new(1, 1, 1)
+Button.Size = UDim2.new(0, 32, 0, 32)
+Button.BorderSizePixel = 0
+Button.BackgroundTransparency = 0.5
+Button.Parent = ClickGui
 
 local function dragGUI(gui, dragpart)
     spawn(function()
@@ -627,10 +531,10 @@ function Library:CreateWindow()
                 BindText.TextXAlignment = Enum.TextXAlignment.Left
                 BindText.TextYAlignment = Enum.TextYAlignment.Center
                 BindText.MouseEnter:Connect(function()
-                    focus["Elements"]["toggle_"..title]=true 
+                    focus["Elements"]["toggle_"..title] = true 
                 end)
                 BindText.MouseLeave:Connect(function()
-                    focus["Elements"]["toggle_"..title]=false
+                    focus["Elements"]["toggle_"..title] = false
                 end)
                 conf["functions"]:WriteConfigs(configtable)
                 local x = (HttpService:JSONDecode(readfile(conf["file"])))
@@ -1050,6 +954,7 @@ function Library:CreateWindow()
     end
 end
 Library:ToggleLibrary()
+
 UserInputService.InputBegan:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.N then
         Library:ToggleLibrary()
