@@ -953,6 +953,19 @@ function Library:CreateWindow()
         return tabtable
     end
 end
+
+function Library:ToggleLibrary()
+    if not (NotificationGui.Visible and TabsFrame.Visible) and UserInputService:GetFocusedTextBox() == nil then
+        NotificationGui.Visible = true
+        TabsFrame.Visible = true
+    else
+        if UserInputService:GetFocusedTextBox() == nil then
+            NotificationGui.Visible = false
+            TabsFrame.Visible = fakse
+        end
+    end
+end
+
 Library:ToggleLibrary()
 
 UserInputService.InputBegan:Connect(function(input)
@@ -960,4 +973,5 @@ UserInputService.InputBegan:Connect(function(input)
         Library:ToggleLibrary()
     end
 end) 
+
 return Library
