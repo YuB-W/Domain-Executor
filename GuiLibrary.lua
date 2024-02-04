@@ -956,10 +956,12 @@ end
 
 function Library:ToggleLibrary()
     if NotificationGui.Visible == false and TabsFrame.Visible == false and UserInputService:GetFocusedTextBox() == nil then
+        print("a")
         NotificationGui.Visible = true
         TabsFrame.Visible = true
     else
         if UserInputService:GetFocusedTextBox() == nil then
+            print("b")
             NotificationGui.Visible = false
             TabsFrame.Visible = false
         end
