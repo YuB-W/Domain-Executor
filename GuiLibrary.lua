@@ -958,17 +958,16 @@ function Library:ToggleLibrary()
     if NotificationGui.Visible == false and TabsFrame.Visible == false 
         if UserInputService:GetFocusedTextBox() == nil then
             NotificationGui.Visible = true
-            if TabsFrame then TabsFrame.Visible = true end
+            ClickGui.Tabs.Visible.Visible = true
         end
     else
         if UserInputService:GetFocusedTextBox() == nil then
             NotificationGui.Visible = false
-            if TabsFrame then TabsFrame.Visible = false end
+            ClickGui.Tabs.Visible.Visible = false
         end
     end
 end
 
-Library:ToggleLibrary()
 
 UserInputService.InputBegan:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.N then
