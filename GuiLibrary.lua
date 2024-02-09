@@ -591,7 +591,7 @@ function Library:CreateWindow()
             if isfile(conf["file"]) then
                
             else
-               configtable[title]["IsToggled"]=false
+               configtable[title]["IsToggled"] = false
             end
     
             function sussyamog:Toggle(bool)
@@ -667,7 +667,7 @@ function Library:CreateWindow()
                     sussyamog:Toggle()
                 end	
             end) 
-            if configtable[title]["IsToggled"]==true then
+            if configtable[title]["IsToggled"] == true then
                 sussyamog:silentToggle(true)
             end
             function sussyamog:CreateSlider(argstable)
@@ -795,7 +795,7 @@ function Library:CreateWindow()
                 Dropdown.Position = UDim2.new(0.0859375, 0, 0.491620123, 0)
                 Dropdown.Size = UDim2.new(0, 175, 0, 25)
                 Dropdown.Font = Enum.Font.SourceSansLight
-                Dropdown.Text = "Value: " --[[.. argstable.Text .. ": "]] ..argstable.Default
+                Dropdown.Text = "Value: "..argstable.Default
                 Dropdown.TextColor3 = Color3.fromRGB(255, 255, 255)
                 Dropdown.TextSize = 22.000
                 --Dropdown.TextWrapped = true
@@ -952,29 +952,27 @@ function Library:CreateWindow()
         
         return tabtable
     end
-end
 
---[[
-function Library:ToggleLibrary()
-    if NotificationGui.Visible == false and TabsFrame.Visible == false 
-        if UserInputService:GetFocusedTextBox() == nil then
-            NotificationGui.Visible = true
-            ClickGui.Tabs.Visible = true
-        end
-    else
-        if UserInputService:GetFocusedTextBox() == nil then
-            NotificationGui.Visible = false
-            ClickGui.Tabs.Visible = false
+    function Library:ToggleLibrary()
+        if NotificationGui.Visible == false and TabsFrame.Visible == false 
+            if UserInputService:GetFocusedTextBox() == nil then
+                NotificationGui.Visible = true
+                TabsFrame.Visible = true
+            end
+        else
+            if UserInputService:GetFocusedTextBox() == nil then
+                NotificationGui.Visible = false
+                TabsFrame.Visible = false
+            end
         end
     end
+
+
+    UserInputService.InputBegan:Connect(function(input)
+        if input.KeyCode == Enum.KeyCode.N then
+            Library:ToggleLibrary()
+        end
+    end) 
 end
-
-
-UserInputService.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.N then
-        Library:ToggleLibrary()
-    end
-end) 
-]]
 
 return Library
