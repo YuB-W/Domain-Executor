@@ -1,5 +1,7 @@
 --[[
     Credits to anyones code i used or looked at
+
+    Re writing this thing for 2 weeks already lol, will be done on next week i think
 ]]
 
 repeat task.wait() until game:IsLoaded()

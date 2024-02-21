@@ -66,8 +66,8 @@ end
 
 if not getgenv then
     warn("[ManaV2ForRoblox]: Using _G function.")
-elseif not (_G and getgenv) then
-    return warn("[ManaV2ForRoblox: Unsupported executor.]")
+elseif not (_G and getgenv) then --idk if its possible to dont have _G thing
+    return warn("[ManaV2ForRoblox]: Unsupported executor.")
 end
 
 if Mana and Mana.Activated == true then 
@@ -113,7 +113,7 @@ runFunction(function()
         Keybind = nil,
         Callback = function(v)
         if v then
-            toclipboard("https://discord.gg/gPkD8BdbMA")
+            --toclipboard("https://discord.gg/gPkD8BdbMA")
         else
 
         end
@@ -192,12 +192,11 @@ runFunction(function()
     })
 end)
 
---some mobile support, and yea it's only smaller gui
 if UserInputService.TouchEnabled then
-    warn("[ManaV2ForRoblox]: mobile user.")
+    warn("[ManaV2ForRoblox]: Mobile user.")
     CoreGui.Mana.Tabs:FindFirstChild("scalee").Scale = 0.7
 else
-    warn("[ManaV2ForRoblox]: not mobile user.")
+    warn("[ManaV2ForRoblox]: Not mobile user.")
 end
 
 print("[ManaV2ForRoblox/MainScript.lua]: Loaded in " .. tostring(tick() - startTick) .. ".")
