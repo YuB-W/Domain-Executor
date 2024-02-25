@@ -21,7 +21,6 @@ local RealCamera = workspace.Camera
 local Mouse = LocalPlayer:GetMouse()
 local PlayerGui = LocalPlayer.PlayerGui
 local PlaceId = game.PlaceId
-local Whitelist = HttpService:JSONDecode(game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/Whitelist/main/Whitelist.json"))
 
 --what do i write here
 local request = (syn and syn.request) or request or http_request or (http and http.request)
