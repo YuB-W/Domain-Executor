@@ -41,8 +41,6 @@ NotificationGui.Draggable = true
 -- Just don't ask what is this and why it is here
 local ToggleGui = Instance.new("ScreenGui", CoreGui)
 ToggleGui.Name = "ToggleGui"
-local ToggleClickGui = Instance.new("Frame", ToggleGui)
-ToggleClickGui.Name = "ToggleClickGui"
 
 local keybinds = {}
 local Library = {
@@ -956,7 +954,7 @@ function Library:CreateWindow()
                 }
                 return textboxapi
             end
-            
+
             local thngylol = Instance.new("Frame")
             thngylol.Parent = optionframe
             thngylol.Transparency = 1
@@ -999,7 +997,7 @@ Button.TextColor3 = Color3.new(1, 1, 1)
 Button.Size = UDim2.new(0, 32, 0, 32)
 Button.BorderSizePixel = 0
 Button.BackgroundTransparency = 0.5
-Button.Parent = ToggleClickGui
+Button.Parent = ToggleGui
 Button.MouseButton1Click:Connect(function()
     Library:ToggleLibrary()
 end)
