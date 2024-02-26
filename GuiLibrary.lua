@@ -973,7 +973,7 @@ function Library:CreateWindow()
 end
 
 function Library:ToggleLibrary()
-    if ScreenGui.Enabled == false 
+    if ScreenGui.Enabled == false then
         if UserInputService:GetFocusedTextBox() == nil then
             ScreenGui.Enabled = true
         end
