@@ -38,6 +38,12 @@ NotificationGui.Position = UDim2.new(0, 1817, 0, 955)
 NotificationGui.Active = true
 NotificationGui.Draggable = true
 
+-- Just don't ask what is this and why it is here
+local ToggleGui = Instance.new("ScreenGui", CoreGui)
+ToggleGui.Name = "ToggleGui"
+local ToggleClickGui = Instance.new("Frame", ToggleGui)
+ToggleClickGui.Name = "ToggleClickGui"
+
 local keybinds = {}
 local Library = {
     ["Sounds"] = true,
@@ -282,7 +288,7 @@ Button.TextColor3 = Color3.new(1, 1, 1)
 Button.Size = UDim2.new(0, 32, 0, 32)
 Button.BorderSizePixel = 0
 Button.BackgroundTransparency = 0.5
-Button.Parent = ClickGui
+Button.Parent = ToggleClickGui
 
 local function dragGUI(gui, dragpart)
     spawn(function()
@@ -667,7 +673,7 @@ function Library:CreateWindow()
                     sussyamog:Toggle()
                 end	
             end) 
-            if configtable[title]["IsToggled"]==true then
+            if configtable[title]["IsToggled" ]== true then
                 sussyamog:silentToggle(true)
             end
             function sussyamog:CreateSlider(argstable)
@@ -754,7 +760,13 @@ function Library:CreateWindow()
                 end
                 sliderapi.Set(sliderapi["Value"])
 
-                Library["Objects"][argstable.Name.."Slider"] = {["API"] = sliderapi, ["Instance"] = Slider, ["Type"] = "Slider", ["OptionsButton"] = argstable.Name, ["Window"] = TabsFrame.Name}
+                Library["Objects"][argstable.Name.."Slider"] = {
+                    ["API"] = sliderapi, 
+                    ["Instance"] = Slider, 
+                    ["Type"] = "Slider", 
+                    ["OptionsButton"] = argstable.Name, 
+                    ["Window"] = TabsFrame.Name
+                }
                 return sliderapi
             end
             function sussyamog:CreateDropDown(argstable)
@@ -795,16 +807,16 @@ function Library:CreateWindow()
                 Dropdown.Position = UDim2.new(0.0859375, 0, 0.491620123, 0)
                 Dropdown.Size = UDim2.new(0, 175, 0, 25)
                 Dropdown.Font = Enum.Font.SourceSansLight
-                Dropdown.Text = "Value: " --[[.. argstable.Text .. ": "]] ..argstable.Default
+                Dropdown.Text = "Mode: "..argstable.Default
                 Dropdown.TextColor3 = Color3.fromRGB(255, 255, 255)
                 Dropdown.TextSize = 22.000
-                --Dropdown.TextWrapped = true
+                Dropdown.TextWrapped = true
                 Dropdown.TextXAlignment = Enum.TextXAlignment.Left
                 Dropdown.TextYAlignment = Enum.TextYAlignment.Bottom
                 dropdownapi["Select"] = function(_select) 
                     if dropdownapi.List[_select] or stringtablefind(dropdownapi.List, _select) then
                         dropdownapi["Value"] = dropdownapi.List[_select] or dropdownapi.List[stringtablefind(dropdownapi.List, _select)]
-                        Dropdown.Text = "".. argstable.Text .. ": " ..tostring(dropdownapi.Value)
+                        Dropdown.Text = "Mode: "..tostring(dropdownapi.Value)
                         configtable[ddname]["Value"]=dropdownapi["Value"]
                         argstable.Function(dropdownapi["Value"])
                     end
@@ -815,7 +827,8 @@ function Library:CreateWindow()
                         newindex = getvalue(newindex + 1)
                         dropdownapi.Select(newindex)
                     else
-                        Library:CreateNotification("NewIndex in selector ("..argstable.Name..") in function `SelectNext` was not found!", "If this keeps happening, go to you exploit's folder\nthen go to workspace/Mana/Config\nand delete everything inside of that folder", 10)
+                        warn("NewIndex in selector ("..argstable.Name..") in function `SelectNext` was not found!,")
+                        Library:CreateNotification("NewIndex in selector ("..argstable.Name..") in function `SelectNext` was not found!", "If this keeps happening, go to you exploit's folder\nthen go to workspace/rektsky/config\nand delete everything inside of that folder", 10, false)
                     end
                 end
 
@@ -825,18 +838,24 @@ function Library:CreateWindow()
                         newindex = getvalue(newindex - 1)
                         dropdownapi.Select(newindex)
                     else
-                        Library:CreateWarning("NewIndex in selector ("..argstable.Name..") in function `SelectPrevious` was not found!", "If this keeps happening, go to you exploit's folder\nthen go to workspace/Mana/Config\nand delete everything inside of that folder", 10)
+                        warn("NewIndex in selector ("..argstable.Name..") in function `SelectPrevious` was not found!")
+                        Library:CreateNotification("NewIndex in selector ("..argstable.Name..") in function `SelectPrevious` was not found!", "If this keeps happening, go to you exploit's folder\nthen go to workspace/rektsky/config\nand delete everything inside of that folder", 10, false)
                     end
                 end
-    			if configtable[ddname] and configtable[ddname]["Value"] then
-    				dropdownapi.Select(stringtablefind(dropdownapi.List,configtable[ddname]["Value"]))
-    			end
+                    if configtable[ddname] and configtable[ddname]["Value"] then
+                        dropdownapi.Select(stringtablefind(dropdownapi.List,configtable[ddname]["Value"]))
+                    end
                 Dropdown.MouseButton1Click:Connect(dropdownapi.SelectNext)
                 Dropdown.MouseButton2Click:Connect(dropdownapi.SelectPrevious)
     
-                Library["Objects"][argstable.Name.."Selector"] = {["API"] = dropdownapi, ["Instance"] = Selector, ["Type"] = "Selector", ["OptionsButton"] = argstable.Name, ["Window"] = TabsFrame.Name}
+                Library["Objects"][argstable.Name.."Selector"] = {
+                        ["API"] = dropdownapi, ["Instance"] = Selector, 
+                        ["Type"] = "Selector", 
+                        ["OptionsButton"] = argstable.Name, 
+                        ["Window"] = TabsFrame.Name
+                }
                 return dropdownapi
-            end
+          end
             function sussyamog:CreateOptionTog(argstable)
                 if configtable[argstable["Name"]..sussyamog["Name"].."_OT"] == nil then
                     configtable[argstable["Name"]..sussyamog["Name"].."_OT"] = {["IsToggled"] = configtable[argstable["Name"]..sussyamog["Name"].."_OT"] and configtable[argstable["Name"]..sussyamog["Name"].."_OT"]["IsToggled"] or argstable.Default}
@@ -937,6 +956,7 @@ function Library:CreateWindow()
                 }
                 return textboxapi
             end
+            
             local thngylol = Instance.new("Frame")
             thngylol.Parent = optionframe
             thngylol.Transparency = 1
@@ -954,27 +974,40 @@ function Library:CreateWindow()
     end
 end
 
---[[
 function Library:ToggleLibrary()
-    if NotificationGui.Visible == false and TabsFrame.Visible == false 
+    if ScreenGui.Enabled == false 
         if UserInputService:GetFocusedTextBox() == nil then
-            NotificationGui.Visible = true
-            ClickGui.Tabs.Visible = true
+            ScreenGui.Enabled = true
         end
     else
         if UserInputService:GetFocusedTextBox() == nil then
-            NotificationGui.Visible = false
-            ClickGui.Tabs.Visible = false
+            ScreenGui.Enabled = false
         end
     end
 end
 
+local Button = Instance.new("TextButton")
+local Corner = Instance.new("UICorner", Button)
+Corner.CornerRadius = UDim.new(0, 8)
+Button.Name = "GuiButton"
+Button.Position = UDim2.new(1, -702, 0, -32)
+Button.Text = "Mana"
+--Button.Active = true
+--Button.Draggable = true
+Button.BackgroundColor3 = Color3.fromRGB(26, 25, 26)
+Button.TextColor3 = Color3.new(1, 1, 1)
+Button.Size = UDim2.new(0, 32, 0, 32)
+Button.BorderSizePixel = 0
+Button.BackgroundTransparency = 0.5
+Button.Parent = ToggleClickGui
+Button.MouseButton1Click:Connect(function()
+    Library:ToggleLibrary()
+end)
 
 UserInputService.InputBegan:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.N then
         Library:ToggleLibrary()
     end
 end) 
-]]
 
 return Library
