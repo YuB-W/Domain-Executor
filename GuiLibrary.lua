@@ -273,21 +273,6 @@ end
 --Library:CreateNotification("Loaded", "Press N to toggle GUI", 3, true)
 --Library:CreateWarning("Loaded", "Press N to toggle GUI", 3)
 
-local Button = Instance.new("TextButton")
-local Corner = Instance.new("UICorner", Button)
-Corner.CornerRadius = UDim.new(0, 8)
-Button.Name = "GuiButton"
-Button.Position = UDim2.new(1, -702, 0, -32)
-Button.Text = "Mana"
---Button.Active = true
---Button.Draggable = true
-Button.BackgroundColor3 = Color3.fromRGB(26, 25, 26)
-Button.TextColor3 = Color3.new(1, 1, 1)
-Button.Size = UDim2.new(0, 32, 0, 32)
-Button.BorderSizePixel = 0
-Button.BackgroundTransparency = 0.5
-Button.Parent = ToggleClickGui
-
 local function dragGUI(gui, dragpart)
     spawn(function()
         local dragging
@@ -460,10 +445,11 @@ function Library:CreateWindow()
             local togname = Instance.new("TextLabel")
             local toggledtog = Instance.new("TextButton")
             local togname_2 = Instance.new("TextLabel")
+            local optionsframebutton = Instance.new("ImageButton")
             local uicorner = Instance.new("UICorner")
             toggle.Name = "toggle_" .. title
             toggle.Parent = tab
-            toggle.BackgroundColor3 = Color3.fromRGB(14, 20, 14)
+            toggle.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
             toggle.BorderSizePixel = 0
             toggle.Position = UDim2.new(0.0827946085, -17, 0.133742347, 33)
             toggle.Size = UDim2.new(0, 207, 0, 40)
@@ -481,6 +467,12 @@ function Library:CreateWindow()
             togname.TextSize = 22.000
             togname.TextWrapped = true
             togname.TextXAlignment = Enum.TextXAlignment.Left
+            optionsframebutton.Name = "ImageButton"
+            optionsframebutton.Parent = toggle
+            optionsframebutton.Position = UDim2.new(0, 819, 0, 0)
+            optionsframebutton.Size = UDim2.new(0, 37, 0, 39)
+            optionsframebutton.BackgroundTransparency = 1
+            optionsframebutton.Image = "rbxassetid://16542929468"
 
             toggle.MouseMoved:Connect(function()
                 if ToolTip then
@@ -588,9 +580,14 @@ function Library:CreateWindow()
                         end
                     end)
                 end)
+
                 toggle.MouseButton2Click:Connect(function()
                     optionframe.Visible = not optionframe.Visible
                 end) 
+
+                optionsframebutton.MouseButton1Click:Connect(function()
+                    optionframe.Visible = not optionframe.Visible
+                end)
     
             if isfile(conf["file"]) then
                
