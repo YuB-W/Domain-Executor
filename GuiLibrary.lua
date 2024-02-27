@@ -607,7 +607,7 @@ function Library:CreateWindow()
                         Library:CreateNotification(title, "Disabled "..title, 4, false)
                         configtable[title]["IsToggled"] = false
                     end)
-                    toggle.BackgroundColor3 = Color3.fromRGB(14, 20, 14)
+                    toggle.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
                     playsound("rbxassetid://421058925", 1)
                 else
                     spawn(function()
@@ -643,7 +643,7 @@ function Library:CreateWindow()
                         callback(false)
                     end)
                     configtable[title]["IsToggled"] = false
-                    toggle.BackgroundColor3 = Color3.fromRGB(14, 20, 14)
+                    toggle.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
                 else
                     if bool == true or bool == "true" then
                         spawn(function()
