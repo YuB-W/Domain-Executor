@@ -469,7 +469,7 @@ function Library:CreateWindow()
             togname.TextXAlignment = Enum.TextXAlignment.Left
             optionsframebutton.Name = "ImageButton"
             optionsframebutton.Parent = toggle
-            optionsframebutton.Position = UDim2.new(0, 819, 0, 0)
+            optionsframebutton.Position = UDim2.new(0, 170, 0, 0)
             optionsframebutton.Size = UDim2.new(0, 37, 0, 39)
             optionsframebutton.BackgroundTransparency = 1
             optionsframebutton.Image = "rbxassetid://16542929468"
