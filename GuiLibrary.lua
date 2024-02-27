@@ -445,7 +445,7 @@ function Library:CreateWindow()
             local togname = Instance.new("TextLabel")
             local toggledtog = Instance.new("TextButton")
             local togname_2 = Instance.new("TextLabel")
-            local optionsframebutton = Instance.new("ImageButton")
+            local optionsframebutton = Instance.new("TextButton")
             local uicorner = Instance.new("UICorner")
             toggle.Name = "toggle_" .. title
             toggle.Parent = tab
@@ -467,12 +467,13 @@ function Library:CreateWindow()
             togname.TextSize = 22.000
             togname.TextWrapped = true
             togname.TextXAlignment = Enum.TextXAlignment.Left
-            optionsframebutton.Name = "ImageButton"
+            optionsframebutton.Name = "TextButton"
             optionsframebutton.Parent = toggle
             optionsframebutton.Position = UDim2.new(0, 170, 0, 0)
             optionsframebutton.Size = UDim2.new(0, 37, 0, 39)
             optionsframebutton.BackgroundTransparency = 1
-            optionsframebutton.Image = "rbxassetid://16542929468"
+            optionsframebutton.Text = "."
+            optionsframebutton.TextSize = "30"
 
             toggle.MouseMoved:Connect(function()
                 if ToolTip then
