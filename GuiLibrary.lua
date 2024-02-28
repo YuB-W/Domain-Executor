@@ -706,10 +706,12 @@ function Library:CreateWindow()
                 slider_2.Position = UDim2.new(0.00786163565, 0, -0.00825500488, 0)
                 slider_2.Size = UDim2.new(0, 0, 0, 34)
                 slider_2.ZIndex = 2
-                local mouse = game.Players.LocalPlayer:GetMouse()
+        
+            
                 if configtable[argstable["Name"]..sussyamog["Name"].."_SR"] == nil then
                     configtable[argstable["Name"]..sussyamog["Name"].."_SR"] = {["Value"] = sliderapi["Value"]}
                 end
+            
                 local function slide(input)
                     local sizeX = math.clamp((input.Position.X - slider.AbsolutePosition.X) / slider.AbsoluteSize.X, 0, 1)
                     slider_2.Size = UDim2.new(sizeX, 0, 1, 0)
@@ -721,32 +723,37 @@ function Library:CreateWindow()
                         argstable.Function(value)
                     end
                 end
-                local sliding
-                slider.InputBegan:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            
+                local sliding = false
+            
+                local function inputBegan(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                         sliding = true
                         slide(input)
                     end
-                end)
-
-                slider.InputEnded:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                end
+            
+                local function inputEnded(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                         if argstable["OnInputEnded"] then
                             argstable.Function(sliderapi.Value)
                             configtable[argstable["Name"]..sussyamog["Name"].."_SR"]["Value"]=sliderapi["Value"] 
                         end
                         sliding = false
                     end
-                end)
-
+                end
+            
+                slider.InputBegan:Connect(inputBegan)
+                slider.InputEnded:Connect(inputEnded)
+            
                 UserInputService.InputChanged:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseMovement then
+                    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
                         if sliding then
                             slide(input)
                         end
                     end
                 end)
-
+            
                 sliderapi["Set"] = function(value)
                     local value = math.floor((math.clamp(value, min, max) * (10^roundval))+0.5)/(10^roundval)
                     sliderapi["Value"] = value
@@ -755,7 +762,7 @@ function Library:CreateWindow()
                     argstable.Function(value)
                 end
                 sliderapi.Set(sliderapi["Value"])
-
+            
                 Library["Objects"][argstable.Name.."Slider"] = {
                     ["API"] = sliderapi, 
                     ["Instance"] = Slider, 
@@ -764,7 +771,7 @@ function Library:CreateWindow()
                     ["Window"] = TabsFrame.Name
                 }
                 return sliderapi
-            end
+            end            
             function sussyamog:CreateDropDown(argstable)
                 local ddname = argstable.Name
                 local dropdownapi = {["Value"] = nil, ["List"] = {}}
