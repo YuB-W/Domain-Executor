@@ -1,7 +1,5 @@
 # ManaV2ForRoblox - Revived
 Cool script for roblox
-
- **It's not discontinued**
  
 Supports any executors that has file system
 
