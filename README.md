@@ -1,7 +1,7 @@
 # ManaV2ForRoblox - Revived
 Cool script for roblox
  
-Supports ~~any~~ executors that has normal file system
+Supports executors that has file system
 
 Loadstring:
 ```
