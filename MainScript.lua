@@ -11,7 +11,6 @@ local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 
---Variables
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character
 local HumanoidRootPart = Character.HumanoidRootPart
@@ -22,7 +21,6 @@ local Mouse = LocalPlayer:GetMouse()
 local PlayerGui = LocalPlayer.PlayerGui
 local PlaceId = game.PlaceId
 
---what do i write here
 local request = (syn and syn.request) or request or http_request or (http and http.request)
 local queueteleport = syn and syn.queue_on_teleport or queue_on_teleport or fluxus and fluxus.queue_on_teleport
 local setthreadidentityfunc = syn and syn.set_thread_identity or set_thread_identity or setidentity or setthreadidentity
@@ -65,7 +63,7 @@ end
 
 if not getgenv then
     warn("[ManaV2ForRoblox]: Using _G function.")
-elseif not (_G and getgenv) then --idk if its possible to dont have _G thing
+elseif not (_G and getgenv) then
     return warn("[ManaV2ForRoblox]: Unsupported executor.")
 end
 
@@ -106,20 +104,21 @@ local Tabs = {
 
 Mana.Tabs = Tabs
 
+--[[
 runFunction(function()
     Discord = Tabs.Misc:CreateToggle({
         Name = "CopyDiscordInvite",
         Keybind = nil,
         Callback = function(v)
         if v then
-            --toclipboard("https://discord.gg/gPkD8BdbMA")
+            toclipboard("https://discord.gg/gPkD8BdbMA")
         else
 
         end
         end
     })
 end)
-
+]]
 
 runFunction(function()
     local LibSounds = {Value = true}
