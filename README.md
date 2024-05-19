@@ -2,6 +2,8 @@
 Cool script for roblox
 
 it's not discontinued
+
+Rewrite release date: ~mid june
  
 Supports executors that has file system
 
