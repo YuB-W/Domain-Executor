@@ -8,10 +8,11 @@ Rewrite release date: ~mid june
 Supports executors that has file system
 
 Loadstring:
-```
+```lua
 loadstring(game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/MainScript.lua"))()
 ```
 
+discord: ``https://discord.gg/CEMMRSvXek``
 ## Supported Games:
 ```
 RaceClicker | roblox.com/games/9285238704
