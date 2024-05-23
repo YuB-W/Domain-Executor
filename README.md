@@ -14,7 +14,6 @@ Loadstring:
 loadstring(game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/MainScript.lua"))()
 ```
 
-discord: ``https://discord.gg/CEMMRSvXek``
 ## Supported Games:
 ```
 RaceClicker | roblox.com/games/9285238704
