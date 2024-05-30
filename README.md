@@ -1,11 +1,9 @@
-# ManaV2ForRoblox - Revived
+# ManaV2ForRoblox
 Cool script for roblox
-
-it's not discontinued
 
 Rewrite release date: ~mid june
  
-Supports executors that has file system
+Supports executors that has file system and normal UNC system
 
 Discord server: ``https://discord.gg/CEMMRSvXek``
 
