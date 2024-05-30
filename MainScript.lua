@@ -190,14 +190,14 @@ end)
 
 if UserInputService.TouchEnabled then
     warn("[ManaV2ForRoblox]: Mobile user.")
-    CoreGui.Mana.Tabs:FindFirstChild("scalee").Scale = 0.7
+   GuiLibrary.Scale.Scale = 0.7
 else
     warn("[ManaV2ForRoblox]: Not mobile user.")
 end
 
 UniversalScript = Functions:RunFile("Scripts/Universal.lua")
 local Success, Error = pcall(function() 
-    Functions:RunGameScript("".. PlaceId ..".lua") 
+    Functions:RunGameScript("" .. PlaceId .. ".lua") 
 end) 
 if not Success then warn(Error) end
 
