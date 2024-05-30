@@ -219,7 +219,6 @@ runFunction(function()
     ]]
     local HighJump
     local HighJumpPower = {Value = 20}
-    local HighJumpGravity = {Value = 5}
     HighJump = Tabs.Movement:CreateToggle({
         Name = "HighJump",
         Keybind = nil,
@@ -227,7 +226,6 @@ runFunction(function()
             if callback then
                 LocalPlayer.Character.Humanoid:ChangeState(3)
                 task.wait()
-                workspace.Gravity = HighJumpGravity.Value
                 spawn(function()
                     for i = 1, HighJumpPower.Value do
                         wait()
@@ -245,7 +243,6 @@ runFunction(function()
                 end)
                 HighJump:silentToggle()
             else
-                workspace.Gravity = 196.19999694824
                 return
             end
         end
@@ -258,44 +255,33 @@ runFunction(function()
         Default = 25,
         Round = 0
     })
-
-    HighJumpGravity = HighJump:CreateSlider({
-        Name = "Gravity",
-        Function = function() end,
-        Min = 1,
-        Max = 20,
-        Default = 5,
-        Round = 0
-    })
 end)
 
-if Place == false then
-    runFunction(function()
-        local SpeedValue = {Value = 23}
-        Speed = Tabs.Movement:CreateToggle({
-            Name = "Speed",
-            Keybind = nil,
-            Callback = function(callback)
-                if callback == true then
-                    LocalPlayer.Character.Humanoid.WalkSpeed = SpeedValue.Value
-                else
-                    Humanoid.WalkSpeed = 16
-                end
-            end
-        })
-
-        Speed = Speed:CreateSlider({
+runFunction(function()
+    local SpeedValue = {Value = 23}
+    Speed = Tabs.Movement:CreateToggle({
         Name = "Speed",
-        Function = function(v)
-            LocalPlayer.Character.Humanoid.WalkSpeed = SpeedValue.Value or v
-        end,
-        Min = 0,
-        Max = 200,
-        Default = 16,
-        Round = 0
+        Keybind = nil,
+        Callback = function(callback)
+            if callback then
+                LocalPlayer.Character.Humanoid.WalkSpeed = SpeedValue.Value
+            else
+                Humanoid.WalkSpeed = 16
+            end
+        end
     })
-    end)
-end
+
+    Speed = Speed:CreateSlider({
+    Name = "Speed",
+    Function = function(v)
+        LocalPlayer.Character.Humanoid.WalkSpeed = SpeedValue.Value or v
+    end,
+    Min = 0,
+    Max = 200,
+    Default = 16,
+    Round = 0
+})
+end)
 
 --Render
 
@@ -494,29 +480,27 @@ runFunction(function()
     })
 end)
 
-if Place == false then
-    runFunction(function()
-        local MouseConnection
-        local ClickTP = Tabs.Utility:CreateToggle({
-            Name = "ClickTP",
-            Keybind = nil,
-            Callback = function(callback) 
-                if callback then 
-                    MouseConnection = Mouse.Button1Down:Connect(function()
-                        if isAlive() and Mouse.Target then 
-                            LocalPlayer.Character.HumanoidRootPart.CFrame = Mouse.Hit + Vector3.new(0, 3, 0)
-                        end
-                    end)
-                else
-                    if MouseConnection then 
-                        MouseConnection:Disconnect()
-                        MouseConnection = nil
+runFunction(function()
+    local MouseConnection
+    local ClickTP = Tabs.Utility:CreateToggle({
+        Name = "ClickTP",
+        Keybind = nil,
+        Callback = function(callback) 
+            if callback then 
+                MouseConnection = Mouse.Button1Down:Connect(function()
+                    if isAlive() and Mouse.Target then 
+                        LocalPlayer.Character.HumanoidRootPart.CFrame = Mouse.Hit + Vector3.new(0, 3, 0)
                     end
+                end)
+            else
+                if MouseConnection then 
+                    MouseConnection:Disconnect()
+                    MouseConnection = nil
                 end
             end
-        })
-    end)
-end
+        end
+    })
+end)
 
 runFunction(function()
     local InfinityJump = Tabs.Utility:CreateToggle({
@@ -573,8 +557,7 @@ runFunction(function()
         Name = "Gravity",
         Function = function(v)
             if GravityEnabled then
-                GravityValue.Value = v
-                workspace.Gravity = GravityValue.Value or v
+                workspace.Gravity = v
             end
         end,
         Min = 1,
