@@ -358,6 +358,8 @@ function Library:CreateWindow()
 	HoverText.Parent = TabsFrame
     HoverText.AnchorPoint = Vector2.new(0.5, 0.5)
 
+    Library.UIScale = UIScale
+
     function Library:CreateTab(title, color)
         table.insert(tabs, #tabs)
         local tab = Instance.new("TextButton")
