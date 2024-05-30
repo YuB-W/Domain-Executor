@@ -155,19 +155,13 @@ end)
 
 
 runFunction(function()
-    local FlightEnabled = {Value = false}
     local Flight = Tabs.Movement:CreateToggle({
         Name = "Flight",
         Keybind = nil,
         Callback = function(callback)
             if callback then
-                FlightEnabled = true
-                repeat
-                    task.wait()
-                    workspace.Gravity = 0
-                until (not FlightEnabled)
+                workspace.Gravity = 0
             else
-                FlightEnabled = false
                 workspace.Gravity = 196
             end
         end
