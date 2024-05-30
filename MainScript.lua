@@ -27,6 +27,18 @@ local setthreadidentityfunc = syn and syn.set_thread_identity or set_thread_iden
 local getthreadidentityfunc = syn and syn.get_thread_identity or get_thread_identity or getidentity or getthreadidentity
 local function runFunction(func) func() end
 
+if not getgenv then
+    warn("[ManaV2ForRoblox]: Using _G function.")
+elseif not (_G and getgenv) then --idk if its possible to dont have _G thing
+    return warn("[ManaV2ForRoblox]: Unsupported executor.")
+end
+
+if getgenv then
+    getgenv().Mana = {}
+else
+    _G.Mana = {}
+end
+
 local Functions = {}
 
 do
@@ -74,22 +86,11 @@ end
 
 local GuiLibrary = Functions:RunFile("GuiLibrary.lua")
 
---trash code timee
-if getgenv then
-    getgenv().Mana = {}
-    Mana.Entity = loadstring(game:HttpGet("https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/main/Libraries/entityHandler.lua", true))()
-    Mana.GuiLibrary = GuiLibrary
-    Mana.Functions = Functions
-    Mana.Activated = true
-    Mana.Whitelisted = false
-else
-    _G.Mana = {}
-    Mana.Entity = loadstring(game:HttpGet("https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/main/Libraries/entityHandler.lua", true))()
-    Mana.GuiLibrary = GuiLibrary
-    Mana.Functions = Functions
-    Mana.Activated = true
-    Mana.Whitelisted = false
-end
+Mana.Entity = loadstring(game:HttpGet("https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/main/Libraries/entityHandler.lua", true))()
+Mana.GuiLibrary = GuiLibrary
+Mana.Functions = Functions
+Mana.Activated = true
+Mana.Whitelisted = false
 
 GuiLibrary:CreateWindow()
 
@@ -104,24 +105,21 @@ local Tabs = {
 
 Mana.Tabs = Tabs
 
---[[
 runFunction(function()
     Discord = Tabs.Misc:CreateToggle({
         Name = "CopyDiscordInvite",
         Keybind = nil,
         Callback = function(v)
-        if v then
-            toclipboard("https://discord.gg/gPkD8BdbMA")
-        else
-
-        end
+            if v then
+                toclipboard("https://discord.gg/CEMMRSvXek")
+            end
         end
     })
 end)
-]]
 
 runFunction(function()
     local LibSounds = {Value = true}
+    local en
     local LibrarySettings = Tabs.Misc:CreateToggle({
         Name = "LibrarySettings",
         Keybind = nil,
@@ -197,10 +195,10 @@ else
     warn("[ManaV2ForRoblox]: Not mobile user.")
 end
 
-print("[ManaV2ForRoblox/MainScript.lua]: Loaded in " .. tostring(tick() - startTick) .. ".")
-
 UniversalScript = Functions:RunFile("Scripts/Universal.lua")
 local Success, Error = pcall(function() 
     Functions:RunGameScript("".. PlaceId ..".lua") 
 end) 
 if not Success then warn(Error) end
+
+print("[ManaV2ForRoblox/MainScript.lua]: Loaded in " .. tostring(tick() - startTick) .. ".")
