@@ -190,7 +190,7 @@ end)
 
 if UserInputService.TouchEnabled then
     warn("[ManaV2ForRoblox]: Mobile user.")
-   GuiLibrary.Scale.Scale = 0.7
+   GuiLibrary.UIScale.Scale = 0.7
 else
     warn("[ManaV2ForRoblox]: Not mobile user.")
 end
