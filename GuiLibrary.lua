@@ -351,15 +351,6 @@ function Library:CreateWindow()
     UIScale.Parent = TabsFrame
     UIScale.Scale = Library.Scale
 
-    HoverText.Text = "  "
-    HoverText.ZIndex = 1
-    HoverText.TextColor3 = Color3.fromRGB(160, 160, 160)
-    HoverText.TextXAlignment = Enum.TextXAlignment.Left
-    HoverText.TextSize = 14
-    HoverText.Visible = false
-    HoverText.Parent = TabsFrame
-    HoverText.AnchorPoint = Vector2.new(0.5, 0.5)
-
     Library.UIScale = UIScale
 
     if Library.Device == "Mobile" then
@@ -483,27 +474,6 @@ function Library:CreateWindow()
             optionsframebutton.BackgroundTransparency = 1
             optionsframebutton.Text = "."
             optionsframebutton.TextSize = "30"
-
-            toggle.MouseMoved:Connect(function()
-                if ToolTip then
-                    HoverText.BackgroundColor3 = Color3.fromRGB(14, 20, 14)
-                    HoverText.TextColor3 = tabname.TextColor3
-                    HoverText.Text = "  " .. ToolTip
-                    HoverText.Visible = true
-                    HoverText.Parent = toggle
-
-                    local offsetX = 1
-                    local offsetY = 1
-
-                    local MousePos = UserInputService:GetMouseLocation()
-                    HoverText.Position = UDim2.new(0, MousePos.X - offsetX, 0, MousePos.Y - offsetY)
-                end
-            end)
-
-            toggle.MouseLeave:Connect(function()
-                HoverText.Visible = false
-                HoverText.Parent = TabsFrame
-            end)
             
             local optionselement = {
                 ["Stuff"] = {}
