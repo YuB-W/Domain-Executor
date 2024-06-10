@@ -118,56 +118,6 @@ spawn(function()
     until (not configsaving)
 end)
 
-local requestfunc = syn and syn.request or http and http.request or http_request or fluxus and fluxus.request or request or function(tab)
-    if tab.Method == "GET" then
-        return {
-            Body = game:HttpGet(tab.Url, true),
-            Headers = {},
-            StatusCode = 200
-        }
-    else
-        return {
-            Body = "bad exploit",
-            Headers = {},
-            StatusCode = 404
-        }
-    end
-end 
-
-local betterisfile = function(file)
-    local suc, res = pcall(function() return readfile(file) end)
-    return suc and res ~= nil
-end
-
-local cachedassets = {}
-local function getcustomassetfunc(path)
-    if not betterisfile(path) then
-        spawn(function()
-            local textlabel = Instance.new("TextLabel")
-            textlabel.Size = UDim2.new(1, 0, 0, 36)
-            textlabel.Text = "Downloading "..path
-            textlabel.BackgroundTransparency = 1
-            textlabel.TextStrokeTransparency = 0
-            textlabel.TextSize = 30
-            textlabel.Font = Enum.Font.SourceSans
-            textlabel.TextColor3 = Color3.new(1, 1, 1)
-            textlabel.Position = UDim2.new(0, 0, 0, -36)
-            textlabel.Parent = ScreenGui
-            repeat wait() until betterisfile(path)
-            textlabel:Remove()
-        end)
-        local req = requestfunc({
-            Url = "https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/"..path:gsub("Mana/Assets", "Assets"),
-            Method = "GET"
-        })
-        writefile(path, req.Body)
-    end
-    if cachedassets[path] == nil then
-        cachedassets[path] = getasset(path) 
-    end
-    return cachedassets[path]
-end
-
 function Library:CreateNotification(title, text, delay2, toggled)
     spawn(function()
         if NotificationGui:FindFirstChild("Background") then NotificationGui:FindFirstChild("Background"):Destroy() end
@@ -349,13 +299,12 @@ function Library:CreateWindow()
     uilistthingy.Padding = UDim.new(0, 40)
 
     UIScale.Parent = TabsFrame
-    UIScale.Scale = Library.Scale
+    UIScale.Scale = 1
 
     Library.UIScale = UIScale
 
-    if Library.Device == "Mobile" then
-        UIScale.Scale = Library.MobileScale
-        Library.Scale = 0.45
+    if UserInputService.TouchEnabled then
+        UIScale.Scale = 0.45
     end
 
     function Library:CreateTab(title, color)
