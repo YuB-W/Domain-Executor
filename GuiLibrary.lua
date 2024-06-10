@@ -358,6 +358,10 @@ function Library:CreateWindow()
 	HoverText.Parent = TabsFrame
     HoverText.AnchorPoint = Vector2.new(0.5, 0.5)
 
+    if not UserInputService.TouchEnabled then
+        UIScale.Parent = game
+    end
+
     Library.UIScale = UIScale
 
     function Library:CreateTab(title, color)
