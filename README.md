@@ -45,8 +45,3 @@ FarmLeaves
 FarmTokens and Bubbels
 MemoryMatchHack
 ```
-
-```
-Build A Boat For Treasure:
-InfinityBlocks
-```

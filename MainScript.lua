@@ -7,7 +7,9 @@ repeat task.wait() until game:IsLoaded()
 local startTick = tick()
 
 local UserInputService = game:GetService("UserInputService")
+local TextChatService = game:GetService("TextChatService")
 local HttpService = game:GetService("HttpService")
+local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 
@@ -20,12 +22,26 @@ local RealCamera = workspace.Camera
 local Mouse = LocalPlayer:GetMouse()
 local PlayerGui = LocalPlayer.PlayerGui
 local PlaceId = game.PlaceId
+local SliderScaleValue = 1
+local Functions = {}
+local SessionTime = {
+    Hours = 0,
+    Minutes = 0,
+    Seconds = 0,
+    TotalTime = "00:00:00"
+}
 
-local request = (syn and syn.request) or request or http_request or (http and http.request)
-local queueteleport = syn and syn.queue_on_teleport or queue_on_teleport or fluxus and fluxus.queue_on_teleport
-local setthreadidentityfunc = syn and syn.set_thread_identity or set_thread_identity or setidentity or setthreadidentity
-local getthreadidentityfunc = syn and syn.get_thread_identity or get_thread_identity or getidentity or getthreadidentity
+local httprequest = (request and http and http.request or http_request or fluxus and fluxus.request)
 local function runFunction(func) func() end
+
+if Mana and Mana.Activated == true then 
+    warn("[ManaV2ForRoblox]: Already loaded.")
+    Mana.GuiLibrary:playsound("rbxassetid://421058925", 1)
+    if Mana.GuiLibrary.ChatNotifications then
+        Mana.GuiLibrary:CreateChatNotification("Warn", "Already loaded.")
+    end
+    return
+end
 
 if not getgenv then
     warn("[ManaV2ForRoblox]: Using _G function.")
@@ -34,63 +50,115 @@ elseif not (_G and getgenv) then --idk if its possible to dont have _G thing
 end
 
 if getgenv then
-    getgenv().Mana = {}
+    getgenv().Mana = {Developer = false}
 else
-    _G.Mana = {}
+    _G.Mana = {Developer = false}
 end
 
-local Functions = {}
+--[[
+    if game.Players.LocalPlayer.UserId == 5366854020 then
+        Mana.Developer = true
+    end
+]]
 
 do
+    function Functions:WriteFile(path, filepath) -- path - executor's in workspace path, filepath - github path
+        local CurrentFile
+        if isfile(path) then CurrentFile = readfile(path) end
+        local res = httprequest({Url = 'https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/' .. filepath, Method = 'GET'}).Body
+        if res ~= '404: Not Found' and res ~= CurrentFile then --  and Mana.Developer
+            writefile("Mana/" .. path, res)
+        else
+            warn("[ManaV2ForRoblox]: Can't write requested file. \nWorspacePath: " .. path .. " \nGithubFilePath: " .. filepath .. ". \nError: " .. res)
+        end
+    end
+
+    function Functions:CheckFile(filepath)
+        local ToReturn
+        local Success, Error = pcall(function() 
+            ToReturn = loadstring(game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/" .. filepath))()
+        end) 
+        if not Success then 
+            warn(Error)
+        else
+            return ToReturn
+        end
+    end
+
     function Functions:RunFile(filepath)
-        if isfile("Mana/".. filepath) then
-            return loadstring(readfile("Mana/".. filepath))()
-        elseif game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/".. filepath) then
-            return loadstring(game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/".. filepath))()
+        if filepath == "Scripts/6872274481.lua" or filepath == "Scripts/8560631822.lua" or filepath == "Scripts/8444591321.lua" then -- bedwars 'support' soon
+            return Functions:CheckFile("Scripts/bedwars.lua")
+        elseif isfile("Mana/" .. filepath) and Mana.Developer then
+            return loadstring(readfile("Mana/" .. filepath))()
         else
-            return print("[ManaV2ForRoblox]: Can't find file:", filepath ,".")
-        end
-    end
-
-    function Functions:RunGameScript(path)
-        if isfile("Mana/Scripts/".. path) then
-            loadstring(readfile("Mana/Scripts/".. path))()
-        elseif game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/Scripts/".. path) then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/Scripts/".. path))()
-        else
-            return print("[ManaV2ForRoblox]: Can't find game script:", filepath ,".")
-        end
-    end
-
-    function Functions:CheckPlace(placename)
-        if placename == "Bedwars" then
-            if PlaceId == 8560631822 or PlaceId == 8444591321 or PlaceId == 6872274481 then
-                return true
-            else
-                return false
-            end
+            Functions:WriteFile(filepath, filepath)
+            return Functions:CheckFile(filepath)
         end
     end
 end
 
-if not getgenv then
-    warn("[ManaV2ForRoblox]: Using _G function.")
-elseif not (_G and getgenv) then
-    return warn("[ManaV2ForRoblox]: Unsupported executor.")
+
+local RunLoops = {RenderStepTable = {}, StepTable = {}, HeartTable = {}}
+
+do
+	function RunLoops:BindToRenderStep(name, func)
+		if RunLoops.RenderStepTable[name] == nil then
+			RunLoops.RenderStepTable[name] = RunService.RenderStepped:Connect(func)
+		end
+	end
+
+	function RunLoops:UnbindFromRenderStep(name)
+		if RunLoops.RenderStepTable[name] then
+			RunLoops.RenderStepTable[name]:Disconnect()
+			RunLoops.RenderStepTable[name] = nil
+		end
+	end
+
+	function RunLoops:BindToStepped(name, func)
+		if RunLoops.StepTable[name] == nil then
+			RunLoops.StepTable[name] = RunService.Stepped:Connect(func)
+		end
+	end
+
+	function RunLoops:UnbindFromStepped(name)
+		if RunLoops.StepTable[name] then
+			RunLoops.StepTable[name]:Disconnect()
+			RunLoops.StepTable[name] = nil
+		end
+	end
+
+	function RunLoops:BindToHeartbeat(name, func) 
+		if RunLoops.HeartTable[name] == nil then
+			RunLoops.HeartTable[name] = RunService.Heartbeat:Connect(func)
+		end
+	end
+
+	function RunLoops:UnbindFromHeartbeat(name)
+		if RunLoops.HeartTable[name] then
+			RunLoops.HeartTable[name]:Disconnect()
+			RunLoops.HeartTable[name] = nil
+		end
+	end
 end
 
-if Mana and Mana.Activated == true then 
-    warn("[ManaV2ForRoblox]: Already loaded.")
-    return
+local Commands = {}
+
+do
+    function Commands:CreateCommand(Name, Function) 
+        Commands[Name] = Function
+    end
 end
 
+local Whitelist = HttpService:JSONDecode(game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/Whitelist/main/Whitelist.json"))
 local GuiLibrary = Functions:RunFile("GuiLibrary.lua")
 
-Mana.Entity = loadstring(game:HttpGet("https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/main/Libraries/entityHandler.lua", true))()
 Mana.GuiLibrary = GuiLibrary
 Mana.Functions = Functions
+Mana.RunLoops = RunLoops
+--Mana.GetCustomAssetFunction
 Mana.Activated = true
 Mana.Whitelisted = false
+Mana.SessionTime = SessionTime
 
 GuiLibrary:CreateWindow()
 
@@ -105,23 +173,54 @@ local Tabs = {
 
 Mana.Tabs = Tabs
 
+--[[
+local SessionInfo = GuiLibrary:CreateSessionInfo()
+
+local SessionInfoLabels = {
+    Time = SessionInfo:CreateInfoLabel("Time: 00:00:00")
+}
+
+while wait(1) do
+    SessionInfoLabels.Time.TextLabel.Text = SessionTime.TotalTime
+end
+]]
+
+if GuiLibrary.Device == "Mobile" then
+    SliderScaleValue = 0.5
+end
+
 runFunction(function()
     Discord = Tabs.Misc:CreateToggle({
         Name = "CopyDiscordInvite",
         Keybind = nil,
-        Callback = function(v)
-            if v then
-                toclipboard("https://discord.gg/CEMMRSvXek")
+        Callback = function(callback)
+            if callback then
+                toclipboard("https://discord.gg/gPkD8BdbMA")
+            else
+
             end
         end
     })
 end)
 
 runFunction(function()
-    local LibSounds = {Value = true}
-    local en
+    ToggleGui = Tabs.Misc:CreateToggle({
+        Name = "ToggleGui",
+        Keybind = nil,
+        Callback = function(callback)
+            if callback then
+                GuiLibrary.Functions:ToggleLibrary()
+            else
+                GuiLibrary.Functions:ToggleLibrary()
+            end
+        end
+    })
+end)
+
+
+runFunction(function()
     local LibrarySettings = Tabs.Misc:CreateToggle({
-        Name = "LibrarySettings",
+        Name = "ClickGui",
         Keybind = nil,
         Callback = function(callback)
             if callback then
@@ -133,24 +232,43 @@ runFunction(function()
     LibSounds = LibrarySettings:CreateOptionTog({
         Name = "Sounds",
         Default = true,
-        Func = function(v)
+        Function = function(v)
             if en then
                 GuiLibrary.Sounds = v
             end
         end 
     })
 
-    LibrarrySize = LibrarySettings:CreateSlider({
+    Notifications = LibrarySettings:CreateOptionTog({
+        Name = "Notifications",
+        Default = true,
+        Function = function(v)
+            if en then
+                GuiLibrary.Notifications = v
+            end
+        end 
+    })
+
+    ChatNotifications = LibrarySettings:CreateOptionTog({
+        Name = "ChatNotifications",
+        Default = true,
+        Function = function(v)
+            if en then
+                GuiLibrary.ChatNotifications = v
+            end
+        end 
+    })
+
+    LibrarySize = LibrarySettings:CreateSlider({
         Name = "Size",
         Function = function(v)
             if en then
-                UISizee = CoreGui.ManaV2.Tabs.UIScale
-                if UISizee then UISizee.Scale = v end
+                GuiLibrary.UIScale.Scale = v
             end
 		end,
         Min = 1,
         Max = 10,
-        Default = 4,
+        Default = SliderScaleValue,
         Round = 1
     })
 end)
@@ -159,14 +277,12 @@ runFunction(function()
     Uninject = Tabs.Misc:CreateToggle({
         Name = "Uninject",
         Keybind = nil,
-        Callback = function(v)
-            if v then
+        Callback = function(callback)
+            if callback then
                 Mana.Activated = false
-                Uninject:silentToggle()
+                Uninject:Toggle(false)
                 wait(0.1)
-                if CoreGui:FindFirstChild("Mana") then CoreGui:FindFirstChild("Mana"):Destroy() end
-            else
-
+                GuiLibrary.ScreenGui:Destroy()
             end
         end
     })
@@ -174,31 +290,104 @@ runFunction(function()
     Reinject = Tabs.Misc:CreateToggle({
         Name = "ReInject",
         Keybind = nil,
-        Callback = function(v)
-            if v then
+        Callback = function(callback)
+            if callback then
                 Mana.Activated = false
-                Reinject:silentToggle()
-                if CoreGui:FindFirstChild("Mana") then CoreGui:FindFirstChild("Mana"):Destroy() end
+                Reinject:Toggle(false)
+                GuiLibrary.ScreenGui:Destroy()
                 wait(1)
                 Functions:RunFile("MainScript.lua")
-            else
-                
             end
         end
     })
 end)
 
-if UserInputService.TouchEnabled then
-    warn("[ManaV2ForRoblox]: Mobile user.")
-   GuiLibrary.UIScale.Scale = 0.53
-else
-    warn("[ManaV2ForRoblox]: Not mobile user.")
+runFunction(function()
+    DeleteConfig = Tabs.Misc:CreateToggle({
+        Name = "DeleteConfig",
+        Keybind = nil,
+        Callback = function(callback)
+            if callback then
+                Mana.Activated = false
+                DeleteConfig:Toggle(false)
+                GuiLibrary.ScreenGui:Destroy()
+                if isfile("Mana/Config/" .. game.PlaceId .. ".json") then delfile("Mana/Config/" .. game.PlaceId .. ".json") end
+                wait(1)
+                Functions:RunFile("MainScript.lua")
+            end
+        end
+    })
+end)
+
+local Button = Instance.new("TextButton")
+local Corner = Instance.new("UICorner")
+Button.Name = "GuiButton"
+Button.Position = UDim2.new(1, -700, 0, -32)
+Button.Text = "Mana"
+--Button.Active = true
+--Button.Draggable = true
+Button.BackgroundColor3 = Color3.fromRGB(26, 25, 26)
+Button.TextColor3 = Color3.new(1, 1, 1)
+Button.Size = UDim2.new(0, 32, 0, 32)
+Button.BorderSizePixel = 0
+Button.BackgroundTransparency = 0.5
+Button.Parent = GuiLibrary.ScreenGui
+Corner.Parent = Button
+Corner.CornerRadius = UDim.new(0, 8)
+
+Button.MouseButton1Click:Connect(function()
+    GuiLibrary:ToggleLibrary()
+end)
+
+UserInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.N then
+        GuiLibrary:ToggleLibrary()
+    end
+end)
+
+--[[
+repeat
+    local Seconds = SessionTime.Seconds
+    local Minutes = SessionTime.Minutes
+    local Hours = SessionTime.Hours
+
+    SessionTime.Seconds = Seconds + 1
+
+    if Seconds == 60 then
+        SessionTime.Seconds = 0
+        SessionTime.Minutes = Minutes + 1
+    end
+
+    if Minutes == 60 then
+        SessionTime.Minutes = 0
+        SessionTime.Hours = Hours + 1
+    end
+
+    SessionTime.TotalTime = Hours .. ":" .. Minutes .. ":" .. Seconds
+
+    task.wait(1)
+until (false == true)
+]]
+
+for PlayerName, Tag in pairs(Whitelist) do
+    local Player = Players:FindFirstChild(PlayerName)
+    if Player then
+        TextChatService.OnIncomingMessage = function(Message, ChatStyle)
+            local MessageProperties = Instance.new("TextChatMessageProperties")
+            local Player = Players:GetPlayerByUserId(Message.TextSource.UserId)
+            if Player then
+                for PlayerName, Tag in pairs(Whitelist) do
+                    if Player.Name == PlayerName then
+                        MessageProperties.PrefixText = '<font color="' .. Tag.Color .. '">' .. Tag.Chattag .. '</font> ' .. Message.PrefixText
+                    end
+                end
+            end
+            return MessageProperties
+        end
+    end
 end
 
 UniversalScript = Functions:RunFile("Scripts/Universal.lua")
-local Success, Error = pcall(function() 
-    Functions:RunGameScript("" .. PlaceId .. ".lua") 
-end) 
-if not Success then warn(Error) end
+GameScript = Functions:RunFile("Scripts/" .. PlaceId .. ".lua") 
 
-print("[ManaV2ForRoblox/MainScript.lua]: Loaded in " .. tostring(tick() - startTick) .. ".")
+print("[NewManaV2ForRoblox/MainScript.lua]: Loaded in " .. tostring(tick() - startTick) .. ".")
