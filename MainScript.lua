@@ -336,12 +336,12 @@ Corner.Parent = Button
 Corner.CornerRadius = UDim.new(0, 8)
 
 Button.MouseButton1Click:Connect(function()
-    GuiLibrary:ToggleLibrary()
+    GuiLibrary.Functions:ToggleLibrary()
 end)
 
 UserInputService.InputBegan:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.N then
-        GuiLibrary:ToggleLibrary()
+        GuiLibrary.Functions:ToggleLibrary()
     end
 end)
 
