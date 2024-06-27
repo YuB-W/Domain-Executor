@@ -1,7 +1,5 @@
 # ManaV2ForRoblox
 Cool script for roblox
-
-Rewrite release date: ~mid june
  
 Supports executors that has file system and normal UNC system
 
