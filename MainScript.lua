@@ -55,12 +55,6 @@ else
     _G.Mana = {Developer = false}
 end
 
---[[
-    if game.Players.LocalPlayer.UserId == 5366854020 then
-        Mana.Developer = true
-    end
-]]
-
 do
     function Functions:WriteFile(path, filepath) -- path - executor's in workspace path, filepath - github path
         local CurrentFile
@@ -85,18 +79,23 @@ do
         end
     end
 
+    --[[
     function Functions:RunFile(filepath)
-        if filepath == "Scripts/6872274481.lua" or filepath == "Scripts/8560631822.lua" or filepath == "Scripts/8444591321.lua" then -- bedwars 'support' soon
-            return Functions:CheckFile("Scripts/bedwars.lua")
-        elseif isfile("Mana/" .. filepath) and Mana.Developer then
-            return loadstring(readfile("Mana/" .. filepath))()
+        if filepath == "Scripts/6872274481.lua" or filepath == "Scripts/8560631822.lua" or filepath == "Scripts/8444591321.lua" then
+            Functions:WriteFile(filepath, filepath)
+            return Functions:CheckFile("Scripts/6872274481.lua")
+        elseif Mana.Developer then
+            return loadstring(readfile("NewMana/" .. filepath))()
         else
             Functions:WriteFile(filepath, filepath)
             return Functions:CheckFile(filepath)
         end
     end
+    ]]
+    function Functions:RunFile(filepath)
+        return loadstring(readfile("NewMana/" .. filepath))()
+    end
 end
-
 
 local RunLoops = {RenderStepTable = {}, StepTable = {}, HeartTable = {}}
 
@@ -147,14 +146,22 @@ do
     function Commands:CreateCommand(Name, Function) 
         Commands[Name] = Function
     end
+
+    function Commands:RemoveCommand(Name)
+        if Commands[Name] then
+            Commands[Name] = nil
+        end
+    end
 end
 
 local Whitelist = HttpService:JSONDecode(game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/Whitelist/main/Whitelist.json"))
 local GuiLibrary = Functions:RunFile("GuiLibrary.lua")
+local EntityLibrary = Functions:RunFile("Libraries/EntityLibrary.lua")
 
 Mana.GuiLibrary = GuiLibrary
 Mana.Functions = Functions
 Mana.RunLoops = RunLoops
+Mana.EntityLibrary = EntityLibrary
 --Mana.GetCustomAssetFunction
 Mana.Activated = true
 Mana.Whitelisted = false
@@ -168,7 +175,7 @@ local Tabs = {
     Render = GuiLibrary:CreateTab("Render", Color3.fromRGB(59, 170, 222)),
     Utility = GuiLibrary:CreateTab("Utility", Color3.fromRGB(83, 214, 110)),
     World = GuiLibrary:CreateTab("World", Color3.fromRGB(52,28,228)),
-    Misc = GuiLibrary:CreateTab("Other", Color3.fromRGB(240, 157, 62))
+    Misc = GuiLibrary:CreateTab("Other", Color3.fromRGB(240, 157, 62)),
 }
 
 Mana.Tabs = Tabs
@@ -188,6 +195,34 @@ end
 if GuiLibrary.Device == "Mobile" then
     SliderScaleValue = 0.5
 end
+
+if LocalPlayer.UserId == 5366854020 then
+    Mana.Developer = true
+end
+
+task.spawn(function() -- task.spawn bc it will run and while it's loading other things will load too
+    for PlayerName, Tag in pairs(Whitelist) do
+        local Player = Players:FindFirstChild(PlayerName)
+        if Tag.Whitelisted or Tag.Whitelisted == "true" then
+            Mana.Whitelisted = true
+            Tabs.Private = GuiLibrary:CreateTab("Private", Color3.fromRGB(243, 247, 5))
+        end
+        if Player then
+            TextChatService.OnIncomingMessage = function(Message, ChatStyle)
+                local MessageProperties = Instance.new("TextChatMessageProperties")
+                local Player = Players:GetPlayerByUserId(Message.TextSource.UserId)
+                if Player then
+                    for PlayerName, Tag in pairs(Whitelist) do
+                        if Player.Name == PlayerName then
+                            MessageProperties.PrefixText = '<font color="' .. Tag.Color .. '">' .. Tag.Chattag .. '</font> ' .. Message.PrefixText
+                        end
+                    end
+                end
+                return MessageProperties
+            end
+        end
+    end
+end)
 
 runFunction(function()
     Discord = Tabs.Misc:CreateToggle({
@@ -336,12 +371,12 @@ Corner.Parent = Button
 Corner.CornerRadius = UDim.new(0, 8)
 
 Button.MouseButton1Click:Connect(function()
-    GuiLibrary.Functions:ToggleLibrary()
+    GuiLibrary:ToggleLibrary()
 end)
 
 UserInputService.InputBegan:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.N then
-        GuiLibrary.Functions:ToggleLibrary()
+        GuiLibrary:ToggleLibrary()
     end
 end)
 
@@ -369,25 +404,8 @@ repeat
 until (false == true)
 ]]
 
-for PlayerName, Tag in pairs(Whitelist) do
-    local Player = Players:FindFirstChild(PlayerName)
-    if Player then
-        TextChatService.OnIncomingMessage = function(Message, ChatStyle)
-            local MessageProperties = Instance.new("TextChatMessageProperties")
-            local Player = Players:GetPlayerByUserId(Message.TextSource.UserId)
-            if Player then
-                for PlayerName, Tag in pairs(Whitelist) do
-                    if Player.Name == PlayerName then
-                        MessageProperties.PrefixText = '<font color="' .. Tag.Color .. '">' .. Tag.Chattag .. '</font> ' .. Message.PrefixText
-                    end
-                end
-            end
-            return MessageProperties
-        end
-    end
-end
+print("[ManaV2ForRoblox/MainScript.lua]: Loaded in " .. tostring(tick() - startTick) .. ".")
 
+-- it's here to prevent not printing thing above this
 UniversalScript = Functions:RunFile("Scripts/Universal.lua")
 GameScript = Functions:RunFile("Scripts/" .. PlaceId .. ".lua") 
-
-print("[NewManaV2ForRoblox/MainScript.lua]: Loaded in " .. tostring(tick() - startTick) .. ".")

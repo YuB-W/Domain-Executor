@@ -679,6 +679,48 @@ function Library:CreateWindow()
 
         --dragGUI(tab, tabname)
 
+        function tabtable:CreateDivider(data)
+            if data.WithText then
+                local Text = data.Name or "Hello world!"
+                local DividerFrame = Instance.new("Frame")
+                local Divider = Instance.new("TextLabel")
+                local DividerFrame2 = Instance.new("Frame")
+                DividerFrame.Name = title .. "_FrameDivider"
+                DividerFrame.Parent = tab
+                DividerFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+                DividerFrame.BorderSizePixel = 0
+                DividerFrame.Position = UDim2.new(0.0827946085, -17, 0.133742347, 33)
+                DividerFrame.Size = UDim2.new(0, 207, 0, 2)
+                Divider.Name = title .. "_TextLabelDivider"
+                Divider.Parent = tab
+                Divider.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+                Divider.BorderSizePixel = 0
+                Divider.Position = UDim2.new(0.0827946085, -17, 0.133742347, 33)
+                Divider.Size = UDim2.new(0, 207, 0, 20)
+                Divider.Font = Enum.Font.SourceSansLight --Library.Font
+                Divider.Text = Text
+                Divider.TextColor3 = Color3.fromRGB(255, 255, 255)
+                Divider.TextSize = 18
+                Divider.TextXAlignment = Enum.TextXAlignment.Center
+                DividerFrame2.Name = title .. "_FrameDivider"
+                DividerFrame2.Parent = tab
+                DividerFrame2.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+                DividerFrame2.BorderSizePixel = 0
+                DividerFrame2.Position = UDim2.new(0.0827946085, -17, 0.133742347, 33)
+                DividerFrame2.Size = UDim2.new(0, 207, 0, 2)
+                return Divider
+            else
+                local Divider = Instance.new("Frame")
+                Divider.Name = title .. "_FrameDivider"
+                Divider.Parent = tab
+                Divider.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+                Divider.BorderSizePixel = 0
+                Divider.Position = UDim2.new(0.0827946085, -17, 0.133742347, 33)
+                Divider.Size = UDim2.new(0, 207, 0, 20)
+                return Divider
+            end
+        end
+
         function tabtable:CreateToggle(data)
             local info = {
                 Name = data.Name,
@@ -818,7 +860,11 @@ function Library:CreateWindow()
 
                 UserInputService.InputBegan:Connect(function(input)
                     local inputName = input.KeyCode.Name
-                    if inputName ~= "Unknown" and inputName ~= oldkey then
+                    if inputName == "Unknown" and input.UserInputType == Enum.UserInputType.MouseButton2 then
+                        isclicked = true
+                        BindText.Text = "Bind: " .. configtable[title].Keybind or "none"
+                        print("Binding canceled.")
+                    elseif inputName ~= "Unknown" and inputName ~= oldkey then
                         if not isclicked then return end
                         if Keybinds[inputName] then
                             BindText.Text = "Bind: " .. oldkey
@@ -829,6 +875,8 @@ function Library:CreateWindow()
                         if oldkey then
                             Keybinds[oldkey] = nil
                         end
+
+                        print("Pressed keybind: " .. inputName)
 
                         oldkey = inputName
                         BindText.Text = "Bind: " .. oldkey
@@ -863,39 +911,35 @@ function Library:CreateWindow()
                 configtable[title].IsToggled = false
             end
             
-            function ToggleTable:Toggle(bool)
-                bool = bool or not ToggleTable.Enabled
+            function ToggleTable:Toggle(silent, bool)
+                bool = bool or (not ToggleTable.Enabled)
+                silent = silent or false
                 ToggleTable.Enabled = bool
-            
-                spawn(function()
-                    callback(bool)
-                end)
-            
-                spawn(function()
-                    local message = bool and "Enabled " .. title or "Disabled " .. title
-                    Library:CreateGuiNotification(title, message, 4, bool)
-                    configtable[title].IsToggled = bool
-                end)
-            
-                toggle.BackgroundColor3 = bool and tabname.TextColor3 or Color3.fromRGB(0, 0, 0)
-                Library:playsound("rbxassetid://421058925", 1)
-            end
-            
-            function ToggleTable:silentToggle(bool)
-                bool = bool or not ToggleTable.Enabled
-            
-                if type(bool) == "string" then
-                    bool = bool == "true"
+                if not bool then
+                    spawn(function()
+                        callback(false)
+                    end)
+                    spawn(function()
+                        Library:CreateNotification(title, "Disabled " .. title, 4, false)
+                        configtable[title].IsToggled = false
+                    end)
+                    toggle.BackgroundColor3 = Color3.fromRGB(14, 20, 14)
+                    if not silent then
+                        Library:playsound("rbxassetid://421058925", 1)
+                    end
+                else
+                    spawn(function()
+                        callback(true)
+                    end)
+                    spawn(function()
+                        Library:CreateNotification(title, "Enabled " .. title, 4, true)
+                        configtable[title].IsToggled = true
+                    end)
+                    toggle.BackgroundColor3 = tabname.TextColor3
+                    if not silent then
+                        Library:playsound("rbxassetid://421058925", 1)
+                    end
                 end
-            
-                ToggleTable.Enabled = bool
-            
-                spawn(function()
-                    callback(bool)
-                end)
-            
-                configtable[title].IsToggled = bool
-                toggle.BackgroundColor3 = bool and tabname.TextColor3 or Color3.fromRGB(0, 0, 0)
             end
             
             toggle.MouseButton1Click:Connect(function()
@@ -909,11 +953,7 @@ function Library:CreateWindow()
             end)
             
             if configtable[title].IsToggled then
-                ToggleTable:silentToggle(true)
-            end
-
-            if configtable[title].IsToggled == true then
-                ToggleTable:silentToggle(true)
+                ToggleTable:Toggle(true)
             end
 
             function ToggleTable:CreateSlider(argstable)

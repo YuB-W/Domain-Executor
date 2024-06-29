@@ -9,9 +9,11 @@ local startTick = tick()
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 local TeleportSerivce = game:GetService("TeleportService")
+local NetworkClient = game:GetService("NetworkClient")
 local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
 local TextService = game:GetService("TextService")
+local StarterGui = game:GetService("StarterGui")
 local RunService = game:GetService("RunService")
 local Lighting = game:GetService("Lighting")
 local CoreGui = game:GetService("CoreGui")
@@ -34,11 +36,14 @@ local PlayerJumpPower = Humanoid.JumpPower
 local PlayerHipHeight = Humanoid.HipHeight
 local OldCameraMaxZoomDistance = LocalPlayer.CameraMaxZoomDistance
 local OldFov = Camera.FieldOfView
+local PlaceId = game.PlaceId
+local JobId = game.JobId
 
 local GuiLibrary = Mana.GuiLibrary
 local Tabs = Mana.Tabs
 local Functions = Mana.Functions
 local RunLoops = Mana.RunLoops
+local EntityLibrary = Mana.EntityLibrary
 
 local getasset = getsynasset or getcustomasset
 local function runFunction(func) func() end
@@ -97,6 +102,14 @@ local spawn = function(func)
     return coroutine.wrap(func)()
 end
 
+function CreateCoreNotification(title, text, duration)
+	StarterGui:SetCore("SendNotification", {
+		Title = title,
+		Text = text,
+		Duration = duration,
+	})
+end
+
 local function IsAlive(Player, headCheck)
     local Player = Player or LocalPlayer
     if Player and Player.Character and ((Player.Character:FindFirstChildOfClass("Humanoid")) and (Player.Character:FindFirstChild("HumanoidRootPart")) and (headCheck and Player.Character:FindFirstChild("Head") or not headCheck)) then
@@ -114,12 +127,13 @@ local function IsPlayerTargetable(plr, target)
     return plr ~= LocalPlayer and plr and IsAlive(plr) and TargetCheck(plr, target)
 end
 
-local function GetClosestPlayer(MaximumDistance, TeamCheck)
-	local MaximumDistance = MaximumDistance or 99999999999999
+local function GetClosestPlayer(MaxDisance, TeamCheck)
+	local MaximumDistance = MaxDisance
 	local Target = nil
-	for _, v in pairs(Players:GetPlayers()) do
-		if v ~= LocalPlayer then
-			if TeamCheck == true then
+
+	for _, v in next, Players:GetPlayers() do
+		if v.Name ~= LocalPlayer.Name then
+			if TeamCheck then
 				if v.Team ~= LocalPlayer.Team then
 					if v.Character ~= nil then
 						if v.Character:FindFirstChild("HumanoidRootPart") ~= nil then
@@ -154,52 +168,20 @@ local function GetClosestPlayer(MaximumDistance, TeamCheck)
 	return Target
 end
 
-local function GetPlrNearMouse(max)
-    local max = max or 99999999999999
-    local nearestval = nil
-    local nearestnum = max
-    for i,v in pairs(Players:GetPlayers()) do 
-        if IsAlive(v) and v ~= LocalPlayer then 
-            local pos, vis = workspace.CurrentCamera:WorldToScreenPoint(v.Character.HumanoidRootPart.Position)
-            if vis and pos then 
-                local diff = (UserInputService:GetMouseLocation() - Vector2.new(pos.X, pos.Y)).Magnitude
-                if diff < nearestnum then 
-                    nearestnum = diff 
-                    nearestval = v
-                end
-            end
-        end
-    end
-    return nearestval
-end
-
-local function AimAt(pos, smooth)
-    local smooth = smooth +1
-    local targetPos = Camera:WorldToScreenPoint(pos)
-    local mousePos = Camera:WorldToScreenPoint(Mouse.Hit.p)
-    mousemoverel((targetPos.X - mousePos.X) / smooth, (targetPos.Y - mousePos.Y) / smooth)
+local function FindTouchInterest(Tool)
+    return Tool and Tool:FindFirstChildWhichIsA("TouchTransmitter", true)
 end
 
 -- Combat tab
 
 --[[
     ToDo:
-    + Add Tool mode to AutoClicker
-    + Add SmoothAim / Aimbot
-    + Create new Fly, with Velocity and CFrame mode
-    + Add LongJump
-    + Add HighJump
-    Add Normal and Part mode to AntiVoid
-    + Add notifications
-    + Add Tool mode to ClickTP
-    + Add whitelist
-    + Add session info
+    + Fix AntiVoid
+    + Fix SmoothAim
+    + Add Reach
+    Add FakeLag
+    Add AntiKnockBack (idk if it's possible)
     Add chat commands for whitelisted (reset, leave, to toggle toggles and etc..)
-    + Finish CombatTab
-    + Finish MovementTab
-    Finish RenderTab
-    Finish UtilityTab
-    Finish Worldtab
 ]]
 
 runFunction(function()
@@ -247,20 +229,143 @@ runFunction(function()
 end)
 
 runFunction(function()
-    local SmoothAimPart = {Value = "Root"}
-    local SmoothAimHeld = {Value = ""}
-    local SmoothAimSmoothness = {Value = 0}
-    local SmoothAimFov = {Value = 40}
+    local ReachMode = {Value = "Expand"}
+    local ReachHitBoxesPart = {Value = "HumanoidRootPart"}
+    local ReachHitBoxesExpand = {Value = 1}
+    local ReachRange = {Value = 1}
+    local Characters = {}
+    local ReachEnabled = false
+    Reach = Tabs.Combat:CreateToggle({
+        Name = "Reach",
+        Keybind = nil,
+        Callback = function(callback) 
+            if callback then
+                ReachEnabled = callback
+                task.spawn(function()
+					repeat
+                        if ReachMode.Value == "Expand" then
+                            for i, Player in pairs(EntityLibrary.EntityList) do
+                                if Player.Targetable then
+                                    if ReachHitBoxesPart.Value == "HumanoidRootPart" then
+                                        Player.RootPart.Size = Vector3.new(2 * (ReachHitBoxesExpand.Value / 10), 2 * (ReachHitBoxesExpand.Value / 10), 1 * (ReachHitBoxesExpand.Value / 10))
+                                    else
+                                        Player.Head.Size = Vector3.new((ReachHitBoxesExpand.Value / 10), (ReachHitBoxesExpand.Value / 10), (ReachHitBoxesExpand.Value / 10))
+                                    end
+                                end
+                            end
+                        elseif ReachMode.Value == "Tool" and EntityLibrary.IsAlive then
+                            local Tool = LocalPlayer and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildWhichIsA("Tool")
+                            local Touch = FindTouchInterest(Tool)
+                            if Tool and Touch then
+                                Touch = Touch.Parent
+                                for i,v in pairs(EntityLibrary.EntityList) do table.insert(Characters, v.Character) end
+                                ignorelist.FilterDescendantsInstances = Characters
+                                local parts = workspace:GetPartBoundsInBox(Touch.CFrame, Touch.Size + Vector3.new(ReachRange.Value, 0, ReachRange.Value), ignorelist)
+                                for i,v in pairs(parts) do
+                                    firetouchinterest(Touch, v, 1)
+                                    firetouchinterest(Touch, v, 0)
+                                end
+                            end
+                        end
+                        task.wait()
+					until not ReachEnabled
+				end)
+            else
+                for i, Player in pairs(EntityLibrary.EntityList) do
+					Player.RootPart.Size = Vector3.new(2, 2, 1)
+					Player.Head.Size = Vector3.new(1, 1, 1)
+				end
+            end
+        end
+    })
+
+    ReachMode = Reach:CreateDropDown({
+        Name = "Mode",
+        Function = function(v) 
+            if v == "Tool" then
+                if ReachHitBoxesPart.MainObject then
+                    ReachHitBoxesPart.MainObject.Visible = false
+                end
+                if ReachHitBoxesExpand.MainObject then
+                    ReachHitBoxesExpand.MainObject.Visible = false
+                end
+                if ReachRange.MainObject then
+                    ReachRange.MainObject.Visible = true
+                end
+            elseif v == "Expand" then
+                if ReachRange.MainObject then
+                    ReachRange.MainObject.Visible = false
+                end
+                if ReachHitBoxesPart.MainObject then
+                    ReachHitBoxesPart.MainObject.Visible = true
+                end
+                if ReachHitBoxesExpand.MainObject then
+                    ReachHitBoxesExpand.MainObject.Visible = true
+                end
+            end
+        end,
+        List = {"Expand", "Tool"},
+        Default = "Expand"
+    })
+
+    ReachHitBoxesPart = Reach:CreateDropDown({
+        Name = "HitboxPart",
+        Function = function(v) end,
+        List = {"HumanoidRootPart", "Head"},
+        Default = "HumanoidRootPart"
+    })
+
+    ReachHitBoxesExpand = Reach:CreateSlider({
+        Name = "HitboxExpand",
+        Min = 1,
+        Max = 20,
+        Round = 1, 
+        Function = function(v) end,
+    })
+
+    ReachRange = Reach:CreateSlider({
+        Name = "Range",
+        Min = 1,
+        Max = 20,
+        Round = 1, 
+        Function = function(v) end,
+    })
+end)
+
+runFunction(function()
+    local SmoothAimPart = {Value = "Head"}
+    local SmoothAimHeld = {Value = "LMB"}
+    local SmoothAimSensitivity = {Value = 5}
+    local MouseConnection1
+    local MouseConnection2
+    local Holding = false
+
     SmoothAim = Tabs.Combat:CreateToggle({
         Name = "SmoothAim",
         Keybind = nil,
         Callback = function(callback)
             if callback then
+                UserInputService.InputBegan:Connect(function(Input)
+                    if Input.UserInputType.Name == SmoothAimHeld.Value then
+                        Holding = true
+                    end
+                end)
+                
+                UserInputService.InputEnded:Connect(function(Input)
+                    if Input.UserInputType.Name == SmoothAimHeld.Value then
+                        Holding = false
+                    end
+                end)
+
                 RunLoops:BindToStepped("SmoothAim", function() 
-                    local AimPart = SmoothAimSmoothness.Value == "HumanoidRootPart" and "HumanoidRootPart" or "Head"
-                    local plr = GetPlrNearMouse(SmoothAimFov.Value * 10)
-                    if plr and IsPlayerTargetable(plr, true) and UserInputService:IsMouseButtonPressed(SmoothAimHeld.Value == "LMB" and 0 or 1) then 
-                        AimAt(plr.Character[AimPart].Position, SmoothAimSmoothness.Value)
+                    if Holding == true and callback then
+                        local closestPlayer = GetClosestPlayer()
+                        if closestPlayer and closestPlayer.Character then
+                            local targetPart = closestPlayer.Character:FindFirstChild(SmoothAimPart.Value)
+                            if targetPart then
+                                TweenService:Create(Camera, TweenInfo.new(SmoothAimSensitivity.Value, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {CFrame = CFrame.new(Camera.CFrame.Position, targetPart.Position)}):Play()
+                            end
+                        end
                     end
                 end)
             else
@@ -279,25 +384,16 @@ runFunction(function()
     SmoothAimHeld = SmoothAim:CreateDropDown({
         Name = "Held",
         Function = function(v) end,
-        List = {"LMB", "RMB"},
-        Default = "LMB"
+        List = {"MouseButton1", "MouseButton2"},
+        Default = "MouseButton1"
     })
 
-    SmoothAimSmoothness = SmoothAim:CreateSlider({
-        Name = "Smoothness",
+    SmoothAimSensitivity = SmoothAim:CreateSlider({
+        Name = "Sensitivity",
         Function = function(v) end,
         Min = 1,
-        Max = 50,
-        Default = 0,
-        Round = 0
-    })
-
-    SmoothAimFov = SmoothAim:CreateSlider({
-        Name = "FOV",
-        Function = function(v) end,
-        Min = 1,
-        Max = 100,
-        Default = 40,
+        Max = 10,
+        Default = 5,
         Round = 0
     })
 end)
@@ -322,6 +418,57 @@ runFunction(function()
     })
 end)
 
+--[[from rektsky and not working
+runFunction(function()
+    local CloneGodmodeSpeed = {Value = 100}
+    local CloneGodmodeConnection
+    local RealCharacter
+    local Clone
+
+    local function MakeClone()
+        RealCharacter = LocalPlayer.Character
+        RealCharacter.Archivable = true
+        Clone = RealCharacter:Clone()
+        Clone.Parent = workspace
+        LocalPlayer.Character = Clone
+    end
+
+    CloneGodmode = Tabs.Movement:CreateToggle({
+        Name = "CloneGodmode",
+        Keybind = nil,
+        Callback = function(callback)
+            if callback then
+                spawn(function()
+                    MakeClone()
+                    RunLoops:BindToHeartbeat("CloneGodmode", function()
+                        local Velocity = Clone.Humanoid.MoveDirection * CloneGodmodeSpeed.Value
+                        Clone.HumanoidRootPart.Velocity = Vector3.new(Velocity.X, LocalPlayer.Character.HumanoidRootPart.Velocity.Y, Velocity.Z)
+                    end)
+                end)
+            else
+                if Clone then
+                    Clone:Destroy()
+                end
+                LocalPlayer.Character = RealCharacter
+                if RealCharacter then
+                    RealCharacter.Humanoid:ChangeState(Enum.HumanoidStateType.Dead)
+                end
+                RunLoops:UnbindFromHeartbeat("CloneGodmode")
+            end
+        end
+    })
+
+    CloneGodmodeSpeed = CloneGodmode:CreateSlider({
+        Name = "Speed",
+        Function = function(v) end,
+        Min = 1,
+        Max = 300,
+        Default = 100,
+        Round = 0
+    })
+end)
+]]
+
 runFunction(function()
     local ClickTPMode = {Value = "Click"}
     local MouseConnection1
@@ -338,18 +485,18 @@ runFunction(function()
                     Tool.RequiresHandle = false
                     Tool.Activated:Connect(function()
                         if IsAlive() and callback then
-                            LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(Mouse.Hit.X, Mouse.Hit.Y + 3, Mouse.Hit.Z)
-                        end
-                    end)
-                else
-                    MouseConnection1 = Mouse.Button1Down:Connect(function()
-                        if IsAlive() and Mouse.Target and callback and ClickTPMode == "Click" then 
                             LocalPlayer.Character.HumanoidRootPart.CFrame = Mouse.Hit + Vector3.new(0, 3, 0)
                         end
                     end)
-
+                elseif ClickTPMode.Value == "Click" then
+                    MouseConnection1 = Mouse.Button1Down:Connect(function()
+                        if IsAlive() and callback and ClickTPMode == "Click" then 
+                            LocalPlayer.Character.HumanoidRootPart.CFrame = Mouse.Hit + Vector3.new(0, 3, 0)
+                        end
+                    end)
+                elseif ClickTPMode.Value == "RightClick" then
                     MouseConnection2 = Mouse.Button2Down:Connect(function()
-                        if IsAlive() and Mouse.Target and callback and ClickTPMode == "RightClick" then 
+                        if IsAlive() and callback and ClickTPMode == "RightClick" then 
                             LocalPlayer.Character.HumanoidRootPart.CFrame = Mouse.Hit + Vector3.new(0, 3, 0)
                         end
                     end)
@@ -374,7 +521,10 @@ runFunction(function()
 
     ClickTPMode = ClickTP:CreateDropDown({
         Name = "Mode",
-        Function = function(v) end,
+        Function = function(v) 
+            ClickTP:Toggle()
+            ClickTP:Toggle()
+        end,
         List = {"Click", "RightLick", "Tool"},
         Default = "Click"
     })
@@ -536,7 +686,7 @@ runFunction(function()
                     end
                 end
                 Teleporting = false
-                ForwardTP:Toggle(false)
+                ForwardTP:Toggle(false, false)
             end
         end
     })
@@ -588,13 +738,13 @@ runFunction(function()
                                 Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
                             end
                         end)
-                        HighJump:Toggle(false)
+                        HighJump:Toggle(false, false)
                     elseif HighJumpMode.Value == "Velocity" then
                         HumanoidRootPart.Velocity = Vector3.new(VelocityX, VelocityY + HighJumpHeight.Value, VelocityZ)
-                        HighJump:Toggle(false)
+                        HighJump:Toggle(false, false)
                     elseif HighJumpMode.Value == "TP" then
                         HumanoidRootPart.CFrame = HumanoidRootPart.CFrame + Vector3.new(0, HighJumpHeight.Value / 1.5, 0)
-                        HighJump:Toggle(false)
+                        HighJump:Toggle(false, false)
                     end
                 elseif JumpMode.Value == "Normal" then
                     RunLoops:BindToRenderStep("HighJump", function()
@@ -733,6 +883,34 @@ runFunction(function()
         Max = 10,
         Default = 2,
         Round = 0
+    })
+end)
+
+runFunction(function()
+    local Parts = {}
+    Phase = Tabs.Movement:CreateToggle({
+        Name = "Phase",
+        Keybind = nil,
+        Callback = function(callback) 
+            if callback then 
+                if IsAlive() then
+                    RunLoops:BindToStepped("Phase", function()
+                        for i, v in pairs(LocalPlayer.Character:GetChildren()) do 
+                            if v:IsA("BasePart") and v.CanCollide then 
+                                Parts[v] = v
+                                v.CanCollide = false
+                            end
+                        end
+                    end)
+                end
+            else
+                for i, v in next, Parts do
+                    v.CanCollide = true
+                end
+                Parts = {}
+                RunLoops:UnbindFromStepped("Phase")
+            end
+        end
     })
 end)
 
@@ -956,21 +1134,12 @@ end)
 -- Render tab
 
 runFunction(function()
-    local BreadcrumbsMode = {Value = "Trail"}
     local BreadcrumbsLifeTime = {Value = 20}
     local BreadcrumbsTransparency = {Value = 0}
     local BreadcrumbsThick = {Value = 7}
-    local BreadcrumbsSize = {Value = 3}
-    local BreadcrumbsDistance = {Value = 1.5}
     local BreadcrumbsTrail
 	local BreadcrumbsAttachment
 	local BreadcrumbsAttachment2
-    local CachedPosition
-
-    local BreadcrumbsFolder = Instance.new("Folder")
-    BreadcrumbsFolder.Name = "BreadcrumdsFolder"
-    BreadcrumbsFolder.Parent = workspace
-
     Breadcrumbs = Tabs.Render:CreateToggle({
         Name = "Breadcrumbs",
         Keybind = nil,
@@ -981,62 +1150,27 @@ runFunction(function()
 						if IsAlive() then
                             local Character = LocalPlayer.Character
                             local HumanoidRootPart = Character.HumanoidRootPart
-                            if BreadcrumbsMode.Value == "Trail" then
-                                if not BreadcrumbsTrail then
-                                    BreadcrumbsAttachment = Instance.new("Attachment")
-                                    BreadcrumbsAttachment.Position = Vector3.new(0, 0.07 - 2.7, 0)
-                                    BreadcrumbsAttachment2 = Instance.new("Attachment")
-                                    BreadcrumbsAttachment2.Position = Vector3.new(0, -0.07 - 2.7, 0)
-                                    BreadcrumbsTrail = Instance.new("Trail")
-                                    BreadcrumbsTrail.Attachment0 = BreadcrumbsAttachment
-                                    BreadcrumbsTrail.Attachment1 = BreadcrumbsAttachment2
-                                    BreadcrumbsTrail.FaceCamera = true
-                                    BreadcrumbsTrail.Lifetime = BreadcrumbsLifeTime.Value / 10
-                                    BreadcrumbsTrail.Enabled = true
-                                else
-                                    local Succes = pcall(function()
-                                        BreadcrumbsAttachment.Parent = HumanoidRootPart
-                                        BreadcrumbsAttachment2.Parent = HumanoidRootPart
-                                        BreadcrumbsTrail.Parent = Camera
-                                    end)
-                                    if not Succes then
-                                        if BreadcrumbsTrail then BreadcrumbsTrail:Destroy() BreadcrumbsTrail = nil end
-                                        if BreadcrumbsAttachment then BreadcrumbsAttachment:Destroy() BreadcrumbsAttachment = nil end
-                                        if BreadcrumbsAttachment2 then BreadcrumbsAttachment2:Destroy() BreadcrumbsAttachment2 = nil end
-                                    end
-                                end
-                            elseif BreadcrumbsMode.Value == "Ball" then
-                                if CachedPosition ~= nil and (HumanoidRootPart.Position - CachedPosition).Magnitude > BreadcrumbsDistance.Value or CachedPosition == nil then
-                                    CachedPosition = HumanoidRootPart.Position
-                                    local BreadcrumbPart = Instance.new("Part")
-                                    local BreadcrumbSphere = Instance.new("SelectionSphere")
-                                    BreadcrumbPart.Parent = BreadcrumbsFolder
-                                    BreadcrumbPart.Anchored = true
-                                    BreadcrumbPart.CFrame = HumanoidRootPart.CFrame - Vector3.new(0, 1.5, 0)
-                                    BreadcrumbPart.CanCollide = false
-                                    BreadcrumbPart.Size = Vector3.new(0,0,0)
-                                    BreadcrumbPart.Transparency = 1 
-                                    BreadcrumbSphere.Transparency = BreadcrumbsTransparency.Value / 100
-                                    BreadcrumbSphere.Adornee = BreadcrumbPart
-                                    --BreadcrumbSphere.Color3
-                                    Debris:AddItem(BreadcrumbPart, BreadcrumbsLifeTime.Value)
-                                end
-                            elseif BreadcrumbsMode.Value == "Cube" then
-                                if CachedPosition ~= nil and (HumanoidRootPart.Position - CachedPosition).Magnitude > BreadcrumbsDistance.Value or CachedPosition == nil then
-                                    CachedPosition = HumanoidRootPart.Position
-                                    local BreadcrumbPart = Instance.new("Part")
-                                    local BreadcrumbCube = Instance.new("Part")
-                                    BreadcrumbPart.Parent = BreadcrumbsFolder
-                                    BreadcrumbPart.Anchored = true
-                                    BreadcrumbPart.CFrame = HumanoidRootPart.CFrame - Vector3.new(0, 1.5, 0)
-                                    BreadcrumbPart.CanCollide = false
-                                    BreadcrumbPart.Size = Vector3.new(0,0,0)
-                                    BreadcrumbPart.Transparency = 1 
-                                    BreadcrumbCube.Size = Vector3.new(BreadcrumbsSize.Value, BreadcrumbsSize.Value, BreadcrumbsSize.Value)
-                                    BreadcrumbCube.Transparency = BreadcrumbsTransparency.Value / 100
-                                    BreadcrumbCube.Adornee = BreadcrumbPart
-                                    --BreadcrumbSphere.Color3
-                                    Debris:AddItem(BreadcrumbPart, BreadcrumbsLifeTime.Value)
+                            if not BreadcrumbsTrail then
+                                BreadcrumbsAttachment = Instance.new("Attachment")
+                                BreadcrumbsAttachment.Position = Vector3.new(0, 0.07 - 2.7, 0)
+                                BreadcrumbsAttachment2 = Instance.new("Attachment")
+                                BreadcrumbsAttachment2.Position = Vector3.new(0, -0.07 - 2.7, 0)
+                                BreadcrumbsTrail = Instance.new("Trail")
+                                BreadcrumbsTrail.Attachment0 = BreadcrumbsAttachment
+                                BreadcrumbsTrail.Attachment1 = BreadcrumbsAttachment2
+                                BreadcrumbsTrail.FaceCamera = true
+                                BreadcrumbsTrail.Lifetime = BreadcrumbsLifeTime.Value / 10
+                                BreadcrumbsTrail.Enabled = true
+                            else
+                                local Succes = pcall(function()
+                                    BreadcrumbsAttachment.Parent = HumanoidRootPart
+                                    BreadcrumbsAttachment2.Parent = HumanoidRootPart
+                                    BreadcrumbsTrail.Parent = Camera
+                                end)
+                                if not Succes then
+                                    if BreadcrumbsTrail then BreadcrumbsTrail:Destroy() BreadcrumbsTrail = nil end
+                                    if BreadcrumbsAttachment then BreadcrumbsAttachment:Destroy() BreadcrumbsAttachment = nil end
+                                    if BreadcrumbsAttachment2 then BreadcrumbsAttachment2:Destroy() BreadcrumbsAttachment2 = nil end
                                 end
                             end
 						end
@@ -1058,47 +1192,6 @@ runFunction(function()
                 end
             end
         end
-    })
-
-    BreadcrumbsMode = Breadcrumbs:CreateDropDown({
-        Name = "Mode",
-        Function = function(v) 
-            if v == "Trail" then -- idk how to make this look better
-                if BreadcrumbsLifeTime.MainObject then
-                    BreadcrumbsLifeTime.MainObject.Visible = true
-                end
-                if BreadcrumbsThick.MainObject then
-                    BreadcrumbsThick.MainObject.Visible = true
-                end
-                if BreadcrumbsTransparency.MainObject then
-                    BreadcrumbsTransparency.MainObject.Visible = false
-                end
-                if BreadcrumbsSize.MainObject then
-                    BreadcrumbsSize.MainObject.Visible = false
-                end
-                if BreadcrumbsDistance.MainObject then
-                    BreadcrumbsDistance.MainObject.Visible = false
-                end
-            else
-                if BreadcrumbsLifeTime.MainObject then
-                    BreadcrumbsLifeTime.MainObject.Visible = false
-                end
-                if BreadcrumbsThick.MainObject then
-                    BreadcrumbsThick.MainObject.Visible = false
-                end
-                if BreadcrumbsTransparency.MainObject then
-                    BreadcrumbsTransparency.MainObject.Visible = true
-                end
-                if BreadcrumbsSize.MainObject then
-                    BreadcrumbsSize.MainObject.Visible = true
-                end
-                if BreadcrumbsDistance.MainObject then
-                    BreadcrumbsDistance.MainObject.Visible = true
-                end
-            end
-        end,
-        List = {"Trail", "Ball", "Cube"},
-        Default = "Trail"
     })
 
     BreadcrumbsLifeTime = Breadcrumbs:CreateSlider({
@@ -1127,23 +1220,21 @@ runFunction(function()
         Default = 7,
         Round = 2
     })
+end)
 
-    BreadcrumbsSize = Breadcrumbs:CreateSlider({
-        Name = "Size",
-        Function = function(v) end,
-        Min = 1,
-        Max = 10,
-        Default = 3,
-        Round = 2
-    })
-
-    BreadcrumbsDistance = Breadcrumbs:CreateSlider({
-        Name = "Distance",
-        Function = function(v) end,
-        Min = 1,
-        Max = 100,
-        Default = 20,
-        Round = 2
+runFunction(function()
+    CameraFix = Tabs.Render:CreateToggle({
+        Name = "CameraFix",
+        Keybind = nil,
+        Callback = function(callback) 
+            spawn(function()
+                repeat
+                    task.wait()
+                    if (not CameraFix.Enabled) then break end
+                    UserSettings():GetService("UserGameSettings").RotationType = ((Camera.CFrame.Position - Camera.Focus.Position).Magnitude <= 0.5 and Enum.RotationType.CameraRelative or Enum.RotationType.MovementRelative)
+                until (not CameraFix.Enabled)
+            end)
+        end
     })
 end)
 
@@ -1192,7 +1283,6 @@ runFunction(function()
         end
     })
 end)
-
 
 if GuiLibrary.Device ~= "Mobile" then
     runFunction(function()
@@ -1443,6 +1533,183 @@ runFunction(function()
     })
 end)
 
+runFunction(function()
+    ViewClip = Tabs.Render:CreateToggle({
+        Name = "ViewClip",
+        Keybind = nil,
+        Callback = function(callback) 
+            if callback then
+                LocalPlayer.DevCameraOcclusionMode = "Invisicam"
+            else
+                LocalPlayer.DevCameraOcclusionMode = "Zoom"
+            end
+        end
+    })
+end)
+
+--[[code no work
+runFunction(function()
+    local TracerStartPoint = {Value = "Mouse"}
+    local TracerEndPoint = {Value = "HumanoidRootPart"}
+    local TracerThickness = {Value = 0}
+    local TracerOpacity = {Value = 0}
+    local TracerOutlined = {Value = false}
+    local TracerOutlineThickness = {Value = 0}
+    local TracerOutlineOpacity = {Value = 0}
+    local Lines = {}
+    local TracerConnection
+    local TracerConnection2
+    local TracerConnection3
+    local RealTracerStartPoint
+    local RealTracerEndPoint
+
+    local function DrawTracer(Entity)
+        if TracerStartPoint.Value == "Mouse" then
+            RealTracerStartPoint = PointMouse.new()
+        elseif TracerStartPoint.Value == "Bottom" then
+            local ViewportSize = workspace.CurrentCamera.ViewportSize
+            RealTracerStartPoint = Point2D.new(ViewportSize.X / 2, ViewportSize.Y)
+        elseif TracerStartPoint.Value == "Top" then
+            local ViewportSize = workspace.CurrentCamera.ViewportSize
+            RealTracerStartPoint = Point2D.new(ViewportSize.X / 2, 0)
+        elseif TracerStartPoint.Value == "Center" then
+            local ViewportSize = workspace.CurrentCamera.ViewportSize
+            RealTracerStartPoint = Point2D.new(ViewportSize.X / 2, ViewportSize.Y / 2)
+        end
+        
+        if TracerEndPoint.Value == "Head" then
+            RealTracerEndPoint = PointInstance.new(Entity.Head)
+        elseif TracerEndPoint.Value == "HumanoidRootPart" then
+            RealTracerEndPoint = PointInstance.new(Entity.HumanoidRootPart)
+        end
+
+        local line = LineDynamic.new(RealTracerStartPoint, RealTracerEndPoint)
+        line.Thickness = TracerThickness.Value
+        line.Opacity = TracerOpacity.Value
+        line.Outlined = TracerOutlined.Value
+        line.OutlineThickness = TracerOutlineThickness.Value
+        line.OutlineOpacity = TracerOutlineOpacity.Value
+        Lines[Entity.Player.Name] = line
+    end
+
+    Tracers = Tabs.Render:CreateToggle({
+        Name = "Tracers",
+        Keybind = nil,
+        Callback = function(callback)
+            if callback then
+                TracerConnection = EntityLibrary.EntityAddedEvent:Connect(function(Entity)
+                    DrawTracer(Entity)
+                end)
+
+                TracerConnection2 = EntityLibrary.EntityRemovedEvent:Connect(function(Entity)
+                    if Lines[Entity.Player.Name] then
+                        Lines[Entity.Player.Name].Visible = false
+                        Lines[Entity.Player.Name] = nil
+                    end
+                end)
+
+                TracerConnection3 = Camera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+                    local ViewportSize = Camera.ViewportSize
+                    local StartPoint = Point2D.new(ViewportSize.X / 2, ViewportSize.Y / (TracerStartPoint.Value == 'Center' and 2 or 1))
+
+                    for _, v in pairs(Lines) do
+                        v.From = StartPoint
+                    end
+                end)
+
+                for _, Entity in pairs(EntityLibrary.EntityList) do 
+                    DrawTracer(Entity)
+                end
+            else
+                TracerConnection:Disconnect()
+                TracerConnection2:Disconnect()
+                TracerConnection3:Disconnect()
+            end
+        end
+    })  
+
+    TracerStartPoint = Tracers:CreateDropDown({
+        Name = "StartPoint",
+        Function = function(v) end,
+        List = {"Center", "Mouse", "Bottom"},
+        Default = "Bottom"
+    })
+
+    TracerEndPoint = Tracers:CreateDropDown({
+        Name = "EndPoint",
+        Function = function(v) end,
+        List = {"Head", "HumanoidRootPart"},
+        Default = "HumanoidRootPart"
+    })
+
+    TracerThickness = Tracers:CreateSlider({
+        Name = "Thickness",
+        Function = function(v) 
+            for _, Object in pairs(Lines) do
+                Object.Thickness = v
+            end
+        end,
+        Min = 0.1,
+        Max = 4,
+        Default = 2,
+        Round = 1
+    })
+
+    TracerOpacity = Tracers:CreateSlider({
+        Name = "Opacity",
+        Function = function(v) 
+            for _, Object in pairs(Lines) do
+                Object.Opacity = v
+            end
+        end,
+        Min = 0,
+        Max = 1,
+        Default = 0.5,
+        Round = 1
+    })
+
+    TracerOutlined = Tracers:CreateOptionTog({
+        Name = "TracerOutlined",
+        Default = true,
+        Function = function(v) 
+            if v then
+                if TracerOutlineThickness.MainObject then
+                    TracerOutlineThickness.MainObject.Visible = true
+                end
+                if TracerOutlineOpacity.MainObject then
+                    TracerOutlineOpacity.MainObject.Visible = true
+                end
+            else
+                if TracerOutlineThickness.MainObject then
+                    TracerOutlineThickness.MainObject.Visible = false
+                end
+                if TracerOutlineOpacity.MainObject then
+                    TracerOutlineOpacity.MainObject.Visible = false
+                end
+            end
+        end
+    })
+
+    TracerOutlineThickness = Tracers:CreateSlider({
+        Name = "OutlineThickness",
+        Function = function(v) end,
+        Min = 0.1,
+        Max = 4,
+        Default = 1,
+        Round = 1
+    })
+
+    TracerOutlineOpacity = Tracers:CreateSlider({
+        Name = "OutlineOpacity",
+        Function = function(v) end,
+        Min = 0,
+        Max = 1,
+        Default = 1,
+        Round = 1
+    })
+end)
+]]
+
 --[[
 -- Utility tab
 runFunction(function()
@@ -1538,33 +1805,6 @@ end)
 ]]
 
 runFunction(function()
-    local AutoRejoinDelay = {Value = 5}
-    local AutoRejoinEnabled = false
-    AutoRejoin = Tabs.Utility:CreateToggle({
-        Name = "AutoRejoin",
-        Keybind = nil,
-        Callback = function(callback) 
-            if callback then 
-                repeat wait() until AutoRejoin.Enabled == false or #CoreGui.RobloxPromptGui.promptOverlay:GetChildren() ~= 0
-                if AutoRejoin.Enabled then 
-                    wait(AutoRejoinDelay.Value)
-                    TeleportService:Teleport(game.PlaceId)
-                end
-            end
-        end
-    })
-
-    AutoRejoinDelay = AutoRejoin:CreateSlider({
-        Name = "Delay",
-        Function = function(v) end,
-        Min = 0,
-        Max = 60,
-        Default = 5,
-        Round = 0
-    })
-end)
-
-runFunction(function()
     AntiAFK = Tabs.Utility:CreateToggle({
         Name = "AntiAFK",
         Keybind = nil,
@@ -1579,6 +1819,79 @@ runFunction(function()
                 end
             end
         end
+    })
+end)
+
+runFunction(function()
+	local AntiKickEnabled = false
+	local First = false
+    local OldNameCall
+    AntiKick = Tabs.Utility:CreateToggle({
+        Name = "AntiKick",
+        Keybind = nil,
+        Callback = function(callback) 
+            if callback then
+                if hookmetamethod then
+                    if not First then
+                        OldNameCall = hookmetamethod(game, "__namecall", function(Self, ...)
+                            local NameCallMethod = getnamecallmethod()
+            
+                            if tostring(string.lower(NameCallMethod)) == "kick" and callback then
+                                GuiLibrary:CreateNotification("AntiKick", "Detected kick attempt.", 7, false, "warn")
+                                return nil
+                            end
+            
+                            return OldNameCall(Self, ...)
+                        end)
+                    end
+                    if not First then
+                        First = true
+                    end
+                else
+                    GuiLibrary:CreateNotification("AntiKick", "Missing hookmetamethod function.", 10, false, "error")
+                    AntiKick:Toggle(true)
+                    return
+                end
+            end
+        end
+    })
+end)
+
+runFunction(function()
+    local AutoRejoinDelay = {Value = 5}
+    local AutoRejoinSameServer = {Value = false}
+    AutoRejoin = Tabs.Utility:CreateToggle({
+        Name = "AutoRejoin",
+        Keybind = nil,
+        Callback = function(callback) 
+            if callback then 
+                repeat wait(AutoRejoinDelay.Value) until AutoRejoin.Enabled == false or #CoreGui.RobloxPromptGui.promptOverlay:GetChildren() ~= 0
+                if AutoRejoin.Enabled and not AutoRejoinSameServer then 
+                    if #Players:GetPlayers() <= 1 then
+                        LocalPlayer:Kick("\nRejoining...")
+                        task.wait()
+                        TeleportService:Teleport(PlaceId, LocalPlayer)
+                    end
+                else
+                    TeleportService:TeleportToPlaceInstance(PlaceId, JobId, LocalPlayer)
+                end
+            end
+        end
+    })
+
+    AutoRejoinDelay = AutoRejoin:CreateSlider({
+        Name = "Delay",
+        Function = function(v) end,
+        Min = 0,
+        Max = 60,
+        Default = 5,
+        Round = 0
+    })
+
+    AutoRejoinSameServer = AutoRejoin:CreateOptionTog({
+        Name = "SameServer",
+        Default = true,
+        Function = function() end
     })
 end)
 
@@ -1756,6 +2069,24 @@ runFunction(function()
 end)
 
 runFunction(function()
+    FPSUnlocker = Tabs.Utility:CreateToggle({
+        Name = "FPSUnlocker",
+        Keybind = nil,
+        Callback = function(callback)
+            if callback then
+                if setfpscap then
+                    setfpscap(10000000)
+                else
+                    GuiLibrary:CreateNotification("FPSUnlocker", "Missing setfpscap function.", 10, false, "error")
+                    FPSUnlocker:Toggle(true)
+                    return
+                end
+            end
+        end
+    })
+end)
+
+runFunction(function()
     InfinityJump = Tabs.Utility:CreateToggle({
         Name = "InfinityJump",
         Keybind = nil,
@@ -1792,49 +2123,23 @@ end)
 ]]
 
 runFunction(function()
-    local Parts = {}
-    Phase = Tabs.Utility:CreateToggle({
-        Name = "Phase",
-        Keybind = nil,
-        Callback = function(callback) 
-            if callback then 
-                if IsAlive() then
-                    RunLoops:BindToStepped("Phase", function()
-                        for i, v in pairs(LocalPlayer.Character:GetChildren()) do 
-                            if v:IsA("BasePart") and v.CanCollide then 
-                                Parts[v] = v
-                                v.CanCollide = false
-                            end
-                        end
-                    end)
-                end
-            else
-                for i, v in next, Parts do
-                    v.CanCollide = true
-                end
-                Parts = {}
-                RunLoops:UnbindFromStepped("Phase")
-            end
-        end
-    })
-end)
-
-runFunction(function()
     ServerHop = Tabs.Utility:CreateToggle({
         Name = "ServerHop",
         Keybind = nil,
         Callback = function(callback) 
             if callback then 
-                ServerHop:Toggle(false)
-                TeleportService:Teleport(game.PlaceId)
+                ServerHop:Toggle(false, false)
+                TeleportService:Teleport(PlaceId)
             end
         end
     })
 end)
 
 -- World tab
+
 runFunction(function()
     local AntiVoidMode = {Value = "Part"}
+    local AntiVoidPartMode = {Value = "Velocity"}
     local AntiVoidPartTransparency = {Value = 0}
     local AntiVoidJumpDelay = {Value = 0.2}
     local AntiVoidEnabled = false
@@ -1866,31 +2171,35 @@ runFunction(function()
                                     AntiVoidPart.Transparency = AntiVoidPartTransparency.Value
                                     AntiVoidPart.Anchored = true
                                     AntiVoidPart.Touched:Connect(function(Toucher)
-                                        if Toucher.Parent.Name == LocalPlayer.Name then
-                                            Humanoid:ChangeState("Jumping")
-                                            wait(AntiVoidJumpDelay.Value)
-                                            Humanoid:ChangeState("Jumping")
-                                            wait(AntiVoidJumpDelay.Value)
-                                            Humanoid:ChangeState("Jumping")
-                                            Humanoid:ChangeState("Jumping")
+                                        if AntiVoidPartMode.Value == "Jump" then
+                                            if Toucher.Parent.Name == LocalPlayer.Name then
+                                                Humanoid:ChangeState("Jumping")
+                                                wait(AntiVoidJumpDelay.Value)
+                                                Humanoid:ChangeState("Jumping")
+                                                wait(AntiVoidJumpDelay.Value)
+                                                Humanoid:ChangeState("Jumping")
+                                                Humanoid:ChangeState("Jumping")
+                                            end
+                                        elseif AntiVoidPartMode.Value == "Veocity" then
+                                            if Character:WaitForChild("HumanoidRootPart").Position.Y < 20 then
+                                                local BodyVelocity = Instance.new("BodyVelocity", HumanoidRootPart)
+                                                workspace.Gravity = 0
+                                                BodyVelocity.Velocity = Vector3.new(HumanoidRootPart.Velocity.X, 300, HumanoidRootPart.Velocity.Z)
+                                                task.wait(0.5)
+                                                BodyVelocity:Destroy()
+                                                workspace.Gravity = 196.2
+                                            end
                                         end
                                     end)
                                 end
-                            elseif AntiVoidMode.Value == "Velocity" then
-                                if IsAlive() then
-                                    RaycastParams.FilterDescendantsInstances = {Camera, Character}
-                                    LastRaycast = Humanoid.FloorMaterial ~= Enum.Material.Air and HumanoidRootPart.CFrame or LastRaycast
-                                    if (HumanoidRootPart.Position.Y + (HumanoidRootPart.Velocity.Y * 0.016)) <= (workspace.FallenPartsDestroyHeight + 5) then
-                                        local Components = {HumanoidRootPart.CFrame:GetComponents()}
-                                        Components[2] = (workspace.FallenPartsDestroyHeight + 20)
-                                        if LastRaycast then
-                                            Components[1] = LastRaycast.Position.X
-                                            Components[2] = LastRaycast.Position.Y + (Humanoid.HipHeight + (HumanoidRootPart.Size.Y / 2))
-                                            Components[3] = LastRaycast.Position.Z
-                                        end
-                                        HumanoidRootPart.CFrame = CFrame.new(unpack(Components))
-                                        HumanoidRootPart.Velocity = Vector3.new(HumanoidRootPart.Velocity.X, 0, HumanoidRootPart.Velocity.Z)
-                                    end
+                            elseif AntiVoidMode.Value == "BodyVelocity" then
+                                if Character:WaitForChild("HumanoidRootPart").Position.Y < 20 then
+                                    local BodyVelocity = Instance.new("BodyVelocity", HumanoidRootPart)
+                                    workspace.Gravity = 0
+                                    BodyVelocity.Velocity = Vector3.new(HumanoidRootPart.Velocity.X, 300, HumanoidRootPart.Velocity.Z)
+                                    task.wait(0.5)
+                                    BodyVelocity:Destroy()
+                                    workspace.Gravity = 196.2
                                 end
                             end
                         end
@@ -1910,7 +2219,24 @@ runFunction(function()
     AntiVoidMode = AntiVoid:CreateDropDown({
         Name = "Mode",
         Function = function(v) end,
-        List = {"Part", "Velocity"},
+        List = {"Part", "BodyVelocity"},
+        Default = "Velocity"
+    })
+
+    AntiVoidPartMode = AntiVoid:CreateDropDown({
+        Name = "Mode",
+        Function = function(v) 
+            if v == "Jump" then
+                if AntiVoidJumpDelay.MainObject then
+                    AntiVoidJumpDelay.MainObject.Visible = true
+                end
+            elseif v == "Velocity" then
+                if AntiVoidJumpDelay.MainObject then
+                    AntiVoidJumpDelay.MainObject.Visible = false
+                end
+            end
+        end,
+        List = {"Jump", "Velocity"},
         Default = "Velocity"
     })
 
@@ -2233,4 +2559,136 @@ runFunction(function()
     })
 end)
 
-print("[NewManaV2ForRoblox/Universal.lua]: Loaded in " .. tostring(tick() - startTick) .. ".")
+print("[ManaV2ForRoblox/Universal.lua]: Loaded in " .. tostring(tick() - startTick) .. ".")
+
+--[[
+    Private part
+    Please don't skid thiss
+]]
+
+if Mana.Developer or Mana.Whitelisted then
+    runFunction(function()
+        local FakeLagSend = {Value = false}
+        local FakeLagRecieve = {Value = false}
+        FakeLag = Tabs.Private:CreateToggle({
+            Name = "FakeLag",
+            Keybind = nil,
+            Callback = function(callback) 
+                if callback then
+                    if FakeLagSend.Value then 
+                        RunLoops:BindToHeartbeat("SendFakeLag", function() 
+                            if IsAlive() and sethiddenproperty then
+                                sethiddenproperty(LocalPlayer.Character.HumanoidRootPart, "NetworkIsSleeping", true)
+                            elseif not sethiddenproperty then
+                                GuiLibrary:CreateNotification("FakeLag", "Missing sethiddenproperty function.", 10, false, "error")
+                                RunLoops:UnbindFromHeartbeat("SendFakeLag")
+                                FakeLag:Toggle(true)
+                            end
+                        end)
+                    end
+                    if FakeLagRecieve.Value then 
+                        settings().Network.IncomingReplicationLag = 99999999999999999
+                    end
+                else
+                    NetworkClient:SetOutgoingKBPSLimit(math.huge)
+                    settings().Network.IncomingReplicationLag = 0
+                    RunLoops:UnbindFromHeartbeat("SendFakeLag")
+                end
+            end
+        })
+        FakeLagSend = FakeLag:CreateOptionTog({
+            Name = "Sending",
+            Function = function() end,
+            Default = true
+        })
+        FakeLagRecieve = FakeLag:CreateOptionTog({
+            Name = "Recieving",
+            Function = function() end,
+            Default = false
+        })
+    end)
+
+    runFunction(function()
+        Tabs.Private:CreateToggle({
+            Name = "HackerDetector",
+            Keybind = nil,
+            Callback = function(callback)
+                if callback then
+                    spawn(function()
+                        repeat
+                            task.wait()
+                            if (not callback) then return end
+                            for i, v in pairs(Players:GetChildren()) do
+                                if v:FindFirstChild("HumanoidRootPart") then
+                                    local oldpos = v.Character.HumanoidRootPart.Position
+                                    task.wait(0.5)
+                                    local newpos = Vector3.new(v.Character.HumanoidRootPart.Position.X, 0, v.Character.HumanoidRootPart.Position.Z)
+                                    local realnewpos = math.floor((newpos - Vector3.new(oldpos.X, 0, oldpos.Z)).magnitude) * 2
+                                    if realnewpos > 32 then
+                                        title = v.Name .. " is cheating"
+                                        text =  tostring(math.floor((newpos - Vector3.new(oldpos.X, 0, oldpos.Z)).magnitude))
+                                        CreateCoreNotification(title, text, 5)
+                                    end
+                                end
+                            end
+                        until (not callback)
+                    end)
+                end
+            end
+        })
+    end)
+
+    runFunction(function()
+        local PrivateTabDivider = Tabs.Private:CreateDivider({
+            Name = "Tools",
+            WithText = true
+        })
+    end)
+
+    runFunction(function()
+        DarkDex = Tabs.Private:CreateToggle({
+            Name = "DarkDex",
+            Keybind = nil,
+            Callback = function(callback)
+                if callback then
+                    loadstring(game:HttpGet('https://ithinkimandrew.site/scripts/tools/dark-dex.lua'))()
+                end
+            end
+        })
+    end)
+
+    runFunction(function()
+        Hydroxide = Tabs.Private:CreateToggle({
+            Name = "Hydroxide",
+            Keybind = nil,
+            Callback = function(callback)
+                if callback then
+                    local owner = "Upbolt"
+                    local branch = "revision"
+
+                    local function webImport(file)
+                        return loadstring(game:HttpGetAsync(("https://raw.githubusercontent.com/%s/Hydroxide/%s/%s.lua"):format(owner, branch, file)), file .. '.lua')()
+                    end
+
+                    webImport("init")
+                    webImport("ui/main")
+                end
+            end
+        })
+    end)
+
+    runFunction(function()
+        InfiniteYeld = Tabs.Private:CreateToggle({
+            Name = "InfiniteYeld",
+            Keybind = nil,
+            Callback = function(callback)
+                if callback then
+                    loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+                end
+            end
+        })
+    end)
+
+
+    print("[ManaV2ForRoblox/Universal.lua]: Loaded with private features in " .. tostring(tick() - startTick) .. ".")
+end
