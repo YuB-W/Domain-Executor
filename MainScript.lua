@@ -79,21 +79,16 @@ do
         end
     end
 
-    --[[
     function Functions:RunFile(filepath)
         if filepath == "Scripts/6872274481.lua" or filepath == "Scripts/8560631822.lua" or filepath == "Scripts/8444591321.lua" then
             Functions:WriteFile(filepath, filepath)
             return Functions:CheckFile("Scripts/6872274481.lua")
         elseif Mana.Developer then
-            return loadstring(readfile("NewMana/" .. filepath))()
+            return loadstring(readfile("Mana/" .. filepath))()
         else
             Functions:WriteFile(filepath, filepath)
             return Functions:CheckFile(filepath)
         end
-    end
-    ]]
-    function Functions:RunFile(filepath)
-        return loadstring(readfile("NewMana/" .. filepath))()
     end
 end
 
@@ -371,12 +366,12 @@ Corner.Parent = Button
 Corner.CornerRadius = UDim.new(0, 8)
 
 Button.MouseButton1Click:Connect(function()
-    GuiLibrary:ToggleLibrary()
+    GuiLibrary.Functions:ToggleLibrary()
 end)
 
 UserInputService.InputBegan:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.N then
-        GuiLibrary:ToggleLibrary()
+        GuiLibrary.Functions:ToggleLibrary()
     end
 end)
 

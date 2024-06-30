@@ -2224,7 +2224,7 @@ runFunction(function()
     })
 
     AntiVoidPartMode = AntiVoid:CreateDropDown({
-        Name = "Mode",
+        Name = "PartMode",
         Function = function(v) 
             if v == "Jump" then
                 if AntiVoidJumpDelay.MainObject then
