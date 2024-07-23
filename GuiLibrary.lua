@@ -124,10 +124,10 @@ function conf.functions:LoadConfigs()
         return HttpService:JSONDecode(readfile("Mana/Config/" .. game.PlaceId .. ".json"))
     end)
     if success then
-        warn("[NewManaV2ForRoblox]: successfully decoded JSON.")
+        warn("[ManaV2ForRoblox]: successfully decoded JSON.")
         return data
     else
-        warn("[NewManaV2ForRoblox]: error in decoding JSON:", data, ".")
+        warn("[ManaV2ForRoblox]: error in decoding JSON:", data, ".")
         return {}
     end
 end
@@ -138,12 +138,17 @@ function conf.functions:WriteConfigs(tab)
 end
 local configtable = (conf.functions:LoadConfigs() or {})
 
+Library.ConfigSystem = conf
+Library.ConfigTable = configtable
+
+--[[ no
 spawn(function()
     repeat
         conf.functions:WriteConfigs(configtable)
         task.wait(30)
     until (not configsaving)
 end)
+]]
 
 local requestfunc = syn and syn.request or http and http.request or http_request or fluxus and fluxus.request or request or function(tab)
     if tab.Method == "GET" then
@@ -358,7 +363,7 @@ function Library:CreateGuiNotification(title, text, delay2, toggled)
 	        pcall(function()
 	            frame:TweenPosition(UDim2.new(0.5, 0, 0, 20), Enum.EasingDirection.InOut, Enum.EasingStyle.Quad, 0.15)
 
-	            DebrisService:AddItem(frame, delay2 + 0.15)
+	            Debris:AddItem(frame, delay2 + 0.15)
 	        end)
 	    end
     end)
@@ -453,7 +458,7 @@ function Library:CreateSessionInfo()
     SessionInfoTitle.TextSize = 14.000
     SessionInfoTitle.TextXAlignment = Enum.TextXAlignment.Left
 
-    function SessionInfoTable:CreateInfoLabel(Name)
+    function SessionInfoTable:CreateStatisticLabel(Name)
         local Name = Name or "Hello"
         local LabelTable = {
             Name = Name
@@ -477,12 +482,12 @@ function Library:CreateSessionInfo()
 
         LabelTable.TextLabel = Label
 
-        table.insert(SessionInfoTable, Label)
+        table.insert(SessionInfoTable.Objects, Label)
 
         return LabelTable
     end
 
-    function SessionInfoTable:RemoveLabel(Name)
+    function SessionInfoTable:RemoveStatisticLabel(Name)
         if SessionInfo:FindFirstChild(Name) then
             SessionInfo:FindFirstChild(Name):Destroy()
         end
@@ -513,7 +518,7 @@ function Library.UpdateHud:UpdateFont(NewFont)
 end
 
 -- Functions functions
-function Library.Functions:RandomString() -- from vape
+function Library:RandomString() -- from vape
     local randomlength = math.random(10,100)
     local array = {}
 
@@ -524,14 +529,13 @@ function Library.Functions:RandomString() -- from vape
     return table.concat(array)
 end
 
+-- Library functions
 function Library:ToggleLibrary()
-    if ClickGui.Visible == false then
-        if UserInputService:GetFocusedTextBox() == nil then
-            ClickGui.Visible = true
-        end
-    else
-        if UserInputService:GetFocusedTextBox() == nil then
+    if UserInputService:GetFocusedTextBox() == nil then
+        if ClickGui.Visible then
             ClickGui.Visible = false
+        else
+            ClickGui.Visible = true
         end
     end
 end
@@ -563,10 +567,11 @@ end
 --[[
     ToDo:
     Make tabs scrollable
+    Make tabs dragable
 ]]
 
 function Library:CreateWindow()
-    ScreenGui.Name = Library.Functions:RandomString()
+    ScreenGui.Name = Library:RandomString()
     
     local TabsFrame = Instance.new("Frame")
     local uilistthingy = Instance.new("UIListLayout")
@@ -574,7 +579,7 @@ function Library:CreateWindow()
     local HoverText = Instance.new("TextLabel")
 
     TabsFrame.Name = "Tabs"
-    TabsFrame.Parent = ScreenGui
+    TabsFrame.Parent = ClickGui
     TabsFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     TabsFrame.BackgroundTransparency = 1.000
     TabsFrame.BorderSizePixel = 0
@@ -607,7 +612,11 @@ function Library:CreateWindow()
         Library.Scale = 0.45
     end
 
-    function Library:CreateTab(title, color)
+    function Library:CreateTab(TabData)
+        local TabName = TabData.Name
+        local Color = TabData.Color or Color3.fromRGB(83, 214, 110)
+        --local TabIcon = TabData.TabIcon
+        local Callback = TabData.Callback or function() end
         table.insert(Tabs, #Tabs)
         local tab = Instance.new("TextButton")
         local tabname = Instance.new("TextLabel")
@@ -615,6 +624,10 @@ function Library:CreateWindow()
         local uilistlayout = Instance.new("UIListLayout")
 
         local tabtable = {
+            Name = TabName,
+            Color = Color,
+            Visible = true,
+            Callback = (TabData.Callback or function() end),
             Toggles = {}
         }
 
@@ -639,20 +652,20 @@ function Library:CreateWindow()
         ]]
 
         tab.Modal = true
-        tab.Name = title
+        tab.Name = TabName
         tab.Selectable = true
         tab.ZIndex = 1
         tab.Parent = TabsFrame
         tab.BackgroundColor3 = Color3.fromRGB(14, 14, 23)
         tab.BorderSizePixel = 0
-        tab.Position = configtable[title.Position] or UDim2.new(TabPositionX, TabPositionY, TabPositionW, TabPositionH)
+        tab.Position = configtable[TabName.Position] or UDim2.new(TabPositionX, TabPositionY, TabPositionW, TabPositionH)
         tab.Size = UDim2.new(0, 207, 0, 40)
         tab.Active = true
         tab.LayoutOrder = 1 + #Tabs
         tab.AutoButtonColor = false
 	    tab.Text = ""
     
-        tabname.Name = title
+        tabname.Name = TabName
         tabname.Parent = tab
         tabname.ZIndex = tab.ZIndex + 1
         tabname.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -661,8 +674,8 @@ function Library:CreateWindow()
         tabname.Position = UDim2.new(0, 199,0, 40)
         tabname.Size = UDim2.new(0, 199,0, 40)
         tabname.Font = Enum.Font.SourceSansLight
-        tabname.Text = " " .. title
-        tabname.TextColor3 = color
+        tabname.Text = " " .. TabName
+        tabname.TextColor3 = Color
         tabname.TextSize = 22.000
         tabname.TextWrapped = true
         tabname.TextXAlignment = Enum.TextXAlignment.Left
@@ -677,48 +690,44 @@ function Library:CreateWindow()
         uilistlayout.Parent = tab
         uilistlayout.SortOrder = Enum.SortOrder.LayoutOrder
 
+        tabtable.MainObject = tab
+
+        function tabtable:ChangeVisibility(bool)
+            bool = bool or not tab.Visible
+            tab.Visible = bool
+            Callback(bool)
+        end
+
         --dragGUI(tab, tabname)
 
-        function tabtable:CreateDivider(data)
-            if data.WithText then
-                local Text = data.Name or "Hello world!"
-                local DividerFrame = Instance.new("Frame")
-                local Divider = Instance.new("TextLabel")
-                local DividerFrame2 = Instance.new("Frame")
-                DividerFrame.Name = title .. "_FrameDivider"
-                DividerFrame.Parent = tab
-                DividerFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-                DividerFrame.BorderSizePixel = 0
-                DividerFrame.Position = UDim2.new(0.0827946085, -17, 0.133742347, 33)
-                DividerFrame.Size = UDim2.new(0, 207, 0, 2)
-                Divider.Name = title .. "_TextLabelDivider"
-                Divider.Parent = tab
-                Divider.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-                Divider.BorderSizePixel = 0
-                Divider.Position = UDim2.new(0.0827946085, -17, 0.133742347, 33)
-                Divider.Size = UDim2.new(0, 207, 0, 20)
-                Divider.Font = Enum.Font.SourceSansLight --Library.Font
-                Divider.Text = Text
-                Divider.TextColor3 = Color3.fromRGB(255, 255, 255)
-                Divider.TextSize = 18
-                Divider.TextXAlignment = Enum.TextXAlignment.Center
-                DividerFrame2.Name = title .. "_FrameDivider"
-                DividerFrame2.Parent = tab
-                DividerFrame2.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-                DividerFrame2.BorderSizePixel = 0
-                DividerFrame2.Position = UDim2.new(0.0827946085, -17, 0.133742347, 33)
-                DividerFrame2.Size = UDim2.new(0, 207, 0, 2)
-                return Divider
-            else
-                local Divider = Instance.new("Frame")
-                Divider.Name = title .. "_FrameDivider"
-                Divider.Parent = tab
-                Divider.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-                Divider.BorderSizePixel = 0
-                Divider.Position = UDim2.new(0.0827946085, -17, 0.133742347, 33)
-                Divider.Size = UDim2.new(0, 207, 0, 20)
-                return Divider
-            end
+        function tabtable:CreateDivider(DividerText)
+            local DividerFrame = Instance.new("Frame")
+            local Divider = Instance.new("TextLabel")
+            local DividerFrame2 = Instance.new("Frame")
+            DividerFrame.Name = title .. "_FrameDivider"
+            DividerFrame.Parent = tab
+            DividerFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+            DividerFrame.BorderSizePixel = 0
+            DividerFrame.Position = UDim2.new(0.0827946085, -17, 0.133742347, 33)
+            DividerFrame.Size = UDim2.new(0, 207, 0, 2)
+            Divider.Name = title .. "_TextLabelDivider"
+            Divider.Parent = tab
+            Divider.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+            Divider.BorderSizePixel = 0
+            Divider.Position = UDim2.new(0.0827946085, -17, 0.133742347, 33)
+            Divider.Size = UDim2.new(0, 207, 0, 20)
+            Divider.Font = Enum.Font.SourceSansLight --Library.Font
+            Divider.Text = DividerText
+            Divider.TextColor3 = Color3.fromRGB(255, 255, 255)
+            Divider.TextSize = 18
+            Divider.TextXAlignment = Enum.TextXAlignment.Center
+            DividerFrame2.Name = title .. "_FrameDivider"
+            DividerFrame2.Parent = tab
+            DividerFrame2.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+            DividerFrame2.BorderSizePixel = 0
+            DividerFrame2.Position = UDim2.new(0.0827946085, -17, 0.133742347, 33)
+            DividerFrame2.Size = UDim2.new(0, 207, 0, 2)
+            return Divider
         end
 
         function tabtable:CreateToggle(data)
@@ -737,7 +746,7 @@ function Library:CreateWindow()
             local title = info.Name
             local ToolTip = info.HoverText
             local keybind = info.Keybind
-            local callback = info.Callback
+            local Callback = info.Callback
 
             keybind = (keybind or {Name = nil})
             Keybinds[(keybind.Name or "%*")] = (keybind.Name == nil and false or true)
@@ -747,15 +756,14 @@ function Library:CreateWindow()
             }
 
             local ToggleTable = {
+                Name = data.Name or "",
                 Enabled = false,
-                Name = data.Name or ""
+                Visible = true,
+                Callback = data.Callback or function() end
             }
 
+            Library.Objects[title] = ToggleTable
             table.insert(tabtable.Toggles, #tabtable.Toggles)
-            
-            ToggleTable.Enabled = false
-            ToggleTable.Name = data.Name or ""
-            callback = callback or function() end
             oldkey = keybind.Name
 
             local toggle = Instance.new("TextButton")
@@ -818,6 +826,8 @@ function Library:CreateWindow()
             BindText.TextSize = 22.000
             BindText.TextXAlignment = Enum.TextXAlignment.Left
             BindText.TextYAlignment = Enum.TextYAlignment.Center
+
+            ToggleTable.MainObject = toggle
 
             BindText.MouseEnter:Connect(function()
                 focus.Elements["toggle_" .. title] = true
@@ -917,7 +927,7 @@ function Library:CreateWindow()
                 ToggleTable.Enabled = bool
                 if not bool then
                     spawn(function()
-                        callback(false)
+                        Callback(false)
                     end)
                     spawn(function()
                         Library:CreateNotification(title, "Disabled " .. title, 4, false)
@@ -929,7 +939,7 @@ function Library:CreateWindow()
                     end
                 else
                     spawn(function()
-                        callback(true)
+                        Callback(true)
                     end)
                     spawn(function()
                         Library:CreateNotification(title, "Enabled " .. title, 4, true)
@@ -954,6 +964,12 @@ function Library:CreateWindow()
             
             if configtable[title].IsToggled then
                 ToggleTable:Toggle(true)
+            end
+
+            function ToggleTable:ChangeVisibility(Bool)
+                bool = bool or not toggle.Visible
+                toggle.Visible = bool
+                Callback(bool)
             end
 
             function ToggleTable:CreateSlider(argstable)
@@ -991,7 +1007,7 @@ function Library:CreateWindow()
             
                 slider_2.Name = "Slider_2"
                 slider_2.Parent = slider
-                slider_2.BackgroundColor3 = color
+                slider_2.BackgroundColor3 = Color
                 slider_2.BorderSizePixel = 0
                 slider_2.Position = UDim2.new(0.00786163565, 0, -0.00825500488, 0)
                 slider_2.Size = UDim2.new(0, 0, 0, 34)
@@ -1114,7 +1130,7 @@ function Library:CreateWindow()
                 Dropdown.Position = UDim2.new(0.0859375, 0, 0.491620123, 0)
                 Dropdown.Size = UDim2.new(0, 175, 0, 25)
                 Dropdown.Font = Enum.Font.SourceSansLight
-                Dropdown.Text = "" .. argstable.Name .. ": " .. argstable.Default
+                Dropdown.Text = argstable.Name .. ": " .. argstable.Default
                 Dropdown.TextColor3 = Color3.fromRGB(255, 255, 255)
                 Dropdown.TextSize = 22.000
                 Dropdown.TextWrapped = true
@@ -1126,7 +1142,7 @@ function Library:CreateWindow()
                 dropdownapi.Select = function(_select) 
                     if dropdownapi.List[_select] or stringtablefind(dropdownapi.List, _select) then
                         dropdownapi.Value = dropdownapi.List[_select] or dropdownapi.List[stringtablefind(dropdownapi.List, _select)]
-                        Dropdown.Text =  "" .. argstable.Name .. ":" .. tostring(dropdownapi.Value)
+                        Dropdown.Text =  argstable.Name .. ":" .. tostring(dropdownapi.Value)
                         configtable[ddname].Value = dropdownapi.Value
                         argstable.Function(dropdownapi.Value)
                     end
@@ -1174,17 +1190,15 @@ function Library:CreateWindow()
                 
                 return dropdownapi
             end               
-            function ToggleTable:CreateOptionTog(argstable)
+            function ToggleTable:CreateToggle(argstable)
                 if configtable[argstable.Name .. ToggleTable.Name] == nil then
                     configtable[argstable.Name .. ToggleTable.Name] = {IsToggled = configtable[argstable.Name .. ToggleTable.Name] and configtable[argstable.Name .. ToggleTable.Name].IsToggled or argstable.Default}
                 end
-                local optiontogval = {Value = configtable[argstable.Name .. ToggleTable.Name] and configtable[argstable.Name .. ToggleTable.Name].IsToggled or argstable.Default}
-                local thing = {
+                local OptionToggle = {
                     Name = argstable.Name,
+                    Enabled = configtable[argstable.Name .. ToggleTable.Name] and configtable[argstable.Name .. ToggleTable.Name].IsToggled or argstable.Default,
                     Function = argstable.Function
                 }
-
-                argstable.Function = argstable.Function or function() end
 
                 local tognametwo = Instance.new("TextLabel")
                 local toggleactived = Instance.new("Frame")
@@ -1219,51 +1233,44 @@ function Library:CreateWindow()
                 toggleactived.Size = UDim2.new(0, 24, 0, 24)
                 toggleactived.ZIndex = 3
 
-                optiontogval.MainObject = tognametwo
+                OptionToggle.MainObject = tognametwo
 
                 if configtable[argstable.Name .. ToggleTable.Name] == nil then
-                    configtable[argstable.Name .. ToggleTable.Name] = {IsToggled = optiontogval.Value}
+                    configtable[argstable.Name .. ToggleTable.Name] = {IsToggled = OptionToggle.Value}
                 end
-                function optiontogval:Toggle(bool)
-                    bool = bool or not (optiontogval.Value)
-                    optiontogval.Value = bool
+
+                function OptionToggle:Toggle(bool)
+                    bool = bool or not OptionToggle.Value
+                    OptionToggle.Value = bool
                     configtable[argstable.Name .. ToggleTable.Name].IsToggled = bool
-                    if not bool then
-                        if argstable.Function then
-                            spawn(function()
-                                argstable.Function(false)
-                            end)
-                        end
-                        toggleactived.BackgroundColor3 = Color3.fromRGB(68, 68, 60)
-                    else
-                        if argstable.Function then
-                            spawn(function()
-                                argstable.Function(true)
-                            end)
-                            toggleactived.BackgroundColor3 = tabname.TextColor3
-                        end
+                    if argstable.Function then
+                        spawn(function()
+                            argstable.Function(bool)
+                        end)
                     end
+                    toggleactived.BackgroundColor3 = bool and tabname.TextColor3 or Color3.fromRGB(68, 68, 60)
                 end
+
                 if configtable[argstable.Name .. ToggleTable.Name] then
-                	optiontogval:Toggle(configtable[argstable.Name .. ToggleTable.Name].IsToggled)
+                	OptionToggle:Toggle(configtable[argstable.Name .. ToggleTable.Name].IsToggled)
                 end
+
+                if argstable.Default then
+                    OptionToggle:Toggle(true)
+                end
+
                 untoggled.MouseButton1Click:Connect(function()
-                    optiontogval:Toggle()
+                    OptionToggle:Toggle()
                 end)
-                return optiontogval
+
+                return OptionToggle
             end
             function ToggleTable:CreateTextBox(argstable)
-                local TextBoxData = {
-                    Name = argstable.Name,
-                    PlaceholderText = argstable.PlaceholderText,
-                    DefaultValue = argstable.DefaultValue,
-                    Function = argstable.Function
-                }
-
                 local TextBoxAPI = {
-                    Value = (configtable[argstable.Name .. ToggleTable.Name] and configtable[argstable.Name .. ToggleTable.Name].Value or TextBoxData.DefaultValue),
-                    PlaceholderText = TextBoxData.PlaceholderText,
-                    TextBoxData = TextBoxData
+                    Name = argstable.Name,
+                    Value = (configtable[argstable.Name .. ToggleTable.Name] and configtable[argstable.Name .. ToggleTable.Name].Value or argstable.DefaultValue),
+                    PlaceholderText = argstable.PlaceholderText,
+                    Function = argstable.Function
                 }
                 
                 local textbox_background = Instance.new("Frame")
@@ -1271,12 +1278,12 @@ function Library:CreateWindow()
 
                 textbox_background.Name = "textboxbackground"
                 textbox_background.Parent = optionframe
-                textbox_background.BackgroundColor3 = color
+                textbox_background.BackgroundColor3 = Color
                 textbox_background.BorderSizePixel = 0
                 textbox_background.Position = UDim2.new(0.0833333358, 0, 0.109391868, 0)
                 textbox_background.Size = UDim2.new(0, 180, 0, 34)
 
-                textbox.Name = TextBoxData.Name .. "TextBox"
+                textbox.Name = argstable.Name .. "TextBox"
                 textbox.Parent = textbox_background
                 textbox.BackgroundColor3 = Color3.fromRGB(47, 48, 64)
                 textbox.BackgroundTransparency = 1

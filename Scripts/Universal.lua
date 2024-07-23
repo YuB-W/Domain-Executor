@@ -9,6 +9,7 @@ local startTick = tick()
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 local TeleportSerivce = game:GetService("TeleportService")
+local TextChatService = game:GetService("TextChatService")
 local NetworkClient = game:GetService("NetworkClient")
 local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
@@ -28,7 +29,7 @@ local Camera = workspace.CurrentCamera
 local Mouse = LocalPlayer:GetMouse()
 local PlayerGui = LocalPlayer.PlayerGui
 local Backpack = LocalPlayer.Backpack
-local Animate = LocalPlayer.Character.Animate
+local Animate = LocalPlayer.Character:FindFirstChild("Animate") -- bc in Arsenal it's missing
 local LightingTime = Lighting.TimeOfDay
 local workspaceGravity = workspace.Gravity
 local PlayerWalkSpeed = Humanoid.WalkSpeed
@@ -172,17 +173,160 @@ local function FindTouchInterest(Tool)
     return Tool and Tool:FindFirstChildWhichIsA("TouchTransmitter", true)
 end
 
+local function GetColorFromPlayer(Player) 
+    if Player.Team ~= nil then return Player.TeamColor.Color end
+end
+
+local function ConvertHealthToColor(Health, MaxHealth) 
+    local Precent = (Health / MaxHealth) * 100
+    if Precent < 70 then 
+        return Color3.fromRGB(255, 196, 0)
+    elseif Precent < 45 then
+        return Color3.fromRGB(255, 71, 71)
+    end
+    return Color3.fromRGB(96, 253, 48)
+end
+
+function IsVisible(Position, WallCheck, ...)
+    if not WallCheck then
+        return true
+    end
+    return #Camera:GetPartsObscuringTarget({Position}, {Camera, LocalPlayer.Character, ...}) == 0
+end
+
+function GetClosestPlayerToMouse(Fov, TeamCheck, AimPart, WallCheck)
+    local AimFov = Fov
+    local TargetPosition = nil
+    for _, Player in pairs(Players:GetPlayers()) do
+        if Player ~= LocalPlayer then
+            local Character = Player.Character
+            if IsAlive(Player) and Character:FindFirstChild(AimPart) then
+                if not TeamCheck or (TeamCheck and Player.Team ~= LocalPlayer.Team) then
+                    local ScreenPosition, OnScreen = Camera:WorldToViewportPoint(Character[AimPart].Position)
+                    if OnScreen then
+                        local ScreenPosition2D = Vector2.new(ScreenPosition.X, ScreenPosition.Y)
+                        local NewMagnitude = (ScreenPosition2D - UserInputService:GetMouseLocation()).Magnitude
+                        if NewMagnitude < AimFov and IsVisible(Character[AimPart].Position, WallCheck, Character) then
+                            AimFov = NewMagnitude
+                            TargetPosition = Player
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return TargetPosition
+end
+
+local function AimAt(Target, Smoothness, AimPart)
+    local AimPart = Target.Character:FindFirstChild(AimPart)
+    if AimPart then
+        local LookAt = nil
+        local Distance = (LocalPlayer.Character:FindFirstChild("HumanoidRootPart").Position - Target.Character:FindFirstChild("HumanoidRootPart").Position).Magnitude
+        local AdjustedDistance = Distance / 10
+        LookAt = Camera.CFrame:PointToWorldSpace(Vector3.new(0, 0, -Smoothness * AdjustedDistance)):Lerp(AimPart.Position, 0.01)
+        Camera.CFrame = CFrame.lookAt(Camera.CFrame.Position, LookAt)
+    end
+end
+
 -- Combat tab
 
---[[
-    ToDo:
-    + Fix AntiVoid
-    + Fix SmoothAim
-    + Add Reach
-    Add FakeLag
-    Add AntiKnockBack (idk if it's possible)
-    Add chat commands for whitelisted (reset, leave, to toggle toggles and etc..)
-]]
+runFunction(function()
+    local AimbotPart = {Value = "Head"}
+    local AimbotHeld = {Value = "RMB"}
+    local AimbotSmoothness = {Value = 5}
+    local AimbotFov = {Value = 70}
+    local AimbotTeamCheck = {Value = true}
+    local AimbotWallCheck = {Value = true}
+    local MouseInputConnection
+    local LeftConnection = false
+    local RightConnection = false
+
+    Aimbot = Tabs.Combat:CreateToggle({
+        Name = "Aimbot",
+        Keybind = nil,
+        Callback = function(callback)
+            if callback then
+                MouseInputConnection = UserInputService.InputBegan:Connect(function(Input)
+                    if (AimbotHeld.Value == "RMB" and Input.UserInputType == Enum.UserInputType.MouseButton2) then
+                        RightConnection = true
+                        LeftConnection = false
+                    elseif (AimbotHeld.Value == "LMB" and Input.UserInputType == Enum.UserInputType.MouseButton1) then
+                        LeftConnection = true
+                        RightConnection = false
+                    end
+                end)
+
+                RunService:BindToRenderStep("Aimbot", Enum.RenderPriority.Camera.Value + 1, function()
+                    if (AimbotHeld.Value == "LMB" and LeftConnection) or (AimbotHeld.Value == "RMB" and RightConnection) then
+                        local Position = GetClosestPlayerToMouse(AimbotFov.Value, AimbotTeamCheck.Value, AimbotPart.Value, AimbotWallCheck.Value)
+                        if Position then
+                            AimAt(Position, AimbotSmoothness.Value, AimbotPart.Value)
+                        end
+                    end
+                end)
+            else
+                if MouseInputConnection then
+                    MouseInputConnection:Disconnect()
+                end
+                RunService:UnbindFromRenderStep("Aimbot")
+            end
+        end
+    })
+
+    AimbotPart = Aimbot:CreateDropDown({
+        Name = "AimPart",
+        Function = function(v) end,
+        List = {"Head", "HumanoidRootPart"},
+        Default = "Head",
+    })
+
+    AimbotHeld = Aimbot:CreateDropDown({
+        Name = "MouseHeld",
+        Function = function(v) end,
+        List = {"LMB", "RMB"},
+        Default = "RMB",
+    })
+
+    AimbotSmoothness = Aimbot:CreateSlider({
+        Name = "MaxDistance",
+        Function = function(v) end,
+        Min = 1,
+        Max = 100,
+        Default = 100,
+        Round = 0,
+    })
+
+    AimbotSmoothness = Aimbot:CreateSlider({
+        Name = "Smoothness",
+        Function = function(v) end,
+        Min = 1,
+        Max = 50,
+        Default = 20,
+        Round = 0,
+    })
+
+    AimbotFov = Aimbot:CreateSlider({
+        Name = "Fov",
+        Function = function(v) end,
+        Min = 1,
+        Max = 120,
+        Default = 70,
+        Round = 0,
+    })
+
+    AimbotTeamCheck = Aimbot:CreateToggle({
+        Name = "TeamCheck",
+        Default = false,
+        Function = function(v) end
+    })
+
+    AimbotWallCheck = Aimbot:CreateToggle({
+        Name = "WallCheck",
+        Default = false,
+        Function = function(v) end
+    })
+end)
 
 runFunction(function()
     local AutoClickerMode = {Value = "Click"}
@@ -253,7 +397,7 @@ runFunction(function()
                                     end
                                 end
                             end
-                        elseif ReachMode.Value == "Tool" and EntityLibrary.IsAlive then
+                        elseif ReachMode.Value == "Tool" and EntityLibrary.IsAlive and firetouchinterest then
                             local Tool = LocalPlayer and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildWhichIsA("Tool")
                             local Touch = FindTouchInterest(Tool)
                             if Tool and Touch then
@@ -266,6 +410,8 @@ runFunction(function()
                                     firetouchinterest(Touch, v, 0)
                                 end
                             end
+                        elseif not firetouchinterest then
+                            GuiLibrary:CreateNotification("Reach", "Missing firetouchinterest function.", 10, false, "error")
                         end
                         task.wait()
 					until not ReachEnabled
@@ -329,72 +475,6 @@ runFunction(function()
         Max = 20,
         Round = 1, 
         Function = function(v) end,
-    })
-end)
-
-runFunction(function()
-    local SmoothAimPart = {Value = "Head"}
-    local SmoothAimHeld = {Value = "LMB"}
-    local SmoothAimSensitivity = {Value = 5}
-    local MouseConnection1
-    local MouseConnection2
-    local Holding = false
-
-    SmoothAim = Tabs.Combat:CreateToggle({
-        Name = "SmoothAim",
-        Keybind = nil,
-        Callback = function(callback)
-            if callback then
-                UserInputService.InputBegan:Connect(function(Input)
-                    if Input.UserInputType.Name == SmoothAimHeld.Value then
-                        Holding = true
-                    end
-                end)
-                
-                UserInputService.InputEnded:Connect(function(Input)
-                    if Input.UserInputType.Name == SmoothAimHeld.Value then
-                        Holding = false
-                    end
-                end)
-
-                RunLoops:BindToStepped("SmoothAim", function() 
-                    if Holding == true and callback then
-                        local closestPlayer = GetClosestPlayer()
-                        if closestPlayer and closestPlayer.Character then
-                            local targetPart = closestPlayer.Character:FindFirstChild(SmoothAimPart.Value)
-                            if targetPart then
-                                TweenService:Create(Camera, TweenInfo.new(SmoothAimSensitivity.Value, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {CFrame = CFrame.new(Camera.CFrame.Position, targetPart.Position)}):Play()
-                            end
-                        end
-                    end
-                end)
-            else
-                RunLoops:UnbindFromStepped("SmoothAim")
-            end
-        end
-    })
-
-    SmoothAimPart = SmoothAim:CreateDropDown({
-        Name = "Part",
-        Function = function(v) end,
-        List = {"HumanoidRootPart", "Head"},
-        Default = "Head"
-    })
-
-    SmoothAimHeld = SmoothAim:CreateDropDown({
-        Name = "Held",
-        Function = function(v) end,
-        List = {"MouseButton1", "MouseButton2"},
-        Default = "MouseButton1"
-    })
-
-    SmoothAimSensitivity = SmoothAim:CreateSlider({
-        Name = "Sensitivity",
-        Function = function(v) end,
-        Min = 1,
-        Max = 10,
-        Default = 5,
-        Round = 0
     })
 end)
 
@@ -1038,7 +1118,7 @@ runFunction(function()
         Round = 0
     })
 
-    AutoJump = Speed:CreateOptionTog({
+    AutoJump = Speed:CreateToggle({
         Name = "AutoJump",
         Default = false,
         Function = function(v)
@@ -1048,7 +1128,7 @@ runFunction(function()
         end
     })
 
-    NoAnimation = Speed:CreateOptionTog({
+    NoAnimation = Speed:CreateToggle({
         Name = "NoAnimation",
         Default = false,
         Function = function(v)
@@ -1112,19 +1192,19 @@ runFunction(function()
         Round = 0
     })
 
-    SpinBotX = SpinBot:CreateOptionTog({
+    SpinBotX = SpinBot:CreateToggle({
         Name = "Spin X",
         Default = false,
         Function = function(v) end
     })
 
-    SpinBotY = SpinBot:CreateOptionTog({
+    SpinBotY = SpinBot:CreateToggle({
         Name = "Spin Y",
         Default = false,
         Function = function(v) end
     })
 
-    SpinBotZ = SpinBot:CreateOptionTog({
+    SpinBotZ = SpinBot:CreateToggle({
         Name = "Spin Z",
         Default = false,
         Function = function(v) end
@@ -1308,98 +1388,140 @@ if GuiLibrary.Device ~= "Mobile" then
 end
 
 runFunction(function()
-    local EspMode = {Value = "Highlight"}
+    local EspMode = {Value = "Box"}
+    local EspNames = {Value = false}
+    local EspDisplayNames = {Value = false}
+    local EspHealth = {Value = false}
+    local EspTeamColor = {Value = false}
+    local EspTeammates = {Value = false}
+    local ESPEnabled = false
+    local PlayerRemovingConnection
+
     local ESPFolder = Instance.new("Folder")
-    ESPFolder.Name = "ESPFolder"
     ESPFolder.Parent = workspace
-    Esp = Tabs.Render:CreateToggle({
+    ESPFolder.Name = "ESPFolder"
+
+    local function UpdateESP()
+        for _, Player in pairs(Players:GetPlayers()) do
+            if IsAlive(Player) and Player ~= LocalPlayer and (EspTeammates.Value or Player.Team ~= LocalPlayer.Team) then
+                local EspObject = ESPFolder:FindFirstChild(Player.Name)
+
+                if EspMode.Value == "Box" then
+                    if EspObject and EspObject:IsA("BoxHandleAdornment") then
+                        EspObject.Visible = true
+                    else
+                        local Box = Instance.new("BoxHandleAdornment")
+                        Box.Name = Player.Name
+                        Box.Parent = ESPFolder
+                        Box.Size = Player.Character.HumanoidRootPart.Size * 1.1
+                        Box.AlwaysOnTop = true
+                        Box.ZIndex = 5
+                        Box.Adornee = Player.Character.HumanoidRootPart
+                        Box.Color3 = EspTeamColor.Value and (Player.Team and Player.Team.TeamColor.Color or Color3.fromRGB(255, 0, 0)) or Color3.fromRGB(255, 0, 0)
+                    end
+                elseif EspMode.Value == "AssetFrame" then
+                    if EspObject and EspObject:IsA("ImageLabel") then
+                        EspObject.Visible = true
+                    else
+                        local ImageLabel = Instance.new("ImageLabel")
+                        ImageLabel.Name = Player.Name
+                        ImageLabel.Parent = ESPFolder
+                        ImageLabel.BackgroundTransparency = 1
+                        ImageLabel.BorderSizePixel = 0
+                        ImageLabel.Image = "rbxassetid://YOUR_ASSET_ID" -- Replace with actual asset ID
+                        ImageLabel.ImageColor3 = EspTeamColor.Value and (Player.Team and Player.Team.TeamColor.Color or Color3.fromRGB(255, 0, 0)) or Color3.fromRGB(255, 0, 0)
+                        ImageLabel.Size = UDim2.new(0, 256, 0, 256)
+                        ImageLabel.Visible = false
+                    end
+
+                    local rootPos, rootVis = Camera:WorldToViewportPoint(Player.Character.HumanoidRootPart.Position)
+                    local headPos, headVis = Camera:WorldToViewportPoint(Player.Character.Head.Position)
+                    local legPos, legVis = Camera:WorldToViewportPoint(Player.Character.HumanoidRootPart.Position - Vector3.new(0, Player.Character.Humanoid.HipHeight, 0))
+
+                    if rootVis then
+                        local ImageLabel = ESPFolder:FindFirstChild(Player.Name)
+                        if ImageLabel then
+                            ImageLabel.Visible = rootVis
+                            ImageLabel.Size = UDim2.new(0, rootSize / rootPos.Z, 0, headPos.Y - legPos.Y)
+                            ImageLabel.Position = UDim2.new(0, rootPos.X - ImageLabel.Size.X.Offset / 2, 0, rootPos.Y - ImageLabel.Size.Y.Offset / 2 - 36)
+                        end
+                    end
+                elseif EspMode.Value == "Highlight" then
+                    if EspObject and EspObject:IsA("Highlight") then
+                        EspObject.Enabled = true
+                    else
+                        local Highlight = Instance.new("Highlight")
+                        Highlight.Name = Player.Name
+                        Highlight.Parent = ESPFolder
+                        Highlight.Adornee = Player.Character.HumanoidRootPart
+                        Highlight.OutlineColor = EspTeamColor.Value and (Player.Team and Player.Team.TeamColor.Color or Color3.fromRGB(255, 0, 0)) or Color3.fromRGB(255, 0, 0)
+                        Highlight.FillTransparency = 1
+                        -- Highlight.FillColor is not needed as FillTransparency is set to 1
+                    end
+                end
+            end
+        end
+    end
+
+    local Esp = Tabs.Render:CreateToggle({
         Name = "ESP",
         Keybind = nil,
         Callback = function(callback)
             if callback then
-                ESPFolder:ClearAllChildren()
-                spawn(function()
-                    repeat
-                        if EspMode.Value == "Highlight" then
-                            for i, player in pairs(Players:GetPlayers()) do
-                                if player ~= Players.LocalPlayer and player.Character then
-                                    local Highlight = Instance.new("Highlight")
-                                    Highlight.Name = "HighlighObject"
-                                    Highlight.Parent = player.Character
-                                    Highlight.AlwaysOnTop = true
-                                    Highlight.ZIndex = 5
-                                    Hightligh.Adornee = player.Character.HumanoidRootPart
-                                    Hightligh.Color3 = Color3.fromRGB(255, 0, 0)
-                                end
-                            end
-                        elseif EspMode.Value == "Box" then
-                            for i, player in pairs(Players:GetPlayers()) do
-                                if player ~= Players.LocalPlayer and player.Character then
-                                    local Box = Instance.new("BoxHandleAdornment")
-                                    Box.Name = "BoxHandleAdornmentObject"
-                                    Box.Parent = ESPFolder
-                                    Box.Size = player.Character.HumanoidRootPart.Size * 1.1
-                                    Box.AlwaysOnTop = true
-                                    Box.ZIndex = 5
-                                    Box.Adornee = player.Character.HumanoidRootPart
-                                    Box.Color3 = Color3.fromRGB(255, 0, 0)
-                                end
-                            end
-                        elseif EspMode.Value == "AssetFrame" then
-                            for i, plr in pairs(Players:GetChildren()) do
-                                if ESPFolder:FindFirstChild(plr.Name) then
-                                    ImageLabel = ESPFolder[plr.Name]
-                                    ImageLabel.Visible = false
-                                else
-                                    ImageLabel = Instance.new("ImageLabel")
-                                    ImageLabel.Name = plr.Name
-                                    ImageLabel.Parent = ESPFolder
-                                    ImageLabel.BackgroundTransparency = 1
-                                    ImageLabel.BorderSizePixel = 0
-                                    ImageLabel.Image = GetCustomAsset("Mana/Assets/EspFrame.png")
-                                    ImageLabel.Visible = false
-                                    ImageLabel.Size = UDim2.new(0, 256, 0, 256)
-                                end
-                                if IsAlive(plr) and plr ~= LocalPlayer and plr.Team ~= tostring(LocalPlayer.Team) then
-                                    local rootPos, rootVis = Camera:WorldToViewportPoint(plr.Character.HumanoidRootPart.Position)
-                                    local rootSize = (plr.Character.HumanoidRootPart.Size.X * 1200) * (Camera.ViewportSize.X / 1920)
-                                    local headPos, headVis = Camera:WorldToViewportPoint(plr.Character.HumanoidRootPart.Position + Vector3.new(0, 1 + (plr.Character.Humanoid.RigType == Enum.HumanoidRigType.R6 and 2 or plr.Character.Humanoid.HipHeight), 0))
-                                    local legPos, legVis = Camera:WorldToViewportPoint(plr.Character.HumanoidRootPart.Position - Vector3.new(0, 1 + (plr.Character.Humanoid.RigType == Enum.HumanoidRigType.R6 and 2 or plr.Character.Humanoid.HipHeight), 0))
-                                    if rootVis then
-                                        ImageLabel.Visible = rootVis
-                                        ImageLabel.Size = UDim2.new(0, rootSize / rootPos.Z, 0, headPos.Y - legPos.Y)
-                                        ImageLabel.Position = UDim2.new(0, rootPos.X - thing.Size.X.Offset / 2, 0, (rootPos.Y - ImageLabel.Size.Y.Offset / 2) - 36)
-                                    end
-                                end
-                            end
-                            Players.PlayerRemoving:connect(function(plr)
-                                if ESPFolder:FindFirstChild(plr.Name) then
-                                    ESPFolder[plr.Name]:Remove()
-                                end
-                            end)
-                        end
-                    until (not Esp.Enabled)
+                ESPEnabled = callback
+                RunLoops:BindToRenderStep("ESP", function()
+                    UpdateESP()
+                end)
+
+                PlayerRemovingConnection = Players.PlayerRemoving:Connect(function(Player)
+                    local obj = ESPFolder:FindFirstChild(Player.Name)
+                    if obj then
+                        obj:Destroy()
+                    end
                 end)
             else
-                for i, player in pairs(Players:GetPlayers()) do
-                    if player ~= Players.LocalPlayer and player.Character then
-                        if player.Character:FindFirstChild("HighlighObject") then
-                            player.Character:FindFirstChild("HighlighObject"):Destroy()
-                        elseif player.Character:FindFirstChild("BoxHandleAdornmentObject") then
-                            player.Character:FindFirstChild("BoxHandleAdornmentObject"):Destroy()
-                        end
-                    end
+                RunLoops:UnbindFromRenderStep("ESP")
+
+                if PlayerRemovingConnection then
+                    PlayerRemovingConnection:Disconnect()
                 end
-                ESPFolder:ClearAllChildren()
+                
+                for _, obj in pairs(ESPFolder:GetChildren()) do
+                    obj:Destroy()
+                end
             end
         end
     })
 
     EspMode = Esp:CreateDropDown({
         Name = "Mode",
-        Function = function(v) end,
-        List = {"Highlight", "Box", "AssetFrame"},
-        Default = "Highlight"
+        List = {"Box", "AssetFrame", "Highlight"},
+        Default = "Box",
+        Callback = function(v)
+            if ESPEnabled then
+                UpdateESP()
+            end
+        end
+    })
+
+    EspTeammates = Esp:CreateToggle({
+        Name = "Teammates",
+        Default = false,
+        Function = function(v)
+            if ESPEnabled then
+                UpdateESP()
+            end
+        end
+    })
+
+    EspTeamColor = Esp:CreateToggle({
+        Name = "TeamColor",
+        Default = false,
+        Function = function(v)
+            if ESPEnabled then
+                UpdateESP()
+            end
+        end
     })
 end)
 
@@ -1668,7 +1790,7 @@ runFunction(function()
         Round = 1
     })
 
-    TracerOutlined = Tracers:CreateOptionTog({
+    TracerOutlined = Tracers:CreateToggle({
         Name = "TracerOutlined",
         Default = true,
         Function = function(v) 
@@ -1710,12 +1832,13 @@ runFunction(function()
 end)
 ]]
 
---[[
+
 -- Utility tab
 runFunction(function()
     local SayInChat = {Value = false}
     local AutoReportNotifications = {Value = true}
     local AutoReportEnabled = false
+
     local ReportTable = {
         ez = "Bullying",
         gay = "Bullying",
@@ -1725,8 +1848,8 @@ runFunction(function()
         hack = "Scamming",
         cheat = "Scamming",
         hecker = "Scamming",
-        HC
-        get a life = "Bullying",
+        get = "Scamming",
+        ["get a life"] = "Bullying",
         L = "Bullying",
         thuck = "Swearing",
         thuc = "Swearing",
@@ -1743,84 +1866,91 @@ runFunction(function()
         lobby = "Bullying",
         ban = "Bullying",
         youtube = "Offsite Links",
-        "im hacking" = "Cheating/Exploiting",
-        "I'm hacking" = "Cheating/Exploiting",
+        ["im hacking"] = "Cheating/Exploiting",
+        ["I'm hacking"] = "Cheating/Exploiting",
         download = "Offsite Links",
-        "kill your" = "Bullying",
+        ["kill your"] = "Bullying",
         kys = "Bullying",
-        "hack to win" = "Bullying",
+        ["hack to win"] = "Bullying",
         bozo = "Bullying",
         kid = "Bullying",
         adopted = "Bullying",
         vxpe = "Cheating/Exploiting",
         futureclient = "Cheating/Exploiting",
         nova6 = "Cheating/Exploiting",
-        ".gg" = "Offsite Links",
+        [".gg"] = "Offsite Links",
         gg = "Offsite Links",
         lol = "Bullying",
         suck = "Dating",
         love = "Dating",
         fuck = "Swearing",
         sthu = "Swearing",
-        "i hack" = "Cheating/Exploiting",
+        ["i hack"] = "Cheating/Exploiting",
         disco = "Offsite Links",
-        dc = "Offsite Links"
+        dc = "Offsite Links",
+        toxic = "Bullying",
+        loser = "Bullying",
+        noob = "Bullying",
+        ["you suck"] = "Bullying",
+        ["you're bad"] = "Bullying",
+        ["your mom"] = "Bullying"
     }
+
+    local function GetReport(Message)
+        for word, reportType in pairs(ReportTable) do 
+            if Message:lower():find(word) then 
+                return reportType
+            end
+        end
+        return nil
+    end
+
     local AutoReport = Tabs.Utility:CreateToggle({
         Name = "AutoReport",
         Keybind = nil,
         Callback = function(Callback)
             if Callback then
-                function getreport(Message)
-                    for i,v in pairs(reporttable) do 
-                        if Message:lower():find(i) then 
-                            return v
-                        end
-                    end
-                    return nil
-                end
-
-                for i, v in pairs(Players:GetPlayers()) do
-                    if v.Name ~= LocalPlayer.Name then
-                        v.Chatted:connect(function(Message)
-                            local reportfound = getreport(Message)
-                            if reportfound then
-                                Players:ReportAbuse(v, reportfound, "he said a bad word.")
-                                if AutoReportNotifications.Value then
-                                    GuiLibrary:CreateNotification("AutoReport", "Reported: " .. v.Name .. "\n For:" .. Message .. "", 10)
+                if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then 
+                    TextChatService.MessageReceived:Connect(function(MessageData)
+                        if MessageData.TextSource then
+                            local Player = Players:GetPlayerByUserId(MessageData.TextSource.UserId)
+                            if Player and Player ~= LocalPlayer then
+                                local ReportFound = GetReport(MessageData.Text)
+                                if ReportFound then
+                                    Players:ReportAbuse(Player, ReportFound, "he said a bad word.")
+                                    if AutoReportNotifications.Value then
+                                        GuiLibrary:CreateNotification("AutoReport", "Reported: " .. Player.Name .. "\nFor: " .. MessageData.Text, 10, false, "warn")
+                                    end
                                 end
                             end
-                        end)
+                        end
+                    end)
+                else
+                    for _, Player in pairs(Players:GetPlayers()) do
+                        if Player.Name ~= LocalPlayer.Name then
+                            Player.Chatted:connect(function(Message)
+                                local ReportFound = GetReport(Message)
+                                if ReportFound then
+                                    Players:ReportAbuse(Player, ReportFound, "he said a bad word.")
+                                    if AutoReportNotifications.Value then
+                                        GuiLibrary:CreateNotification("AutoReport", "Reported: " .. Player.Name .. "\nFor: " .. Message, 10, false, "warn")
+                                    end
+                                end
+                            end)
+                        end
                     end
                 end
             end
         end
     })
-    AutoReportNotifications = AutoReport:CreateOptionTog({
+
+    AutoReportNotifications = AutoReport:CreateToggle({
         Name = "Notifications",
         Default = true,
         Function = function() end
     })
 end)
-]]
 
-runFunction(function()
-    AntiAFK = Tabs.Utility:CreateToggle({
-        Name = "AntiAFK",
-        Keybind = nil,
-        Callback = function(callback) 
-            if callback then 
-                for i,v in next, getconnections(LocalPlayer.Idled) do
-                    v:Disable()
-                end
-            else
-                for i,v in next, getconnections(LocalPlayer.Idled) do
-                    v:Enable()
-                end
-            end
-        end
-    })
-end)
 
 runFunction(function()
 	local AntiKickEnabled = false
@@ -1873,7 +2003,11 @@ runFunction(function()
                         TeleportService:Teleport(PlaceId, LocalPlayer)
                     end
                 else
-                    TeleportService:TeleportToPlaceInstance(PlaceId, JobId, LocalPlayer)
+                    if #Players:GetPlayers() <= 1 then
+                        LocalPlayer:Kick("\nRejoining...")
+                        task.wait()
+                        TeleportService:TeleportToPlaceInstance(PlaceId, JobId, LocalPlayer)
+                    end
                 end
             end
         end
@@ -1888,7 +2022,7 @@ runFunction(function()
         Round = 0
     })
 
-    AutoRejoinSameServer = AutoRejoin:CreateOptionTog({
+    AutoRejoinSameServer = AutoRejoin:CreateToggle({
         Name = "SameServer",
         Default = true,
         Function = function() end
@@ -1909,118 +2043,120 @@ runFunction(function()
     })
 end)
 
-runFunction(function()
-    local IdleAnimation1 = {Value = ""}
-    local IdleAnimation2 = {Value = ""}
-    local WalkAnimation = {Value = ""}
-    local RunAnimation = {Value = ""}
-    local JumpAnimation = {Value = ""}
-    local FallAnimation = {Value = ""}
-    local ClimbAnimation = {Value = ""}
-    local SwimIdleAnimation = {Value = ""}
-    local SwimAnimation = {Value = ""}
-    local OldAnimations = {
-        IdleAnimation1 = Animate.idle.Animation1.AnimationId,
-        IdleAnimation2 = Animate.idle.Animation2.AnimationId,
-        WalkAnimation = Animate.walk.WalkAnim.AnimationId,
-        RunAnimation = Animate.run.RunAnim.AnimationId,
-        JumpAnimation = Animate.jump.JumpAnim.AnimationId,
-        FallAnimation = Animate.fall.FallAnim.AnimationId,
-        ClimbAnimation = Animate.climb.ClimbAnim.AnimationId,
-        SwimIdleAnimation = Animate.swimidle.SwimIdle.AnimationId,
-        SwimAnimation = Animate.swim.Swim.AnimationId
-    }
-    CustomAnimations = Tabs.Utility:CreateToggle({
-        Name = "CustomAnimations",
-        Keybind = nil,
-        Callback = function(callback) 
-            if callback then 
-                Animate.idle.Animation1.AnimationId = tonumber(IdleAnimation1.Value) and "http://www.roblox.com/asset/?id=" .. IdleAnimation1.Value or IdleAnimation1.Value
-                Animate.idle.Animation2.AnimationId = tonumber(IdleAnimation2.Value) and "http://www.roblox.com/asset/?id=" .. IdleAnimation2.Value or IdleAnimation2.Value
-                Animate.walk.WalkAnim.AnimationId = tonumber(WalkAnimation.Value) and "http://www.roblox.com/asset/?id=" .. WalkAnimation.Value or WalkAnimation.Value
-                Animate.run.RunAnim.AnimationId = tonumber(RunAnimation.Value) and "http://www.roblox.com/asset/?id=" .. RunAnimation.Value or RunAnimation.Value
-                Animate.jump.JumpAnim.AnimationId = tonumber(JumpAnimation.Value) and "http://www.roblox.com/asset/?id=" .. JumpAnimation.Value or JumpAnimation.Value
-                Animate.fall.FallAnim.AnimationId = tonumber(FallAnimation.Value) and "http://www.roblox.com/asset/?id=" .. FallAnimation.Value or FallAnimation.Value
-                Animate.climb.ClimbAnim.AnimationId = tonumber(ClimbAnimation.Value) and "http://www.roblox.com/asset/?id=" .. ClimbAnimation.Value or ClimbAnimation.Value
-                Animate.swimidle.SwimIdle.AnimationId = tonumber(SwimIdleAnimation.Value) and "http://www.roblox.com/asset/?id=" .. SwimIdleAnimation.Value or SwimIdleAnimation.Value
-                Animate.swim.Swim.AnimationId = tonumber(SwimAnimation.Value) and "http://www.roblox.com/asset/?id=" .. SwimAnimation.Value or SwimAnimation.Value
-            else
-                Animate.idle.Animation1.AnimationId = OldAnimations.IdleAnimation1
-                Animate.idle.Animation2.AnimationId = OldAnimations.IdleAnimation2
-                Animate.walk.WalkAnim.AnimationId = OldAnimations.WalkAnimation
-                Animate.run.RunAnim.AnimationId = OldAnimations.RunAnimation
-                Animate.jump.JumpAnim.AnimationId = OldAnimations.JumpAnimation
-                Animate.fall.FallAnim.AnimationId = OldAnimations.FallAnimation
-                Animate.climb.ClimbAnim.AnimationId = OldAnimations.ClimbAnimation
-                Animate.swimidle.SwimIdle.AnimationId = OldAnimations.SwimIdleAnimation
-                Animate.swim.Swim.AnimationId = OldAnimations.SwimAnimation
+if Animate then
+    runFunction(function()
+        local IdleAnimation1 = {Value = ""}
+        local IdleAnimation2 = {Value = ""}
+        local WalkAnimation = {Value = ""}
+        local RunAnimation = {Value = ""}
+        local JumpAnimation = {Value = ""}
+        local FallAnimation = {Value = ""}
+        local ClimbAnimation = {Value = ""}
+        local SwimIdleAnimation = {Value = ""}
+        local SwimAnimation = {Value = ""}
+        local OldAnimations = {
+            IdleAnimation1 = Animate.idle.Animation1.AnimationId,
+            IdleAnimation2 = Animate.idle.Animation2.AnimationId,
+            WalkAnimation = Animate.walk.WalkAnim.AnimationId,
+            RunAnimation = Animate.run.RunAnim.AnimationId,
+            JumpAnimation = Animate.jump.JumpAnim.AnimationId,
+            FallAnimation = Animate.fall.FallAnim.AnimationId,
+            ClimbAnimation = Animate.climb.ClimbAnim.AnimationId,
+            SwimIdleAnimation = Animate.swimidle.SwimIdle.AnimationId,
+            SwimAnimation = Animate.swim.Swim.AnimationId
+        }
+        CustomAnimations = Tabs.Utility:CreateToggle({
+            Name = "CustomAnimations",
+            Keybind = nil,
+            Callback = function(callback) 
+                if callback then 
+                    Animate.idle.Animation1.AnimationId = tonumber(IdleAnimation1.Value) and "http://www.roblox.com/asset/?id=" .. IdleAnimation1.Value or IdleAnimation1.Value
+                    Animate.idle.Animation2.AnimationId = tonumber(IdleAnimation2.Value) and "http://www.roblox.com/asset/?id=" .. IdleAnimation2.Value or IdleAnimation2.Value
+                    Animate.walk.WalkAnim.AnimationId = tonumber(WalkAnimation.Value) and "http://www.roblox.com/asset/?id=" .. WalkAnimation.Value or WalkAnimation.Value
+                    Animate.run.RunAnim.AnimationId = tonumber(RunAnimation.Value) and "http://www.roblox.com/asset/?id=" .. RunAnimation.Value or RunAnimation.Value
+                    Animate.jump.JumpAnim.AnimationId = tonumber(JumpAnimation.Value) and "http://www.roblox.com/asset/?id=" .. JumpAnimation.Value or JumpAnimation.Value
+                    Animate.fall.FallAnim.AnimationId = tonumber(FallAnimation.Value) and "http://www.roblox.com/asset/?id=" .. FallAnimation.Value or FallAnimation.Value
+                    Animate.climb.ClimbAnim.AnimationId = tonumber(ClimbAnimation.Value) and "http://www.roblox.com/asset/?id=" .. ClimbAnimation.Value or ClimbAnimation.Value
+                    Animate.swimidle.SwimIdle.AnimationId = tonumber(SwimIdleAnimation.Value) and "http://www.roblox.com/asset/?id=" .. SwimIdleAnimation.Value or SwimIdleAnimation.Value
+                    Animate.swim.Swim.AnimationId = tonumber(SwimAnimation.Value) and "http://www.roblox.com/asset/?id=" .. SwimAnimation.Value or SwimAnimation.Value
+                else
+                    Animate.idle.Animation1.AnimationId = OldAnimations.IdleAnimation1
+                    Animate.idle.Animation2.AnimationId = OldAnimations.IdleAnimation2
+                    Animate.walk.WalkAnim.AnimationId = OldAnimations.WalkAnimation
+                    Animate.run.RunAnim.AnimationId = OldAnimations.RunAnimation
+                    Animate.jump.JumpAnim.AnimationId = OldAnimations.JumpAnimation
+                    Animate.fall.FallAnim.AnimationId = OldAnimations.FallAnimation
+                    Animate.climb.ClimbAnim.AnimationId = OldAnimations.ClimbAnimation
+                    Animate.swimidle.SwimIdle.AnimationId = OldAnimations.SwimIdleAnimation
+                    Animate.swim.Swim.AnimationId = OldAnimations.SwimAnimation
+                end
             end
-        end
-    })
+        })
 
-    IdleAnimation1 = CustomAnimations:CreateTextBox({
-        Name = "IdleAnimation1",
-        PlaceholderText = "Idle Animation1 ID",
-        DefaultValue = "",
-        Function = function(v) end,
-    })
+        IdleAnimation1 = CustomAnimations:CreateTextBox({
+            Name = "IdleAnimation1",
+            PlaceholderText = "Idle Animation1 ID",
+            DefaultValue = "",
+            Function = function(v) end,
+        })
 
-    IdleAnimation2 = CustomAnimations:CreateTextBox({
-        Name = "IdleAnimation2",
-        PlaceholderText = "Idle Animation1 ID",
-        DefaultValue = "",
-        Function = function(v) end,
-    })
+        IdleAnimation2 = CustomAnimations:CreateTextBox({
+            Name = "IdleAnimation2",
+            PlaceholderText = "Idle Animation1 ID",
+            DefaultValue = "",
+            Function = function(v) end,
+        })
 
-    WalkAnimation = CustomAnimations:CreateTextBox({
-        Name = "WalkAnimation",
-        PlaceholderText = "Walk Animation ID",
-        DefaultValue = "",
-        Function = function(v) end,
-    })
+        WalkAnimation = CustomAnimations:CreateTextBox({
+            Name = "WalkAnimation",
+            PlaceholderText = "Walk Animation ID",
+            DefaultValue = "",
+            Function = function(v) end,
+        })
 
-    RunAnimation = CustomAnimations:CreateTextBox({
-        Name = "RunAnimation",
-        PlaceholderText = "Run Animation ID",
-        DefaultValue = "",
-        Function = function(v) end,
-    })
+        RunAnimation = CustomAnimations:CreateTextBox({
+            Name = "RunAnimation",
+            PlaceholderText = "Run Animation ID",
+            DefaultValue = "",
+            Function = function(v) end,
+        })
 
-    JumpAnimation = CustomAnimations:CreateTextBox({
-        Name = "JumpAnimation",
-        PlaceholderText = "Jump Animation ID",
-        DefaultValue = "",
-        Function = function(v) end,
-    })
+        JumpAnimation = CustomAnimations:CreateTextBox({
+            Name = "JumpAnimation",
+            PlaceholderText = "Jump Animation ID",
+            DefaultValue = "",
+            Function = function(v) end,
+        })
 
-    FallAnimation = CustomAnimations:CreateTextBox({
-        Name = "FallAnimation",
-        PlaceholderText = "Fall Animation ID",
-        DefaultValue = "",
-        Function = function(v) end,
-    })
+        FallAnimation = CustomAnimations:CreateTextBox({
+            Name = "FallAnimation",
+            PlaceholderText = "Fall Animation ID",
+            DefaultValue = "",
+            Function = function(v) end,
+        })
 
-    ClimbAnimation = CustomAnimations:CreateTextBox({
-        Name = "Climb Animation",
-        PlaceholderText = "Climb Animation ID",
-        DefaultValue = "",
-        Function = function(v) end,
-    })
+        ClimbAnimation = CustomAnimations:CreateTextBox({
+            Name = "Climb Animation",
+            PlaceholderText = "Climb Animation ID",
+            DefaultValue = "",
+            Function = function(v) end,
+        })
 
-    SwimIdleAnimation = CustomAnimations:CreateTextBox({
-        Name = "SwimIdleAnimation",
-        PlaceholderText = "Swim Idle Animation ID",
-        DefaultValue = "",
-        Function = function(v) end,
-    })
+        SwimIdleAnimation = CustomAnimations:CreateTextBox({
+            Name = "SwimIdleAnimation",
+            PlaceholderText = "Swim Idle Animation ID",
+            DefaultValue = "",
+            Function = function(v) end,
+        })
 
-    SwimAnimation = CustomAnimations:CreateTextBox({
-        Name = "SwimAnimation",
-        PlaceholderText = "Swim Animation ID",
-        DefaultValue = "",
-        Function = function(v) end,
-    })
-end)
+        SwimAnimation = CustomAnimations:CreateTextBox({
+            Name = "SwimAnimation",
+            PlaceholderText = "Swim Animation ID",
+            DefaultValue = "",
+            Function = function(v) end,
+        })
+    end)
+end
 
 runFunction(function()
     local ProximityPromptsHoldDuration = {Value = 0.1}
@@ -2561,10 +2697,7 @@ end)
 
 print("[ManaV2ForRoblox/Universal.lua]: Loaded in " .. tostring(tick() - startTick) .. ".")
 
---[[
-    Private part
-    Please don't skid thiss
-]]
+-- Private part
 
 if Mana.Developer or Mana.Whitelisted then
     runFunction(function()
@@ -2596,12 +2729,12 @@ if Mana.Developer or Mana.Whitelisted then
                 end
             end
         })
-        FakeLagSend = FakeLag:CreateOptionTog({
+        FakeLagSend = FakeLag:CreateToggle({
             Name = "Sending",
             Function = function() end,
             Default = true
         })
-        FakeLagRecieve = FakeLag:CreateOptionTog({
+        FakeLagRecieve = FakeLag:CreateToggle({
             Name = "Recieving",
             Function = function() end,
             Default = false
@@ -2610,7 +2743,7 @@ if Mana.Developer or Mana.Whitelisted then
 
     runFunction(function()
         Tabs.Private:CreateToggle({
-            Name = "HackerDetector",
+            Name = "HackerDetector(Beta)",
             Keybind = nil,
             Callback = function(callback)
                 if callback then
@@ -2638,12 +2771,7 @@ if Mana.Developer or Mana.Whitelisted then
         })
     end)
 
-    runFunction(function()
-        local PrivateTabDivider = Tabs.Private:CreateDivider({
-            Name = "Tools",
-            WithText = true
-        })
-    end)
+    --PrivateTabDivider = Tabs.Private:CreateDivider("Tools")
 
     runFunction(function()
         DarkDex = Tabs.Private:CreateToggle({
@@ -2689,6 +2817,7 @@ if Mana.Developer or Mana.Whitelisted then
         })
     end)
 
-
     print("[ManaV2ForRoblox/Universal.lua]: Loaded with private features in " .. tostring(tick() - startTick) .. ".")
+
+    --print("[ManaV2ForRoblox/Universal.lua]: Loaded with private features and chat commands in " .. tostring(tick() - startTick) .. ".")
 end

@@ -1,5 +1,5 @@
 --[[
-    Credits to anyones code i used or looked at
+    Credits to anyones code I used or looked at
 ]]
 
 repeat task.wait() until game:IsLoaded()
@@ -24,12 +24,7 @@ local PlayerGui = LocalPlayer.PlayerGui
 local PlaceId = game.PlaceId
 local SliderScaleValue = 1
 local Functions = {}
-local SessionTime = {
-    Hours = 0,
-    Minutes = 0,
-    Seconds = 0,
-    TotalTime = "00:00:00"
-}
+local LocalPlayerEvents = {}
 
 local httprequest = (request and http and http.request or http_request or fluxus and fluxus.request)
 local function runFunction(func) func() end
@@ -43,16 +38,13 @@ if Mana and Mana.Activated == true then
     return
 end
 
-if not getgenv then
-    warn("[ManaV2ForRoblox]: Using _G function.")
-elseif not (_G and getgenv) then --idk if its possible to dont have _G thing
-    return warn("[ManaV2ForRoblox]: Unsupported executor.")
-end
-
 if getgenv then
     getgenv().Mana = {Developer = false}
-else
+elseif not getgenv then
     _G.Mana = {Developer = false}
+    warn("[ManaV2ForRoblox]: Using _G function.")
+elseif not (_G and getgenv) then
+    return warn("[ManaV2ForRoblox]: Unsupported executor.")
 end
 
 do
@@ -60,10 +52,10 @@ do
         local CurrentFile
         if isfile(path) then CurrentFile = readfile(path) end
         local res = httprequest({Url = 'https://raw.githubusercontent.com/Maanaaaa/ManaV2ForRoblox/main/' .. filepath, Method = 'GET'}).Body
-        if res ~= '404: Not Found' and res ~= CurrentFile then --  and Mana.Developer
+        if res ~= '404: Not Found' and res ~= CurrentFile then
             writefile("Mana/" .. path, res)
         else
-            warn("[ManaV2ForRoblox]: Can't write requested file. \nWorspacePath: " .. path .. " \nGithubFilePath: " .. filepath .. ". \nError: " .. res)
+            warn("[ManaV2ForRoblox]: Can't write requested file. \nWorkspacePath: " .. path .. " \nGithubFilePath: " .. filepath .. ". \nError: " .. res)
         end
     end
 
@@ -80,15 +72,7 @@ do
     end
 
     function Functions:RunFile(filepath)
-        if filepath == "Scripts/6872274481.lua" or filepath == "Scripts/8560631822.lua" or filepath == "Scripts/8444591321.lua" then
-            Functions:WriteFile(filepath, filepath)
-            return Functions:CheckFile("Scripts/6872274481.lua")
-        elseif Mana.Developer then
-            return loadstring(readfile("Mana/" .. filepath))()
-        else
-            Functions:WriteFile(filepath, filepath)
-            return Functions:CheckFile(filepath)
-        end
+        return loadstring(readfile("NewMana/" .. filepath))()
     end
 end
 
@@ -135,20 +119,6 @@ do
 	end
 end
 
-local Commands = {}
-
-do
-    function Commands:CreateCommand(Name, Function) 
-        Commands[Name] = Function
-    end
-
-    function Commands:RemoveCommand(Name)
-        if Commands[Name] then
-            Commands[Name] = nil
-        end
-    end
-end
-
 local Whitelist = HttpService:JSONDecode(game:HttpGet("https://raw.githubusercontent.com/Maanaaaa/Whitelist/main/Whitelist.json"))
 local GuiLibrary = Functions:RunFile("GuiLibrary.lua")
 local EntityLibrary = Functions:RunFile("Libraries/EntityLibrary.lua")
@@ -157,133 +127,181 @@ Mana.GuiLibrary = GuiLibrary
 Mana.Functions = Functions
 Mana.RunLoops = RunLoops
 Mana.EntityLibrary = EntityLibrary
---Mana.GetCustomAssetFunction
 Mana.Activated = true
 Mana.Whitelisted = false
-Mana.SessionTime = SessionTime
 
 GuiLibrary:CreateWindow()
 
 local Tabs = {
-    Combat = GuiLibrary:CreateTab("Combat", Color3.fromRGB(252, 60, 68)),
-    Movement = GuiLibrary:CreateTab("Movement", Color3.fromRGB(255, 148, 36)),
-    Render = GuiLibrary:CreateTab("Render", Color3.fromRGB(59, 170, 222)),
-    Utility = GuiLibrary:CreateTab("Utility", Color3.fromRGB(83, 214, 110)),
-    World = GuiLibrary:CreateTab("World", Color3.fromRGB(52,28,228)),
-    Misc = GuiLibrary:CreateTab("Other", Color3.fromRGB(240, 157, 62)),
+    Combat = GuiLibrary:CreateTab({
+        Name = "Combat",
+        Color = Color3.fromRGB(252, 60, 68),
+        Visible = true,
+        Callback = function() end
+    }),
+    Movement = GuiLibrary:CreateTab({
+        Name = "Movement",
+        Color = Color3.fromRGB(255, 148, 36),
+        Visible = true,
+        Callback = function() end
+    }),
+    Render = GuiLibrary:CreateTab({
+        Name = "Render",
+        Color = Color3.fromRGB(59, 170, 222),
+        Visible = true,
+        Callback = function() end
+    }),
+    Utility = GuiLibrary:CreateTab({
+        Name = "Utility",
+        Color = Color3.fromRGB(83, 214, 110),
+        Visible = true,
+        Callback = function() end
+    }),
+    World = GuiLibrary:CreateTab({
+        Name = "World",
+        Color = Color3.fromRGB(52,28,228),
+        Visible = true,
+        Callback = function() end
+    }),
+    Misc = GuiLibrary:CreateTab({
+        Name = "Other",
+        Color = Color3.fromRGB(240, 157, 62),
+        Visible = true,
+        Callback = function() end
+    }),
 }
 
 Mana.Tabs = Tabs
-
---[[
-local SessionInfo = GuiLibrary:CreateSessionInfo()
-
-local SessionInfoLabels = {
-    Time = SessionInfo:CreateInfoLabel("Time: 00:00:00")
-}
-
-while wait(1) do
-    SessionInfoLabels.Time.TextLabel.Text = SessionTime.TotalTime
-end
-]]
 
 if GuiLibrary.Device == "Mobile" then
     SliderScaleValue = 0.5
 end
 
-if LocalPlayer.UserId == 5366854020 then
-    Mana.Developer = true
-end
-
-task.spawn(function() -- task.spawn bc it will run and while it's loading other things will load too
+-- Chattags and commands system
+task.spawn(function() -- so it doesn't stop script loading
     for PlayerName, Tag in pairs(Whitelist) do
-        local Player = Players:FindFirstChild(PlayerName)
-        if Tag.Whitelisted or Tag.Whitelisted == "true" then
-            Mana.Whitelisted = true
-            Tabs.Private = GuiLibrary:CreateTab("Private", Color3.fromRGB(243, 247, 5))
-        end
-        if Player then
-            TextChatService.OnIncomingMessage = function(Message, ChatStyle)
-                local MessageProperties = Instance.new("TextChatMessageProperties")
-                local Player = Players:GetPlayerByUserId(Message.TextSource.UserId)
-                if Player then
-                    for PlayerName, Tag in pairs(Whitelist) do
-                        if Player.Name == PlayerName then
-                            MessageProperties.PrefixText = '<font color="' .. Tag.Color .. '">' .. Tag.Chattag .. '</font> ' .. Message.PrefixText
-                        end
+        if LocalPlayer.UserId == tonumber(Tag.UserId) then
+            if Tag.Whitelisted or Tag.Whitelisted == "true" then
+                Mana.Whitelisted = true
+
+                Tabs.Private = GuiLibrary:CreateTab({
+                    Name = "Private",
+                    Color = Color3.fromRGB(243, 247, 5),
+                    Visible = true,
+                    Callback = function() end
+                })
+
+                GuiLibrary:CreateNotification("Whitelist", "Successfully whitelisted as whitelisted!", 10, true, "warn") -- warn bc it has bigger chance that you will notice this
+            elseif Tag.Developer or Tag.Developer == "true" then
+                Mana.Whitelisted = true
+                Mana.Developer = true
+
+                Tabs.Private = GuiLibrary:CreateTab({
+                    Name = "Private",
+                    Color = Color3.fromRGB(243, 247, 5),
+                    Visible = true,
+                    Callback = function() end
+                })
+
+                GuiLibrary:CreateNotification("Whitelist", "Successfully whitelisted as whitelisted and developer!", 10, true, "warn")
+            end
+            if Mana.Whitelisted or Mana.Developer then
+                TextChatService.OnIncomingMessage = function(Message, ChatStyle)
+                    local MessageProperties = Instance.new("TextChatMessageProperties")
+                    local Player = Players:GetPlayerByUserId(Message.TextSource.UserId)
+                    if Player.Name == PlayerName then
+                        MessageProperties.PrefixText = '<font color="' .. Tag.Color .. '">' .. Tag.Chattag .. '</font> ' .. Message.PrefixText
                     end
+                    return MessageProperties
                 end
-                return MessageProperties
             end
         end
     end
 end)
 
+-- Misc tab
+
 runFunction(function()
-    Discord = Tabs.Misc:CreateToggle({
-        Name = "CopyDiscordInvite",
+    local AutoSaveDelay = {Value = 5}
+    local AutoSaveOnRejoin = {Value = true}
+    local LeavingEvent
+    AutoSaveConfig = Tabs.Misc:CreateToggle({
+        Name = "AutoSaveConfig",
         Keybind = nil,
         Callback = function(callback)
             if callback then
-                toclipboard("https://discord.gg/gPkD8BdbMA")
-            else
+                while callback and task.wait(AutoSaveDelay.Value) do
+                    GuiLibrary.ConfigSystem.functions:WriteConfigs(GuiLibrary.ConfigTable)
+                end
 
+                LeavingEvent = Players.PlayerRemoving:Connect(function(Player)
+                    if Player == LocalPlayer and AutoSaveOnRejoin.Value then
+                        GuiLibrary.ConfigSystem.functions:WriteConfigs(GuiLibrary.ConfigTable)
+                    end
+                end)
+            else
+                if LeavingEvent then
+                    LeavingEvent:Disconnect()
+                end
             end
         end
+    })
+
+    AutoSaveOnRejoin = AutoSaveConfig:CreateToggle({
+        Name = "On rejoin or leave",
+        Default = true,
+        Function = function(v)
+        end 
+    })
+
+    AutoSaveDelay = AutoSaveConfig:CreateSlider({
+        Name = "Delay",
+        Function = function(v)
+		end,
+        Min = 1,
+        Max = 60,
+        Default = 15,
+        Round = 0
     })
 end)
 
 runFunction(function()
-    ToggleGui = Tabs.Misc:CreateToggle({
-        Name = "ToggleGui",
-        Keybind = nil,
-        Callback = function(callback)
-            if callback then
-                GuiLibrary.Functions:ToggleLibrary()
-            else
-                GuiLibrary.Functions:ToggleLibrary()
-            end
-        end
-    })
-end)
-
-
-runFunction(function()
+    local ClickGuiEnabled = false
     local LibrarySettings = Tabs.Misc:CreateToggle({
         Name = "ClickGui",
         Keybind = nil,
         Callback = function(callback)
             if callback then
-                en = callback
+                ClickGuiEnabled = callback
             end
         end
     })
 
-    LibSounds = LibrarySettings:CreateOptionTog({
+    LibSounds = LibrarySettings:CreateToggle({
         Name = "Sounds",
         Default = true,
         Function = function(v)
-            if en then
+            if ClickGuiEnabled then
                 GuiLibrary.Sounds = v
             end
         end 
     })
 
-    Notifications = LibrarySettings:CreateOptionTog({
+    Notifications = LibrarySettings:CreateToggle({
         Name = "Notifications",
         Default = true,
         Function = function(v)
-            if en then
+            if ClickGuiEnabled then
                 GuiLibrary.Notifications = v
             end
         end 
     })
 
-    ChatNotifications = LibrarySettings:CreateOptionTog({
+    ChatNotifications = LibrarySettings:CreateToggle({
         Name = "ChatNotifications",
         Default = true,
         Function = function(v)
-            if en then
+            if ClickGuiEnabled then
                 GuiLibrary.ChatNotifications = v
             end
         end 
@@ -292,7 +310,7 @@ runFunction(function()
     LibrarySize = LibrarySettings:CreateSlider({
         Name = "Size",
         Function = function(v)
-            if en then
+            if ClickGuiEnabled then
                 GuiLibrary.UIScale.Scale = v
             end
 		end,
@@ -304,29 +322,13 @@ runFunction(function()
 end)
 
 runFunction(function()
-    Uninject = Tabs.Misc:CreateToggle({
-        Name = "Uninject",
+    Discord = Tabs.Misc:CreateToggle({
+        Name = "CopyDiscordInvite",
         Keybind = nil,
         Callback = function(callback)
             if callback then
-                Mana.Activated = false
-                Uninject:Toggle(false)
-                wait(0.1)
-                GuiLibrary.ScreenGui:Destroy()
-            end
-        end
-    })
-
-    Reinject = Tabs.Misc:CreateToggle({
-        Name = "ReInject",
-        Keybind = nil,
-        Callback = function(callback)
-            if callback then
-                Mana.Activated = false
-                Reinject:Toggle(false)
-                GuiLibrary.ScreenGui:Destroy()
-                wait(1)
-                Functions:RunFile("MainScript.lua")
+                toclipboard("https://discord.gg/gPkD8BdbMA")
+                Discord:Toggle(true)
             end
         end
     })
@@ -349,13 +351,52 @@ runFunction(function()
     })
 end)
 
+runFunction(function()
+    Reinject = Tabs.Misc:CreateToggle({
+        Name = "ReInject",
+        Keybind = nil,
+        Callback = function(callback)
+            if callback then
+                Mana.Activated = false
+                Reinject:Toggle(false)
+                GuiLibrary.ScreenGui:Destroy()
+                wait(1)
+                Functions:RunFile("MainScript.lua")
+            end
+        end
+    })
+end)
+
+runFunction(function()
+    ToggleGui = Tabs.Misc:CreateToggle({
+        Name = "ToggleGui",
+        Keybind = nil,
+        Callback = function(callback)
+            GuiLibrary:ToggleLibrary()
+        end
+    })
+end)
+
+runFunction(function()
+    Uninject = Tabs.Misc:CreateToggle({
+        Name = "Uninject",
+        Keybind = nil,
+        Callback = function(callback)
+            if callback then
+                Mana.Activated = false
+                Uninject:Toggle(false)
+                wait(0.1)
+                GuiLibrary.ScreenGui:Destroy()
+            end
+        end
+    })
+end)
+
 local Button = Instance.new("TextButton")
 local Corner = Instance.new("UICorner")
 Button.Name = "GuiButton"
 Button.Position = UDim2.new(1, -700, 0, -32)
 Button.Text = "Mana"
---Button.Active = true
---Button.Draggable = true
 Button.BackgroundColor3 = Color3.fromRGB(26, 25, 26)
 Button.TextColor3 = Color3.new(1, 1, 1)
 Button.Size = UDim2.new(0, 32, 0, 32)
@@ -366,41 +407,16 @@ Corner.Parent = Button
 Corner.CornerRadius = UDim.new(0, 8)
 
 Button.MouseButton1Click:Connect(function()
-    GuiLibrary.Functions:ToggleLibrary()
+    GuiLibrary:ToggleLibrary()
 end)
 
-UserInputService.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.N then
-        GuiLibrary.Functions:ToggleLibrary()
+UserInputService.InputBegan:Connect(function(Input)
+    if Input.KeyCode == Enum.KeyCode.RightShift or Input.KeyCode == Enum.KeyCode.N then
+        GuiLibrary:ToggleLibrary()
     end
 end)
-
---[[
-repeat
-    local Seconds = SessionTime.Seconds
-    local Minutes = SessionTime.Minutes
-    local Hours = SessionTime.Hours
-
-    SessionTime.Seconds = Seconds + 1
-
-    if Seconds == 60 then
-        SessionTime.Seconds = 0
-        SessionTime.Minutes = Minutes + 1
-    end
-
-    if Minutes == 60 then
-        SessionTime.Minutes = 0
-        SessionTime.Hours = Hours + 1
-    end
-
-    SessionTime.TotalTime = Hours .. ":" .. Minutes .. ":" .. Seconds
-
-    task.wait(1)
-until (false == true)
-]]
 
 print("[ManaV2ForRoblox/MainScript.lua]: Loaded in " .. tostring(tick() - startTick) .. ".")
 
--- it's here to prevent not printing thing above this
 UniversalScript = Functions:RunFile("Scripts/Universal.lua")
-GameScript = Functions:RunFile("Scripts/" .. PlaceId .. ".lua") 
+GameScript = Functions:RunFile("Scripts/" .. PlaceId .. ".lua")
