@@ -1389,9 +1389,9 @@ end
 
 runFunction(function()
     local EspMode = {Value = "Box"}
-    local EspNames = {Value = false}
-    local EspDisplayNames = {Value = false}
-    local EspHealth = {Value = false}
+    local EspBoxTransparency = {Value = 0.6}
+    local EspHighlightOutlineTransparency = {Value = 0}
+    local EspHighlightFillTransparency = {Value = 0}
     local EspTeamColor = {Value = false}
     local EspTeammates = {Value = false}
     local ESPEnabled = false
@@ -1413,12 +1413,14 @@ runFunction(function()
                         local Box = Instance.new("BoxHandleAdornment")
                         Box.Name = Player.Name
                         Box.Parent = ESPFolder
-                        Box.Size = Player.Character.HumanoidRootPart.Size * 1.1
+                        Box.Size = Player.Character.HumanoidRootPart.Size * 1.5
                         Box.AlwaysOnTop = true
                         Box.ZIndex = 5
                         Box.Adornee = Player.Character.HumanoidRootPart
                         Box.Color3 = EspTeamColor.Value and (Player.Team and Player.Team.TeamColor.Color or Color3.fromRGB(255, 0, 0)) or Color3.fromRGB(255, 0, 0)
+                        Box.Transparency = EspBoxTransparency.Value
                     end
+                --[[ no asset frame mode
                 elseif EspMode.Value == "AssetFrame" then
                     if EspObject and EspObject:IsA("ImageLabel") then
                         EspObject.Visible = true
@@ -1428,7 +1430,7 @@ runFunction(function()
                         ImageLabel.Parent = ESPFolder
                         ImageLabel.BackgroundTransparency = 1
                         ImageLabel.BorderSizePixel = 0
-                        ImageLabel.Image = "rbxassetid://YOUR_ASSET_ID" -- Replace with actual asset ID
+                        ImageLabel.Image = ""
                         ImageLabel.ImageColor3 = EspTeamColor.Value and (Player.Team and Player.Team.TeamColor.Color or Color3.fromRGB(255, 0, 0)) or Color3.fromRGB(255, 0, 0)
                         ImageLabel.Size = UDim2.new(0, 256, 0, 256)
                         ImageLabel.Visible = false
@@ -1446,17 +1448,19 @@ runFunction(function()
                             ImageLabel.Position = UDim2.new(0, rootPos.X - ImageLabel.Size.X.Offset / 2, 0, rootPos.Y - ImageLabel.Size.Y.Offset / 2 - 36)
                         end
                     end
+                ]]
                 elseif EspMode.Value == "Highlight" then
                     if EspObject and EspObject:IsA("Highlight") then
                         EspObject.Enabled = true
                     else
                         local Highlight = Instance.new("Highlight")
                         Highlight.Name = Player.Name
-                        Highlight.Parent = ESPFolder
+                        Highlight.Parent = Player
                         Highlight.Adornee = Player.Character.HumanoidRootPart
+                        Highlight.OutlineTransparency = EspHighlightOutlineTransparency.Value
+                        Highlight.FillTransparency = EspHighlightFillTransparency.Value
+                        Highlight.FillColor = EspTeamColor.Value and (Player.Team and Player.Team.TeamColor.Color or Color3.fromRGB(255, 0, 0)) or Color3.fromRGB(255, 0, 0)
                         Highlight.OutlineColor = EspTeamColor.Value and (Player.Team and Player.Team.TeamColor.Color or Color3.fromRGB(255, 0, 0)) or Color3.fromRGB(255, 0, 0)
-                        Highlight.FillTransparency = 1
-                        -- Highlight.FillColor is not needed as FillTransparency is set to 1
                     end
                 end
             end
@@ -1495,13 +1499,73 @@ runFunction(function()
 
     EspMode = Esp:CreateDropDown({
         Name = "Mode",
-        List = {"Box", "AssetFrame", "Highlight"},
+        List = {"Box", "Highlight"},
         Default = "Box",
         Callback = function(v)
+            if v == "Box" then
+                if EspBoxTransparency.MainObject then
+                    EspBoxTransparency.MainObject.Visible = true
+                end
+                if EspHighlightOutlineTransparency.MainObject then
+                    EspHighlightOutlineTransparency.MainObject.Visible = false
+                end
+                if EspHighlightFillTransparency.MainObject then
+                    EspHighlightFillTransparency.MainObject.Visible = false
+                end
+            elseif v == "Highlight"
+                if EspHighlightOutlineTransparency.MainObject then
+                    EspHighlightOutlineTransparency.MainObject.Visible = true
+                end
+                if EspHighlightFillTransparency.MainObject then
+                    EspHighlightFillTransparency.MainObject.Visible = true
+                end
+                if EspBoxTransparency.MainObject then
+                    EspBoxTransparency.MainObject.Visible = false
+                end
+            end
             if ESPEnabled then
                 UpdateESP()
             end
         end
+    })
+
+    EspBoxTransparency = Esp:CreateSlider({
+        Name = "BoxTransparency",
+        Function = function(v)
+            if ESPEnabled then
+                UpdateESP()
+            end
+        end,
+        Min = 0,
+        Max = 1,
+        Default = 0.6,
+        Round = 1
+    })
+
+    EspHighlightOutlineTransparency = Esp:CreateSlider({
+        Name = "OutlineTransparency",
+        Function = function(v)
+            if ESPEnabled then
+                UpdateESP()
+            end
+        end,
+        Min = 0,
+        Max = 1,
+        Default = 0,
+        Round = 1
+    })
+
+    EspHighlightFillTransparency = Esp:CreateSlider({
+        Name = "FillTransparency",
+        Function = function(v)
+            if ESPEnabled then
+                UpdateESP()
+            end
+        end,
+        Min = 0,
+        Max = 1,
+        Default = 1,
+        Round = 1
     })
 
     EspTeammates = Esp:CreateToggle({
@@ -1655,21 +1719,7 @@ runFunction(function()
     })
 end)
 
-runFunction(function()
-    ViewClip = Tabs.Render:CreateToggle({
-        Name = "ViewClip",
-        Keybind = nil,
-        Callback = function(callback) 
-            if callback then
-                LocalPlayer.DevCameraOcclusionMode = "Invisicam"
-            else
-                LocalPlayer.DevCameraOcclusionMode = "Zoom"
-            end
-        end
-    })
-end)
-
---[[code no work
+--[[soon
 runFunction(function()
     local TracerStartPoint = {Value = "Mouse"}
     local TracerEndPoint = {Value = "HumanoidRootPart"}
@@ -1685,67 +1735,16 @@ runFunction(function()
     local RealTracerStartPoint
     local RealTracerEndPoint
 
-    local function DrawTracer(Entity)
-        if TracerStartPoint.Value == "Mouse" then
-            RealTracerStartPoint = PointMouse.new()
-        elseif TracerStartPoint.Value == "Bottom" then
-            local ViewportSize = workspace.CurrentCamera.ViewportSize
-            RealTracerStartPoint = Point2D.new(ViewportSize.X / 2, ViewportSize.Y)
-        elseif TracerStartPoint.Value == "Top" then
-            local ViewportSize = workspace.CurrentCamera.ViewportSize
-            RealTracerStartPoint = Point2D.new(ViewportSize.X / 2, 0)
-        elseif TracerStartPoint.Value == "Center" then
-            local ViewportSize = workspace.CurrentCamera.ViewportSize
-            RealTracerStartPoint = Point2D.new(ViewportSize.X / 2, ViewportSize.Y / 2)
-        end
-        
-        if TracerEndPoint.Value == "Head" then
-            RealTracerEndPoint = PointInstance.new(Entity.Head)
-        elseif TracerEndPoint.Value == "HumanoidRootPart" then
-            RealTracerEndPoint = PointInstance.new(Entity.HumanoidRootPart)
-        end
-
-        local line = LineDynamic.new(RealTracerStartPoint, RealTracerEndPoint)
-        line.Thickness = TracerThickness.Value
-        line.Opacity = TracerOpacity.Value
-        line.Outlined = TracerOutlined.Value
-        line.OutlineThickness = TracerOutlineThickness.Value
-        line.OutlineOpacity = TracerOutlineOpacity.Value
-        Lines[Entity.Player.Name] = line
-    end
+    
 
     Tracers = Tabs.Render:CreateToggle({
         Name = "Tracers",
         Keybind = nil,
         Callback = function(callback)
             if callback then
-                TracerConnection = EntityLibrary.EntityAddedEvent:Connect(function(Entity)
-                    DrawTracer(Entity)
-                end)
-
-                TracerConnection2 = EntityLibrary.EntityRemovedEvent:Connect(function(Entity)
-                    if Lines[Entity.Player.Name] then
-                        Lines[Entity.Player.Name].Visible = false
-                        Lines[Entity.Player.Name] = nil
-                    end
-                end)
-
-                TracerConnection3 = Camera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
-                    local ViewportSize = Camera.ViewportSize
-                    local StartPoint = Point2D.new(ViewportSize.X / 2, ViewportSize.Y / (TracerStartPoint.Value == 'Center' and 2 or 1))
-
-                    for _, v in pairs(Lines) do
-                        v.From = StartPoint
-                    end
-                end)
-
-                for _, Entity in pairs(EntityLibrary.EntityList) do 
-                    DrawTracer(Entity)
-                end
+                
             else
-                TracerConnection:Disconnect()
-                TracerConnection2:Disconnect()
-                TracerConnection3:Disconnect()
+               
             end
         end
     })  
@@ -1832,12 +1831,42 @@ runFunction(function()
 end)
 ]]
 
+runFunction(function()
+    ViewClip = Tabs.Render:CreateToggle({
+        Name = "ViewClip",
+        Keybind = nil,
+        Callback = function(callback) 
+            if callback then
+                LocalPlayer.DevCameraOcclusionMode = "Invisicam"
+            else
+                LocalPlayer.DevCameraOcclusionMode = "Zoom"
+            end
+        end
+    })
+end)
 
 -- Utility tab
+
 runFunction(function()
-    local SayInChat = {Value = false}
+    AntiAFK = Tabs.Utility:CreateToggle({
+        Name = "AntiAFK",
+        Keybind = nil,
+        Callback = function(callback) 
+            if callback then 
+                for i,v in next, getconnections(LocalPlayer.Idled) do
+                    v:Disable()
+                end
+            else
+                for i,v in next, getconnections(LocalPlayer.Idled) do
+                    v:Enable()
+                end
+            end
+        end
+    })
+end)
+
+runFunction(function()
     local AutoReportNotifications = {Value = true}
-    local AutoReportEnabled = false
 
     local ReportTable = {
         ez = "Bullying",
@@ -1951,9 +1980,7 @@ runFunction(function()
     })
 end)
 
-
 runFunction(function()
-	local AntiKickEnabled = false
 	local First = false
     local OldNameCall
     AntiKick = Tabs.Utility:CreateToggle({

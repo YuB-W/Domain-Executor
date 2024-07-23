@@ -72,7 +72,15 @@ do
     end
 
     function Functions:RunFile(filepath)
-        return loadstring(readfile("NewMana/" .. filepath))()
+        if filepath == "Scripts/6872274481.lua" or filepath == "Scripts/8560631822.lua" or filepath == "Scripts/8444591321.lua" then
+            Functions:WriteFile(filepath, filepath)
+            return Functions:CheckFile("Scripts/6872274481.lua")
+        elseif Mana.Developer then
+            return loadstring(readfile("NewMana/" .. filepath))()
+        else
+            Functions:WriteFile(filepath, filepath)
+            return Functions:CheckFile(filepath)
+        end
     end
 end
 
