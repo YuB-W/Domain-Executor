@@ -289,15 +289,6 @@ runFunction(function()
     })
 
     AimbotSmoothness = Aimbot:CreateSlider({
-        Name = "MaxDistance",
-        Function = function(v) end,
-        Min = 1,
-        Max = 100,
-        Default = 100,
-        Round = 0,
-    })
-
-    AimbotSmoothness = Aimbot:CreateSlider({
         Name = "Smoothness",
         Function = function(v) end,
         Min = 1,
