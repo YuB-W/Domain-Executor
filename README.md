@@ -3,8 +3,6 @@ Cool script for roblox
  
 Supports executors that has file system
 
-__Doesn't support Celery, idk why :sob:__
-
 Discord server: ``https://discord.gg/CEMMRSvXek``
 
 Loadstring:
