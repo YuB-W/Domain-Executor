@@ -1,7 +1,9 @@
 # ManaV2ForRoblox
 Cool script for roblox
  
-Supports executors that has file system and normal UNC system
+Supports executors that has file system
+
+__Doesn't support Celery, idk why :sob:__
 
 Discord server: ``https://discord.gg/CEMMRSvXek``
 
