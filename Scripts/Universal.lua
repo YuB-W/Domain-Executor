@@ -489,7 +489,7 @@ runFunction(function()
     })
 end)
 
---[[from rektsky and not working
+--[[
 runFunction(function()
     local CloneGodmodeSpeed = {Value = 100}
     local CloneGodmodeConnection
@@ -645,6 +645,22 @@ runFunction(function()
 
                         HumanoidRootPart.Velocity = Vector3.new(Velocity.X, 0, Velocity.Y)
                         HumanoidRootPart.CFrame = NewCFrame
+                    --[[
+                    elseif FlyMode.Value == "Swim" then
+                        if FlyMode.Value == "Velocity" then
+                            HumanoidRootPart.Velocity = Vector3.new(XDirection, YDirection, ZDirection)
+                            LocalPlayer.Character.Humanoid:ChangeState(4)
+                        elseif FlyMode.Value == "CFrame" then
+                            local Factor = FlySpeed.Value - Humanoid.WalkSpeed
+                            local NewMoveDirection = (MoveDirection * Factor) * Delta
+                            local NewCFrame = HumanoidRootPart.CFrame + Vector3.new(MoveDirection.X, YDirection * Delta, MoveDirection.Z)
+    
+                            HumanoidRootPart.Velocity = Vector3.new(Velocity.X, 0, Velocity.Y)
+                            HumanoidRootPart.CFrame = NewCFrame
+
+                            LocalPlayer.Character.Humanoid:ChangeState(4)
+                        end
+                    ]]
                     end
                 end)
             else
@@ -655,6 +671,26 @@ runFunction(function()
 
     FlyMode = Fly:CreateDropDown({
         Name = "Mode",
+    --[[
+        Name = "FlyMode",
+        Function = function(v) 
+            if v == "Swim" then
+                SwimFlyMode.MainObject then
+                    SwimFlyMode.MainObject.Visible = true
+                end
+            else
+                SwimFlyMode.MainObject then
+                    SwimFlyMode.MainObject.Visible = false
+                end
+            end
+        end,
+        List = {"CFrame", "Velocity", "Swim"},
+        Default = "Velocity"
+    })
+
+    SwimFlyMode = Fly:CreateDropDown({
+        Name = "SwimFlyMode",
+    ]]
         Function = function(v) end,
         List = {"CFrame", "Velocity"},
         Default = "Velocity"
@@ -1656,6 +1692,7 @@ runFunction(function()
     local Minutes = {Value = 0}
     local Seconds = {Value = 0}
     local TimeOfDayEnabled = false
+    local Connection
     TimeOfDay = Tabs.Render:CreateToggle({
         Name = "TimeOfDay",
         Keybind = nil,
@@ -1663,9 +1700,16 @@ runFunction(function()
             if callback then
                 TimeOfDayEnabled = true
                 Lighting.TimeOfDay = Hours.Value .. ":" .. Minutes.Value.. ":" .. Seconds.Value
+                Connection = Lighting.Changed:Connect(function()
+                    Lighting.TimeOfDay = Hours.Value .. ":" .. Minutes.Value.. ":" .. Seconds.Value
+                end)
             else
                 TimeOfDayEnabled = false
                 Lighting.TimeOfDay = LightingTime
+
+                if Connection then
+                    Connection:Disconnect()
+                end
             end
         end
     })
@@ -1710,56 +1754,88 @@ runFunction(function()
     })
 end)
 
---[[soon
+--[[
 runFunction(function()
     local TracerStartPoint = {Value = "Mouse"}
-    local TracerEndPoint = {Value = "HumanoidRootPart"}
-    local TracerThickness = {Value = 0}
-    local TracerOpacity = {Value = 0}
-    local TracerOutlined = {Value = false}
-    local TracerOutlineThickness = {Value = 0}
-    local TracerOutlineOpacity = {Value = 0}
+    local TracerThickness = {Value = 2}
+    local TracerTransparency = {Value = 0}
+    local TracerTeamCheck = {Value = true}
     local Lines = {}
-    local TracerConnection
-    local TracerConnection2
-    local TracerConnection3
-    local RealTracerStartPoint
-    local RealTracerEndPoint
+    local PlayerRemovingConnection
 
-    
+    local function UpdateTracers()
+        for _, Player in pairs(Players:GetPlayers()) do
+            if IsAlive(Player) and Player ~= LocalPlayer and (not TracerTeamCheck.Value or Player.Team ~= LocalPlayer.Team) then
+                local Line = Drawing.new("Line")
+                Lines[Player.Name] = Line
+
+                local HumanoidRootPartPosition = character.HumanoidRootPart.Position
+                local HumanoidRootPartSize = character.HumanoidRootPart.Size
+                local Vector, OnScreen = Camera:WorldToViewportPoint(HumanoidRootPartPosition - Vector3.new(0, HumanoidRootPartSize.Y / 2, 0))
+                
+                Line.Thickness = TracerThickness.Value
+                Line.Transparency = TracerTransparency.Value
+
+                if TracerStartPoint.Value == "Mouse" then
+                    Line.From = Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y)
+                elseif TracerStartPoint.Value == "Center" then
+                    Line.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+                elseif TracerStartPoint.Value == "Bottom" then
+                    Line.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
+                end
+
+                if OnScreen then
+                    Line.To = Vector2.new(Vector.X, Vector.Y)
+                    Line.Visible = true
+                else
+                    Line.Visible = false
+                end
+            end
+        end
+    end
 
     Tracers = Tabs.Render:CreateToggle({
         Name = "Tracers",
         Keybind = nil,
         Callback = function(callback)
             if callback then
-                
+                ESPEnabled = callback
+                RunLoops:BindToRenderStep("Tracers", function()
+                    UpdateTracers()
+                end)
+
+                PlayerRemovingConnection = Players.PlayerRemoving:Connect(function(Player)
+                    if Lines[Player.Name] then
+                        Lines[Player.Name].Visible = false
+                    end
+                end)
             else
-               
+                RunLoops:UnbindFromRenderStep("Tracers")
+
+                if PlayerRemovingConnection then
+                    PlayerRemovingConnection:Disconnect()
+                end
+                
+                for _, Line in pairs(Lines) do
+                    Line.Visible = false
+                end
             end
         end
     })  
 
     TracerStartPoint = Tracers:CreateDropDown({
         Name = "StartPoint",
-        Function = function(v) end,
+        Function = function(v)
+            TracerStartPoint.Value = v
+        end,
         List = {"Center", "Mouse", "Bottom"},
         Default = "Bottom"
     })
 
-    TracerEndPoint = Tracers:CreateDropDown({
-        Name = "EndPoint",
-        Function = function(v) end,
-        List = {"Head", "HumanoidRootPart"},
-        Default = "HumanoidRootPart"
-    })
-
     TracerThickness = Tracers:CreateSlider({
         Name = "Thickness",
-        Function = function(v) 
-            for _, Object in pairs(Lines) do
-                Object.Thickness = v
-            end
+        Function = function(v)
+            TracerThickness.Value = v
         end,
         Min = 0.1,
         Max = 4,
@@ -1767,56 +1843,14 @@ runFunction(function()
         Round = 1
     })
 
-    TracerOpacity = Tracers:CreateSlider({
-        Name = "Opacity",
-        Function = function(v) 
-            for _, Object in pairs(Lines) do
-                Object.Opacity = v
-            end
+    TracerTransparency = Tracers:CreateSlider({
+        Name = "TracerTransparency",
+        Function = function(v)
+            TracerTransparency.Value = v
         end,
-        Min = 0,
-        Max = 1,
-        Default = 0.5,
-        Round = 1
-    })
-
-    TracerOutlined = Tracers:CreateToggle({
-        Name = "TracerOutlined",
-        Default = true,
-        Function = function(v) 
-            if v then
-                if TracerOutlineThickness.MainObject then
-                    TracerOutlineThickness.MainObject.Visible = true
-                end
-                if TracerOutlineOpacity.MainObject then
-                    TracerOutlineOpacity.MainObject.Visible = true
-                end
-            else
-                if TracerOutlineThickness.MainObject then
-                    TracerOutlineThickness.MainObject.Visible = false
-                end
-                if TracerOutlineOpacity.MainObject then
-                    TracerOutlineOpacity.MainObject.Visible = false
-                end
-            end
-        end
-    })
-
-    TracerOutlineThickness = Tracers:CreateSlider({
-        Name = "OutlineThickness",
-        Function = function(v) end,
         Min = 0.1,
-        Max = 4,
-        Default = 1,
-        Round = 1
-    })
-
-    TracerOutlineOpacity = Tracers:CreateSlider({
-        Name = "OutlineOpacity",
-        Function = function(v) end,
-        Min = 0,
         Max = 1,
-        Default = 1,
+        Default = 0,
         Round = 1
     })
 end)
