@@ -289,15 +289,6 @@ runFunction(function()
     })
 
     AimbotSmoothness = Aimbot:CreateSlider({
-        Name = "MaxDistance",
-        Function = function(v) end,
-        Min = 1,
-        Max = 100,
-        Default = 100,
-        Round = 0,
-    })
-
-    AimbotSmoothness = Aimbot:CreateSlider({
         Name = "Smoothness",
         Function = function(v) end,
         Min = 1,
@@ -498,57 +489,6 @@ runFunction(function()
     })
 end)
 
---[[from rektsky and not working
-runFunction(function()
-    local CloneGodmodeSpeed = {Value = 100}
-    local CloneGodmodeConnection
-    local RealCharacter
-    local Clone
-
-    local function MakeClone()
-        RealCharacter = LocalPlayer.Character
-        RealCharacter.Archivable = true
-        Clone = RealCharacter:Clone()
-        Clone.Parent = workspace
-        LocalPlayer.Character = Clone
-    end
-
-    CloneGodmode = Tabs.Movement:CreateToggle({
-        Name = "CloneGodmode",
-        Keybind = nil,
-        Callback = function(callback)
-            if callback then
-                spawn(function()
-                    MakeClone()
-                    RunLoops:BindToHeartbeat("CloneGodmode", function()
-                        local Velocity = Clone.Humanoid.MoveDirection * CloneGodmodeSpeed.Value
-                        Clone.HumanoidRootPart.Velocity = Vector3.new(Velocity.X, LocalPlayer.Character.HumanoidRootPart.Velocity.Y, Velocity.Z)
-                    end)
-                end)
-            else
-                if Clone then
-                    Clone:Destroy()
-                end
-                LocalPlayer.Character = RealCharacter
-                if RealCharacter then
-                    RealCharacter.Humanoid:ChangeState(Enum.HumanoidStateType.Dead)
-                end
-                RunLoops:UnbindFromHeartbeat("CloneGodmode")
-            end
-        end
-    })
-
-    CloneGodmodeSpeed = CloneGodmode:CreateSlider({
-        Name = "Speed",
-        Function = function(v) end,
-        Min = 1,
-        Max = 300,
-        Default = 100,
-        Round = 0
-    })
-end)
-]]
-
 runFunction(function()
     local ClickTPMode = {Value = "Click"}
     local MouseConnection1
@@ -654,6 +594,22 @@ runFunction(function()
 
                         HumanoidRootPart.Velocity = Vector3.new(Velocity.X, 0, Velocity.Y)
                         HumanoidRootPart.CFrame = NewCFrame
+                    --[[
+                    elseif FlyMode.Value == "Swim" then
+                        if FlyMode.Value == "Velocity" then
+                            HumanoidRootPart.Velocity = Vector3.new(XDirection, YDirection, ZDirection)
+                            LocalPlayer.Character.Humanoid:ChangeState(4)
+                        elseif FlyMode.Value == "CFrame" then
+                            local Factor = FlySpeed.Value - Humanoid.WalkSpeed
+                            local NewMoveDirection = (MoveDirection * Factor) * Delta
+                            local NewCFrame = HumanoidRootPart.CFrame + Vector3.new(MoveDirection.X, YDirection * Delta, MoveDirection.Z)
+    
+                            HumanoidRootPart.Velocity = Vector3.new(Velocity.X, 0, Velocity.Y)
+                            HumanoidRootPart.CFrame = NewCFrame
+
+                            LocalPlayer.Character.Humanoid:ChangeState(4)
+                        end
+                    ]]
                     end
                 end)
             else
@@ -664,6 +620,26 @@ runFunction(function()
 
     FlyMode = Fly:CreateDropDown({
         Name = "Mode",
+    --[[
+        Name = "FlyMode",
+        Function = function(v) 
+            if v == "Swim" then
+                SwimFlyMode.MainObject then
+                    SwimFlyMode.MainObject.Visible = true
+                end
+            else
+                SwimFlyMode.MainObject then
+                    SwimFlyMode.MainObject.Visible = false
+                end
+            end
+        end,
+        List = {"CFrame", "Velocity", "Swim"},
+        Default = "Velocity"
+    })
+
+    SwimFlyMode = Fly:CreateDropDown({
+        Name = "SwimFlyMode",
+    ]]
         Function = function(v) end,
         List = {"CFrame", "Velocity"},
         Default = "Velocity"
@@ -1389,9 +1365,9 @@ end
 
 runFunction(function()
     local EspMode = {Value = "Box"}
-    local EspNames = {Value = false}
-    local EspDisplayNames = {Value = false}
-    local EspHealth = {Value = false}
+    local EspBoxTransparency = {Value = 0.6}
+    local EspHighlightOutlineTransparency = {Value = 0}
+    local EspHighlightFillTransparency = {Value = 0}
     local EspTeamColor = {Value = false}
     local EspTeammates = {Value = false}
     local ESPEnabled = false
@@ -1413,12 +1389,14 @@ runFunction(function()
                         local Box = Instance.new("BoxHandleAdornment")
                         Box.Name = Player.Name
                         Box.Parent = ESPFolder
-                        Box.Size = Player.Character.HumanoidRootPart.Size * 1.1
+                        Box.Size = Player.Character.HumanoidRootPart.Size * 1.5
                         Box.AlwaysOnTop = true
                         Box.ZIndex = 5
                         Box.Adornee = Player.Character.HumanoidRootPart
                         Box.Color3 = EspTeamColor.Value and (Player.Team and Player.Team.TeamColor.Color or Color3.fromRGB(255, 0, 0)) or Color3.fromRGB(255, 0, 0)
+                        Box.Transparency = EspBoxTransparency.Value
                     end
+                --[[ no asset frame mode
                 elseif EspMode.Value == "AssetFrame" then
                     if EspObject and EspObject:IsA("ImageLabel") then
                         EspObject.Visible = true
@@ -1428,7 +1406,7 @@ runFunction(function()
                         ImageLabel.Parent = ESPFolder
                         ImageLabel.BackgroundTransparency = 1
                         ImageLabel.BorderSizePixel = 0
-                        ImageLabel.Image = "rbxassetid://YOUR_ASSET_ID" -- Replace with actual asset ID
+                        ImageLabel.Image = ""
                         ImageLabel.ImageColor3 = EspTeamColor.Value and (Player.Team and Player.Team.TeamColor.Color or Color3.fromRGB(255, 0, 0)) or Color3.fromRGB(255, 0, 0)
                         ImageLabel.Size = UDim2.new(0, 256, 0, 256)
                         ImageLabel.Visible = false
@@ -1446,17 +1424,19 @@ runFunction(function()
                             ImageLabel.Position = UDim2.new(0, rootPos.X - ImageLabel.Size.X.Offset / 2, 0, rootPos.Y - ImageLabel.Size.Y.Offset / 2 - 36)
                         end
                     end
+                ]]
                 elseif EspMode.Value == "Highlight" then
                     if EspObject and EspObject:IsA("Highlight") then
                         EspObject.Enabled = true
                     else
                         local Highlight = Instance.new("Highlight")
                         Highlight.Name = Player.Name
-                        Highlight.Parent = ESPFolder
+                        Highlight.Parent = Player
                         Highlight.Adornee = Player.Character.HumanoidRootPart
+                        Highlight.OutlineTransparency = EspHighlightOutlineTransparency.Value
+                        Highlight.FillTransparency = EspHighlightFillTransparency.Value
+                        Highlight.FillColor = EspTeamColor.Value and (Player.Team and Player.Team.TeamColor.Color or Color3.fromRGB(255, 0, 0)) or Color3.fromRGB(255, 0, 0)
                         Highlight.OutlineColor = EspTeamColor.Value and (Player.Team and Player.Team.TeamColor.Color or Color3.fromRGB(255, 0, 0)) or Color3.fromRGB(255, 0, 0)
-                        Highlight.FillTransparency = 1
-                        -- Highlight.FillColor is not needed as FillTransparency is set to 1
                     end
                 end
             end
@@ -1495,13 +1475,73 @@ runFunction(function()
 
     EspMode = Esp:CreateDropDown({
         Name = "Mode",
-        List = {"Box", "AssetFrame", "Highlight"},
+        List = {"Box", "Highlight"},
         Default = "Box",
         Callback = function(v)
+            if v == "Box" then
+                if EspBoxTransparency.MainObject then
+                    EspBoxTransparency.MainObject.Visible = true
+                end
+                if EspHighlightOutlineTransparency.MainObject then
+                    EspHighlightOutlineTransparency.MainObject.Visible = false
+                end
+                if EspHighlightFillTransparency.MainObject then
+                    EspHighlightFillTransparency.MainObject.Visible = false
+                end
+            elseif v == "Highlight" then
+                if EspHighlightOutlineTransparency.MainObject then
+                    EspHighlightOutlineTransparency.MainObject.Visible = true
+                end
+                if EspHighlightFillTransparency.MainObject then
+                    EspHighlightFillTransparency.MainObject.Visible = true
+                end
+                if EspBoxTransparency.MainObject then
+                    EspBoxTransparency.MainObject.Visible = false
+                end
+            end
             if ESPEnabled then
                 UpdateESP()
             end
         end
+    })
+
+    EspBoxTransparency = Esp:CreateSlider({
+        Name = "BoxTransparency",
+        Function = function(v)
+            if ESPEnabled then
+                UpdateESP()
+            end
+        end,
+        Min = 0,
+        Max = 1,
+        Default = 0.6,
+        Round = 1
+    })
+
+    EspHighlightOutlineTransparency = Esp:CreateSlider({
+        Name = "OutlineTransparency",
+        Function = function(v)
+            if ESPEnabled then
+                UpdateESP()
+            end
+        end,
+        Min = 0,
+        Max = 1,
+        Default = 0,
+        Round = 1
+    })
+
+    EspHighlightFillTransparency = Esp:CreateSlider({
+        Name = "FillTransparency",
+        Function = function(v)
+            if ESPEnabled then
+                UpdateESP()
+            end
+        end,
+        Min = 0,
+        Max = 1,
+        Default = 1,
+        Round = 1
     })
 
     EspTeammates = Esp:CreateToggle({
@@ -1601,6 +1641,7 @@ runFunction(function()
     local Minutes = {Value = 0}
     local Seconds = {Value = 0}
     local TimeOfDayEnabled = false
+    local Connection
     TimeOfDay = Tabs.Render:CreateToggle({
         Name = "TimeOfDay",
         Keybind = nil,
@@ -1608,9 +1649,16 @@ runFunction(function()
             if callback then
                 TimeOfDayEnabled = true
                 Lighting.TimeOfDay = Hours.Value .. ":" .. Minutes.Value.. ":" .. Seconds.Value
+                Connection = Lighting.Changed:Connect(function()
+                    Lighting.TimeOfDay = Hours.Value .. ":" .. Minutes.Value.. ":" .. Seconds.Value
+                end)
             else
                 TimeOfDayEnabled = false
                 Lighting.TimeOfDay = LightingTime
+
+                if Connection then
+                    Connection:Disconnect()
+                end
             end
         end
     })
@@ -1655,6 +1703,108 @@ runFunction(function()
     })
 end)
 
+--[[
+runFunction(function()
+    local TracerStartPoint = {Value = "Mouse"}
+    local TracerThickness = {Value = 2}
+    local TracerTransparency = {Value = 0}
+    local TracerTeamCheck = {Value = true}
+    local Lines = {}
+    local PlayerRemovingConnection
+
+    local function UpdateTracers()
+        for _, Player in pairs(Players:GetPlayers()) do
+            if IsAlive(Player) and Player ~= LocalPlayer and (not TracerTeamCheck.Value or Player.Team ~= LocalPlayer.Team) then
+                local Line = Drawing.new("Line")
+                Lines[Player.Name] = Line
+
+                local HumanoidRootPartPosition = character.HumanoidRootPart.Position
+                local HumanoidRootPartSize = character.HumanoidRootPart.Size
+                local Vector, OnScreen = Camera:WorldToViewportPoint(HumanoidRootPartPosition - Vector3.new(0, HumanoidRootPartSize.Y / 2, 0))
+                
+                Line.Thickness = TracerThickness.Value
+                Line.Transparency = TracerTransparency.Value
+
+                if TracerStartPoint.Value == "Mouse" then
+                    Line.From = Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y)
+                elseif TracerStartPoint.Value == "Center" then
+                    Line.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+                elseif TracerStartPoint.Value == "Bottom" then
+                    Line.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
+                end
+
+                if OnScreen then
+                    Line.To = Vector2.new(Vector.X, Vector.Y)
+                    Line.Visible = true
+                else
+                    Line.Visible = false
+                end
+            end
+        end
+    end
+
+    Tracers = Tabs.Render:CreateToggle({
+        Name = "Tracers",
+        Keybind = nil,
+        Callback = function(callback)
+            if callback then
+                ESPEnabled = callback
+                RunLoops:BindToRenderStep("Tracers", function()
+                    UpdateTracers()
+                end)
+
+                PlayerRemovingConnection = Players.PlayerRemoving:Connect(function(Player)
+                    if Lines[Player.Name] then
+                        Lines[Player.Name].Visible = false
+                    end
+                end)
+            else
+                RunLoops:UnbindFromRenderStep("Tracers")
+
+                if PlayerRemovingConnection then
+                    PlayerRemovingConnection:Disconnect()
+                end
+                
+                for _, Line in pairs(Lines) do
+                    Line.Visible = false
+                end
+            end
+        end
+    })  
+
+    TracerStartPoint = Tracers:CreateDropDown({
+        Name = "StartPoint",
+        Function = function(v)
+            TracerStartPoint.Value = v
+        end,
+        List = {"Center", "Mouse", "Bottom"},
+        Default = "Bottom"
+    })
+
+    TracerThickness = Tracers:CreateSlider({
+        Name = "Thickness",
+        Function = function(v)
+            TracerThickness.Value = v
+        end,
+        Min = 0.1,
+        Max = 4,
+        Default = 2,
+        Round = 1
+    })
+
+    TracerTransparency = Tracers:CreateSlider({
+        Name = "TracerTransparency",
+        Function = function(v)
+            TracerTransparency.Value = v
+        end,
+        Min = 0.1,
+        Max = 1,
+        Default = 0,
+        Round = 1
+    })
+end)
+]]
+
 runFunction(function()
     ViewClip = Tabs.Render:CreateToggle({
         Name = "ViewClip",
@@ -1669,175 +1819,28 @@ runFunction(function()
     })
 end)
 
---[[code no work
+-- Utility tab
+
 runFunction(function()
-    local TracerStartPoint = {Value = "Mouse"}
-    local TracerEndPoint = {Value = "HumanoidRootPart"}
-    local TracerThickness = {Value = 0}
-    local TracerOpacity = {Value = 0}
-    local TracerOutlined = {Value = false}
-    local TracerOutlineThickness = {Value = 0}
-    local TracerOutlineOpacity = {Value = 0}
-    local Lines = {}
-    local TracerConnection
-    local TracerConnection2
-    local TracerConnection3
-    local RealTracerStartPoint
-    local RealTracerEndPoint
-
-    local function DrawTracer(Entity)
-        if TracerStartPoint.Value == "Mouse" then
-            RealTracerStartPoint = PointMouse.new()
-        elseif TracerStartPoint.Value == "Bottom" then
-            local ViewportSize = workspace.CurrentCamera.ViewportSize
-            RealTracerStartPoint = Point2D.new(ViewportSize.X / 2, ViewportSize.Y)
-        elseif TracerStartPoint.Value == "Top" then
-            local ViewportSize = workspace.CurrentCamera.ViewportSize
-            RealTracerStartPoint = Point2D.new(ViewportSize.X / 2, 0)
-        elseif TracerStartPoint.Value == "Center" then
-            local ViewportSize = workspace.CurrentCamera.ViewportSize
-            RealTracerStartPoint = Point2D.new(ViewportSize.X / 2, ViewportSize.Y / 2)
-        end
-        
-        if TracerEndPoint.Value == "Head" then
-            RealTracerEndPoint = PointInstance.new(Entity.Head)
-        elseif TracerEndPoint.Value == "HumanoidRootPart" then
-            RealTracerEndPoint = PointInstance.new(Entity.HumanoidRootPart)
-        end
-
-        local line = LineDynamic.new(RealTracerStartPoint, RealTracerEndPoint)
-        line.Thickness = TracerThickness.Value
-        line.Opacity = TracerOpacity.Value
-        line.Outlined = TracerOutlined.Value
-        line.OutlineThickness = TracerOutlineThickness.Value
-        line.OutlineOpacity = TracerOutlineOpacity.Value
-        Lines[Entity.Player.Name] = line
-    end
-
-    Tracers = Tabs.Render:CreateToggle({
-        Name = "Tracers",
+    AntiAFK = Tabs.Utility:CreateToggle({
+        Name = "AntiAFK",
         Keybind = nil,
-        Callback = function(callback)
-            if callback then
-                TracerConnection = EntityLibrary.EntityAddedEvent:Connect(function(Entity)
-                    DrawTracer(Entity)
-                end)
-
-                TracerConnection2 = EntityLibrary.EntityRemovedEvent:Connect(function(Entity)
-                    if Lines[Entity.Player.Name] then
-                        Lines[Entity.Player.Name].Visible = false
-                        Lines[Entity.Player.Name] = nil
-                    end
-                end)
-
-                TracerConnection3 = Camera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
-                    local ViewportSize = Camera.ViewportSize
-                    local StartPoint = Point2D.new(ViewportSize.X / 2, ViewportSize.Y / (TracerStartPoint.Value == 'Center' and 2 or 1))
-
-                    for _, v in pairs(Lines) do
-                        v.From = StartPoint
-                    end
-                end)
-
-                for _, Entity in pairs(EntityLibrary.EntityList) do 
-                    DrawTracer(Entity)
+        Callback = function(callback) 
+            if callback then 
+                for i,v in next, getconnections(LocalPlayer.Idled) do
+                    v:Disable()
                 end
             else
-                TracerConnection:Disconnect()
-                TracerConnection2:Disconnect()
-                TracerConnection3:Disconnect()
-            end
-        end
-    })  
-
-    TracerStartPoint = Tracers:CreateDropDown({
-        Name = "StartPoint",
-        Function = function(v) end,
-        List = {"Center", "Mouse", "Bottom"},
-        Default = "Bottom"
-    })
-
-    TracerEndPoint = Tracers:CreateDropDown({
-        Name = "EndPoint",
-        Function = function(v) end,
-        List = {"Head", "HumanoidRootPart"},
-        Default = "HumanoidRootPart"
-    })
-
-    TracerThickness = Tracers:CreateSlider({
-        Name = "Thickness",
-        Function = function(v) 
-            for _, Object in pairs(Lines) do
-                Object.Thickness = v
-            end
-        end,
-        Min = 0.1,
-        Max = 4,
-        Default = 2,
-        Round = 1
-    })
-
-    TracerOpacity = Tracers:CreateSlider({
-        Name = "Opacity",
-        Function = function(v) 
-            for _, Object in pairs(Lines) do
-                Object.Opacity = v
-            end
-        end,
-        Min = 0,
-        Max = 1,
-        Default = 0.5,
-        Round = 1
-    })
-
-    TracerOutlined = Tracers:CreateToggle({
-        Name = "TracerOutlined",
-        Default = true,
-        Function = function(v) 
-            if v then
-                if TracerOutlineThickness.MainObject then
-                    TracerOutlineThickness.MainObject.Visible = true
-                end
-                if TracerOutlineOpacity.MainObject then
-                    TracerOutlineOpacity.MainObject.Visible = true
-                end
-            else
-                if TracerOutlineThickness.MainObject then
-                    TracerOutlineThickness.MainObject.Visible = false
-                end
-                if TracerOutlineOpacity.MainObject then
-                    TracerOutlineOpacity.MainObject.Visible = false
+                for i,v in next, getconnections(LocalPlayer.Idled) do
+                    v:Enable()
                 end
             end
         end
-    })
-
-    TracerOutlineThickness = Tracers:CreateSlider({
-        Name = "OutlineThickness",
-        Function = function(v) end,
-        Min = 0.1,
-        Max = 4,
-        Default = 1,
-        Round = 1
-    })
-
-    TracerOutlineOpacity = Tracers:CreateSlider({
-        Name = "OutlineOpacity",
-        Function = function(v) end,
-        Min = 0,
-        Max = 1,
-        Default = 1,
-        Round = 1
     })
 end)
-]]
 
-
--- Utility tab
 runFunction(function()
-    local SayInChat = {Value = false}
     local AutoReportNotifications = {Value = true}
-    local AutoReportEnabled = false
 
     local ReportTable = {
         ez = "Bullying",
@@ -1951,9 +1954,7 @@ runFunction(function()
     })
 end)
 
-
 runFunction(function()
-	local AntiKickEnabled = false
 	local First = false
     local OldNameCall
     AntiKick = Tabs.Utility:CreateToggle({
