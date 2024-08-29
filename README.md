@@ -3,7 +3,7 @@ Cool script for roblox
  
 Supports executors that has file system
 
-__Status:__ **down**
+__Status:__ **working + discontinued**
 
 Discord server: ``https://discord.gg/CEMMRSvXek``
 
